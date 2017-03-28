@@ -53,7 +53,7 @@ class MainWindow (QtGui.QMainWindow):
 
         self.dockDataGraphing = QtGui.QDockWidget("xPlotting Options", self)
         self.dockDataGraphing.setFloating(False)
-        self.dockDataGraphing.setMaximumWidth(300)
+        self.dockDataGraphing.setMaximumWidth(325)
         self.dockDataGraphing.setAllowedAreas(QtCore.Qt.RightDockWidgetArea | QtCore.Qt.LeftDockWidgetArea)
 
         layout = QtGui.QFormLayout()
@@ -68,6 +68,7 @@ class MainWindow (QtGui.QMainWindow):
 
         FileHLayout.addWidget(self.fileNameLabel)
         FileHLayout.addWidget(self.rdOnlyFileName)
+        FileHLayout.addStretch(1)
         FileHLayout.addWidget(self.BrowseBtn)
         FileHLayout.addStretch(1)
 
