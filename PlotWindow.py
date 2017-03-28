@@ -21,7 +21,7 @@ else:
 
 import matplotlib.pyplot as plt
 matplotlib.use('Qt4Agg')
-
+from GraphingUtilities import GraphingUtil
 from matplotlib.figure import Figure
 from matplotlib.backends.backend_qt4agg import FigureCanvasQTAgg as FigureCanvas
 from matplotlib.backends.backend_qt4 import NavigationToolbar2QT as NavigationToolbar
@@ -33,158 +33,26 @@ class MainWindow (QtGui.QMainWindow):
     def __init__ (self, parent=None):
         super(MainWindow, self).__init__(parent)
 
-        self.setGeometry(50, 50, 800, 700)
+        self.setGeometry(50, 50, 1000, 700)
         self.setMinimumSize(800, 700)
         self.setWindowTitle("xPlot Util")
         self.setWindowIcon(QtGui.QIcon('Icons/Graph.png'))
-        self.fileName = None
+        self.grphUtil = GraphingUtil(parent = self)
+        self.fileNm = self.grphUtil.fileName
         self.canvasArray = []
         self.figArray = []
 
+
         self.SetupComponents()
         self.windowTabs()
-        self.dockFittingOptionOne()
-        self.CheckGraphCheckBoxes()
+        self.grphUtil.dockFittingOneOptions()
         self.setCentralWidget(self.tabWidget)
 
-    # -----------------------------------------------------------------------------#
-    def dockFittingOptionOne(self):
-        """Function that creates the dockWidget, Graph Options for fitting one"""
-
-        self.dockDataGraphing = QtGui.QDockWidget("xPlotting Options", self)
-        self.dockDataGraphing.setFloating(False)
-        self.dockDataGraphing.setMaximumWidth(325)
-        self.dockDataGraphing.setAllowedAreas(QtCore.Qt.RightDockWidgetArea | QtCore.Qt.LeftDockWidgetArea)
-
-        layout = QtGui.QFormLayout()
-        FileHLayout = QtGui.QHBoxLayout()
-        BtnLayout = QtGui.QHBoxLayout()
-        self.dataDocked = QtGui.QWidget()
-
-        self.FileNameRdOnlyBox()
-        self.BrowseButton()
-        self.GraphFittingOneButton()
-        self.GraphFittingOneCheckBox()
-
-        FileHLayout.addWidget(self.fileNameLabel)
-        FileHLayout.addWidget(self.rdOnlyFileName)
-        FileHLayout.addStretch(1)
-        FileHLayout.addWidget(self.BrowseBtn)
-        FileHLayout.addStretch(1)
-
-        BtnLayout.addStretch(1)
-        BtnLayout.addWidget(self.GraphFittingOneBtn)
-
-        layout.addRow(FileHLayout)
-        layout.addRow(self.graphCheckBx)
-        layout.addRow(BtnLayout)
-        self.dataDocked.setLayout(layout)
-        self.dockDataGraphing.setWidget(self.dataDocked)
-
-        # Adding the docked widget to the main window
-        self.addDockWidget(QtCore.Qt.RightDockWidgetArea, self.dockDataGraphing)
-
-    def restoreDockFittingOptionOne(self):
-        """This funtion restores the Graphing Options Dock Widget for Fitting One, if it's closed"""
-        if self.dockDataGraphing.isVisible() == False:
-            self.dockFittingOptionOne()
-
-    def GraphFittingOneCheckBox(self):
-        """This function contains a group box with check boxes for fitting one"""
-        self.graphCheckBx = QtGui.QGroupBox("Select graphs")
-
-        self.checkBxAmplitude = QtGui.QCheckBox("Amplitude")
-        self.checkBxPeakPosition = QtGui.QCheckBox("Peak position")
-        self.checkBxPeakWidth = QtGui.QCheckBox("Peak width")
-        self.checkBxAmplitudeXWidth = QtGui.QCheckBox("Amplitude x Width")
-        self.checkBxGraphAll = QtGui.QCheckBox("Graph all")
-
-        vbox = QtGui.QVBoxLayout()
-        vbox.addWidget(self.checkBxAmplitude)
-        vbox.addWidget(self.checkBxPeakPosition)
-        vbox.addWidget(self.checkBxPeakWidth)
-        vbox.addWidget(self.checkBxAmplitudeXWidth)
-        vbox.addWidget(self.checkBxGraphAll)
-
-        self.checkBxAmplitude.stateChanged.connect(self.CheckGraphCheckBoxes)
-        self.checkBxAmplitudeXWidth.stateChanged.connect(self.CheckGraphCheckBoxes)
-        self.checkBxPeakWidth.stateChanged.connect(self.CheckGraphCheckBoxes)
-        self.checkBxPeakPosition.stateChanged.connect(self.CheckGraphCheckBoxes)
-        self.checkBxGraphAll.stateChanged.connect(self.CheckGraphCheckBoxes)
-
-        self.graphCheckBx.setLayout(vbox)
-
-    # ------------------------------------------------------------------------------------#
-    def dockPlotRawData(self):
-        """Function that creates the dockWidget, Graph Options for fitting one"""
-
-        self.dockRawData = QtGui.QDockWidget("xPlotting Options", self)
-        self.dockRawData.setFloating(False)
-        self.dockRawData.setMaximumWidth(300)
-        self.dockRawData.setAllowedAreas(QtCore.Qt.RightDockWidgetArea | QtCore.Qt.LeftDockWidgetArea)
-
-        layout = QtGui.QFormLayout()
-        FileHLayout = QtGui.QHBoxLayout()
-        BtnLayout = QtGui.QHBoxLayout()
-        self.dataDocked = QtGui.QWidget()
-
-        self.FileNameRdOnlyBox()
-        self.BrowseButton()
-        self.GraphButton()
-        self.RawDataPlotCheckBox()
-
-        FileHLayout.addWidget(self.fileNameLabel)
-        FileHLayout.addWidget(self.rdOnlyFileName)
-        FileHLayout.addWidget(self.BrowseBtn)
-        FileHLayout.addStretch(1)
-
-        BtnLayout.addStretch(1)
-        BtnLayout.addWidget(self.GraphBtn)
-
-        layout.addRow(FileHLayout)
-        layout.addRow(self.graphCheckBx)
-        layout.addRow(BtnLayout)
-        self.dataDocked.setLayout(layout)
-        self.dockRawData.setWidget(self.dataDocked)
-
-        # Adding the docked widget to the main window
-        self.addDockWidget(QtCore.Qt.RightDockWidgetArea, self.dockRawData)
-
-    def restoreDockPlotRawData(self):
-        """This funtion restores the Graphing Options Dock Widget for Fitting One, if it's closed"""
-        if self.dockRawData.isVisible() == False:
-            self.dockFittingOptionOne()
-
-    def RawDataPlotCheckBox(self):
-        """This function contains a group box with check boxes"""
-        self.graphCheckBx = QtGui.QGroupBox("Select graphs")
-
-        self.checkBxAmplitude = QtGui.QCheckBox("Amplitude")
-        self.checkBxPeakPosition = QtGui.QCheckBox("Peak position")
-        self.checkBxPeakWidth = QtGui.QCheckBox("Peak width")
-        self.checkBxAmplitudeXWidth = QtGui.QCheckBox("Amplitude x Width")
-        self.checkBxGraphAll = QtGui.QCheckBox("Graph all")
-
-        vbox = QtGui.QVBoxLayout()
-        vbox.addWidget(self.checkBxAmplitude)
-        vbox.addWidget(self.checkBxPeakPosition)
-        vbox.addWidget(self.checkBxPeakWidth)
-        vbox.addWidget(self.checkBxAmplitudeXWidth)
-        vbox.addWidget(self.checkBxGraphAll)
-
-        self.checkBxAmplitude.stateChanged.connect(self.CheckGraphCheckBoxes)
-        self.checkBxAmplitudeXWidth.stateChanged.connect(self.CheckGraphCheckBoxes)
-        self.checkBxPeakWidth.stateChanged.connect(self.CheckGraphCheckBoxes)
-        self.checkBxPeakPosition.stateChanged.connect(self.CheckGraphCheckBoxes)
-        self.checkBxGraphAll.stateChanged.connect(self.CheckGraphCheckBoxes)
-
-        self.graphCheckBx.setLayout(vbox)
 
     # ---------------------------------------------------------------------------------------------#
     def windowTabs(self):
         """This function creates the central widget QTabWidget and creates the Data tab"""
         self.tabWidget = QtGui.QTabWidget()
-        self.tabBar = QtGui.QTabBar()
 
         self.tabWidget.setTabsClosable(True)
         self.tabWidget.tabCloseRequested.connect(self.closeTab)
@@ -207,33 +75,7 @@ class MainWindow (QtGui.QMainWindow):
 
         self.tabWidget.removeTab(tabIndex)
 
-    # ------------------------------------------------------------------------------------#
-    def FileNameRdOnlyBox(self):
-        """This method contains a QLineEdit and label that display the selected file
-            next to the browse button"""
-        self.rdOnlyFileName = QtGui.QLineEdit()
-        self.rdOnlyFileName.setReadOnly(True)
-        self.rdOnlyFileName.setTextMargins(0, 0, 10, 0)
-        self.rdOnlyFileName.setFixedWidth(125)
-
-        self.fileNameLabel = QtGui.QLabel()
-        self.fileNameLabel.setText("File Name:")
-
-    # ------------------------------------------------------------------------------------#
-    def GraphFittingOneButton(self):
-        """Funtion that creates a graph button, connects to the GraphData() method"""
-        self.GraphFittingOneBtn = QtGui.QPushButton('Graph', self)
-        self.GraphFittingOneBtn.clicked.connect(self.GraphDataFittingOne)
-        self.GraphFittingOneBtn.setStatusTip("Graphs the check graphs")
-
-    def BrowseButton(self):
-        """Funtion that creates a browse method, connects to the openFile() method"""
-        # Button next to the FileNameRdOnly label and LineEdit
-        self.BrowseBtn = QtGui.QPushButton('Browse', self)
-        self.BrowseBtn.clicked.connect(self.openFile)
-        self.BrowseBtn.setStatusTip("Browse and open an existing file")
-    # ------------------------------------------------------------------------------------#
-
+    # -------------------------------------------------------------------------------------#
     def SetupComponents(self):
         """ Function to setup status bar and menu bar
         """
@@ -257,14 +99,14 @@ class MainWindow (QtGui.QMainWindow):
         self.openAction = QtGui.QAction(QtGui.QIcon('openFolder.png'), '&Open',
                                         self, shortcut=QtGui.QKeySequence.Open,
                                         statusTip="Open an existing file",
-                                        triggered=self.openFile)
+                                        triggered=self.grphUtil.openFile)
         self.exitAction = QtGui.QAction(QtGui.QIcon('exit.png'), 'E&xit',
                                         self, shortcut="Ctrl+Q",
                                         statusTip="Exit the Application",
                                         triggered=self.exitFile)
         self.graphingFittingOne= QtGui.QAction('Fitting One',
                                                    self, statusTip="Dock the graphing options",
-                                                   triggered=self.restoreDockFittingOptionOne)
+                                                   triggered= self.grphUtil.restoreDockFittingOneOptions)
         self.graphRawData= QtGui.QAction('Raw Data',
                                             self, statusTip="Plots different graphs for the raw data")
         self.aboutAction = QtGui.QAction(QtGui.QIcon('about.png'), 'A&bout',
@@ -278,15 +120,6 @@ class MainWindow (QtGui.QMainWindow):
         self.graphMenu = self.mainMenu.addMenu("Graph")
         self.helpMenu = self.mainMenu.addMenu("Help")
     # ---------------------------------------------------------------------------------------------#
-
-    def openFile(self):
-        """This method opens the file """
-        openDlg = QtGui.QFileDialog()
-        self.fileName = openDlg.getOpenFileName()
-
-        self.rdOnlyFileName.setText(self.fileName)
-        self.rdOnlyFileName.setStatusTip(self.fileName)
-
     def exitFile(self):
         response = self.msgApp("Exiting Form", "Would you like to exit the form")
 
@@ -309,242 +142,172 @@ class MainWindow (QtGui.QMainWindow):
                           "then click to graph the graphs. If you close down the "
                           "graphing options you can click on the ")
 
-    # -----------------------------------------------------------------------------------------#
-
-    def CheckGraphCheckBoxes(self):
-        """This function contains different conditions for the check boxes in data tab"""
-        # Checks Graph all and unchecks the rest, if all are selected
-        if self.checkBxGraphAll.isChecked() is False and self.checkBxPeakPosition.isEnabled() is False \
-                and self.checkBxAmplitude.isEnabled() is False and self.checkBxPeakWidth.isEnabled() is False \
-                and self.checkBxAmplitudeXWidth.isEnabled() is False:
-            self.checkBxPeakPosition.setCheckState(QtCore.Qt.Unchecked)
-            self.checkBxAmplitude.setCheckState(QtCore.Qt.Unchecked)
-            self.checkBxPeakWidth.setCheckState(QtCore.Qt.Unchecked)
-            self.checkBxAmplitudeXWidth.setCheckState(QtCore.Qt.Unchecked)
-            self.checkBxPeakPosition.setEnabled(True)
-            self.checkBxAmplitude.setEnabled(True)
-            self.checkBxPeakWidth.setEnabled(True)
-            self.checkBxAmplitudeXWidth.setEnabled(True)
-
-        # Checks and disables other boxes when Graph all is checked
-        if self.checkBxGraphAll.isChecked():
-            self.checkBxPeakPosition.setCheckState(QtCore.Qt.Checked)
-            self.checkBxAmplitude.setCheckState(QtCore.Qt.Checked)
-            self.checkBxPeakWidth.setCheckState(QtCore.Qt.Checked)
-            self.checkBxAmplitudeXWidth.setCheckState(QtCore.Qt.Checked)
-            self.checkBxPeakPosition.setEnabled(False)
-            self.checkBxAmplitude.setEnabled(False)
-            self.checkBxPeakWidth.setEnabled(False)
-            self.checkBxAmplitudeXWidth.setEnabled(False)
-
-        # Checks Graph all if all other boxes are checked
-        if self.checkBxAmplitude.isChecked() and self.checkBxPeakPosition.isChecked() \
-                and self.checkBxPeakWidth.isChecked() and self.checkBxAmplitudeXWidth.isChecked():
-            self.checkBxGraphAll.setChecked(True)
-    # -----------------------------------------------------------------------------------------#
+    # ----------------------------------------------------------------------------------------------------------#
     def graphAmplitude(self):
         """This method graphs the Amplitude graph"""
-        if self.fileName is not None:
-            if os.path.isfile(self.fileName):
-                mainGraph = QtGui.QWidget()
 
-                dpi = 100
-                fig = Figure((5.0, 4.0), dpi=dpi)
-                canvas = FigureCanvas(fig)
-                canvas.setParent(mainGraph)
+        mainGraph = QtGui.QWidget()
 
-                data = np.loadtxt(open(self.fileName))
-                axes = fig.add_subplot(111)
+        dpi = 100
+        fig = Figure((5.0, 4.0), dpi=dpi)
+        canvas = FigureCanvas(fig)
+        canvas.setParent(mainGraph)
 
-                yy0 = data[:, 0]
-                yy_err0 = data[:, 1]
-                xx = [-7, -6, -5, -4, -3, -2, -1, 0, 1, 2, 3, 4, 5, 6, 7, 7, 6, 5, 4, 3, 2, 1, 0, -1, -2, -3, -4, -5, -6,
-                      -7]
-                axes.plot(xx, yy0)
-                axes.errorbar(xx, yy0, yerr=yy_err0, fmt='o')
-                axes.set_title('Amplitude')
-                canvas.draw()
+        data = np.loadtxt(open(self.fileNm))
+        axes = fig.add_subplot(111)
 
-                tab = QtGui.QWidget()
-                tab.setStatusTip("Amplitude graph")
-                vbox = QtGui.QVBoxLayout()
-                graphNavigationBar = NavigationToolbar(canvas, self)
-                vbox.addWidget(graphNavigationBar)
-                vbox.addWidget(canvas)
-                tab.setLayout(vbox)
+        yy0 = data[:, 0]
+        yy_err0 = data[:, 1]
+        xx = [-7, -6, -5, -4, -3, -2, -1, 0, 1, 2, 3, 4, 5, 6, 7, 7, 6, 5, 4, 3, 2, 1, 0, -1, -2, -3, -4, -5, -6,
+              -7]
+        axes.plot(xx, yy0)
+        axes.errorbar(xx, yy0, yerr=yy_err0, fmt='o')
+        axes.set_title('Amplitude')
+        canvas.draw()
 
-                self.tabWidget.addTab(tab, "Amplitude")
+        tab = QtGui.QWidget()
+        tab.setStatusTip("Amplitude graph")
+        vbox = QtGui.QVBoxLayout()
+        graphNavigationBar = NavigationToolbar(canvas, self)
+        vbox.addWidget(graphNavigationBar)
+        vbox.addWidget(canvas)
+        tab.setLayout(vbox)
 
-                self.canvasArray.append(canvas)
-                self.figArray.append(fig)
+        self.tabWidget.addTab(tab, "Amplitude")
+
+        self.canvasArray.append(canvas)
+        self.figArray.append(fig)
 
 
     # -----------------------------------------------------------------------------------------#
     def graphPeakPosition(self):
         """This method graphs the Peak and position graph"""
-        if self.fileName is not None:
-            if os.path.isfile(self.fileName):
-                mainGraph = QtGui.QWidget()
 
-                dpi = 100
-                fig = Figure((5.0, 4.0), dpi=dpi)
-                canvas = FigureCanvas(fig)
-                canvas.setParent(mainGraph)
+        mainGraph = QtGui.QWidget()
 
-                data = np.loadtxt(open(self.fileName))
-                axes = fig.add_subplot(111)
+        dpi = 100
+        fig = Figure((5.0, 4.0), dpi=dpi)
+        canvas = FigureCanvas(fig)
+        canvas.setParent(mainGraph)
 
-                xx = [-7, -6, -5, -4, -3, -2, -1, 0, 1, 2, 3, 4, 5, 6, 7, 7, 6, 5, 4, 3, 2, 1, 0, -1, -2, -3, -4, -5, -6,
-                      -7]
-                yy1 = data[:, 2]
-                yy_err1 = data[:, 3]
-                axes.plot(xx, yy1)
-                axes.errorbar(xx, yy1, yerr=yy_err1, fmt='o')
-                axes.set_title('Peak Position')
-                canvas.draw()
+        data = np.loadtxt(open(self.fileNm))
+        axes = fig.add_subplot(111)
 
-                tab = QtGui.QWidget()
-                tab.setStatusTip("Peak position graph")
+        xx = [-7, -6, -5, -4, -3, -2, -1, 0, 1, 2, 3, 4, 5, 6, 7, 7, 6, 5, 4, 3, 2, 1, 0, -1, -2, -3, -4, -5, -6,
+              -7]
+        yy1 = data[:, 2]
+        yy_err1 = data[:, 3]
+        axes.plot(xx, yy1)
+        axes.errorbar(xx, yy1, yerr=yy_err1, fmt='o')
+        axes.set_title('Peak Position')
+        canvas.draw()
 
-                vbox = QtGui.QVBoxLayout()
-                graphNavigationBar = NavigationToolbar(canvas, self)
-                vbox.addWidget(graphNavigationBar)
-                vbox.addWidget(canvas)
-                tab.setLayout(vbox)
+        tab = QtGui.QWidget()
+        tab.setStatusTip("Peak position graph")
 
-                self.tabWidget.addTab(tab, "Peak Position")
+        vbox = QtGui.QVBoxLayout()
+        graphNavigationBar = NavigationToolbar(canvas, self)
+        vbox.addWidget(graphNavigationBar)
+        vbox.addWidget(canvas)
+        tab.setLayout(vbox)
+
+        self.tabWidget.addTab(tab, "Peak Position")
 
 
-                self.canvasArray.append(canvas)
-                self.figArray.append(fig)
+        self.canvasArray.append(canvas)
+        self.figArray.append(fig)
 
     # ----------------------------------------------------------------------------------------------------#
     def graphPeakWidth(self):
         """This method graphs the Peak width graph"""
-        if self.fileName is not None:
-            if os.path.isfile(self.fileName):
-                mainGraph = QtGui.QWidget()
 
-                dpi = 100
-                fig = Figure((5.0, 4.0), dpi=dpi)
-                canvas = FigureCanvas(fig)
-                canvas.setParent(mainGraph)
+        mainGraph = QtGui.QWidget()
 
-                data = np.loadtxt(open(self.fileName))
-                axes = fig.add_subplot(111)
+        dpi = 100
+        fig = Figure((5.0, 4.0), dpi=dpi)
+        canvas = FigureCanvas(fig)
+        canvas.setParent(mainGraph)
 
-                xx = [-7, -6, -5, -4, -3, -2, -1, 0, 1, 2, 3, 4, 5, 6, 7, 7, 6, 5, 4, 3, 2, 1, 0, -1, -2, -3, -4, -5, -6,
-                      -7]
-                yy2 = data[:, 4]
-                yy_err2 = data[:, 5]
-                axes.plot(xx, yy2)
-                axes.errorbar(xx, yy2, yerr=yy_err2, fmt='o')
-                axes.set_title('Peak Width')
-                canvas.draw()
+        data = np.loadtxt(open(self.fileNm))
+        axes = fig.add_subplot(111)
 
-                tab = QtGui.QWidget()
-                tab.setStatusTip("Peak width graph")
-                vbox = QtGui.QVBoxLayout()
-                graphNavigationBar = NavigationToolbar(canvas, self)
-                vbox.addWidget(graphNavigationBar)
-                vbox.addWidget(canvas)
-                tab.setLayout(vbox)
-                self.tabWidget.addTab(tab, "Peak Width")
+        xx = [-7, -6, -5, -4, -3, -2, -1, 0, 1, 2, 3, 4, 5, 6, 7, 7, 6, 5, 4, 3, 2, 1, 0, -1, -2, -3, -4, -5, -6,
+              -7]
+        yy2 = data[:, 4]
+        yy_err2 = data[:, 5]
+        axes.plot(xx, yy2)
+        axes.errorbar(xx, yy2, yerr=yy_err2, fmt='o')
+        axes.set_title('Peak Width')
+        canvas.draw()
 
-                self.canvasArray.append(canvas)
-                self.figArray.append(fig)
+        tab = QtGui.QWidget()
+        tab.setStatusTip("Peak width graph")
+        vbox = QtGui.QVBoxLayout()
+        graphNavigationBar = NavigationToolbar(canvas, self)
+        vbox.addWidget(graphNavigationBar)
+        vbox.addWidget(canvas)
+        tab.setLayout(vbox)
+        self.tabWidget.addTab(tab, "Peak Width")
+
+        self.canvasArray.append(canvas)
+        self.figArray.append(fig)
 
     # ----------------------------------------------------------------------------------------------------#
     def graphAmplitudeXWidth(self):
         """This method graphs the amplitude x width graph"""
-        if self.fileName is not None:
-            if os.path.isfile(self.fileName):
-                mainGraph = QtGui.QWidget()
 
-                dpi = 100
-                fig = Figure((5.0, 4.0), dpi=dpi)
-                canvas = FigureCanvas(fig)
-                canvas.setParent(mainGraph)
+        mainGraph = QtGui.QWidget()
 
-                data = np.loadtxt(open(self.fileName))
-                axes = fig.add_subplot(111)
+        dpi = 100
+        fig = Figure((5.0, 4.0), dpi=dpi)
+        canvas = FigureCanvas(fig)
+        canvas.setParent(mainGraph)
 
-                xx = [-7, -6, -5, -4, -3, -2, -1, 0, 1, 2, 3, 4, 5, 6, 7, 7, 6, 5, 4, 3, 2, 1, 0, -1, -2, -3, -4, -5, -6,
-                      -7]
-                yy2 = data[:, 4]
-                yy0 = data[:, 0]
-                yy3 = yy0 * yy2
-                axes.plot(xx, yy3)
-                axes.plot(xx, yy3, 'go')
-                axes.set_title('Amplitude Times Width')
-                canvas.draw()
+        data = np.loadtxt(open(self.fileNm))
+        axes = fig.add_subplot(111)
 
-                tab = QtGui.QWidget()
-                tab.setStatusTip("Amplitude times width graph")
-                vbox = QtGui.QVBoxLayout()
-                graphNavigationBar = NavigationToolbar(canvas, self)
-                vbox.addWidget(graphNavigationBar)
-                vbox.addWidget(canvas)
-                tab.setLayout(vbox)
-                self.tabWidget.addTab(tab, "Amplitude Times Width")
+        xx = [-7, -6, -5, -4, -3, -2, -1, 0, 1, 2, 3, 4, 5, 6, 7, 7, 6, 5, 4, 3, 2, 1, 0, -1, -2, -3, -4, -5, -6,
+              -7]
+        yy2 = data[:, 4]
+        yy0 = data[:, 0]
+        yy3 = yy0 * yy2
+        axes.plot(xx, yy3)
+        axes.plot(xx, yy3, 'go')
+        axes.set_title('Amplitude Times Width')
+        canvas.draw()
 
-                self.canvasArray.append(canvas)
-                self.figArray.append(fig)
+        tab = QtGui.QWidget()
+        tab.setStatusTip("Amplitude times width graph")
+        vbox = QtGui.QVBoxLayout()
+        graphNavigationBar = NavigationToolbar(canvas, self)
+        vbox.addWidget(graphNavigationBar)
+        vbox.addWidget(canvas)
+        tab.setLayout(vbox)
+        self.tabWidget.addTab(tab, "Amplitude Times Width")
+
+        self.canvasArray.append(canvas)
+        self.figArray.append(fig)
 
     # ------------------------------------------------------------------------------------------------------------#
     def graphAll(self):
         """Fuction graphs all the graphs. Makes sure the fileName is not empty
             and that the path leads to a file
         """
-        if self.fileName is not None:
-            if os.path.isfile(self.fileName):
-                self.graphAmplitude()
-                self.graphPeakPosition()
-                self.graphPeakWidth()
-                self.graphAmplitudeXWidth()
 
-    # -----------------------------------------------------------------------------------------#
-    def GraphDataFittingOne(self):
-        """Function that graphs the information from the file and calls on the different method to graph
-        depending on the check boxes the user has chosen. Checks for the fileName not to be empty and
-        the path to lead to an actual file.
-        """
-        if self.fileName is "" or self.fileName is None:
-            QtGui.QMessageBox.warning(self, "Error - No File", "There is no data to graph."
-                                                      " Make sure a file has been open.")
-        else:
-            if os.path.isfile(self.fileName) == False:
-                QtGui.QMessageBox.warning(self, "Error - No File", "There is no data to graph."
-                                                                   " Make sure a file has been open.")
-            else:
+        self.graphAmplitude()
+        self.graphPeakPosition()
+        self.graphPeakWidth()
+        self.graphAmplitudeXWidth()
 
-                if self.checkBxAmplitude.isChecked() and self.checkBxGraphAll.isChecked() == False:
-                    self.graphAmplitude()
-
-                if self.checkBxPeakPosition.isChecked() and self.checkBxGraphAll.isChecked() == False:
-                    self.graphPeakPosition()
-
-                if self.checkBxPeakWidth.isChecked() and self.checkBxGraphAll.isChecked() == False:
-                    self.graphPeakWidth()
-
-                if self.checkBxAmplitudeXWidth.isChecked() and self.checkBxGraphAll.isChecked() == False:
-                    self.graphAmplitudeXWidth()
-
-                if self.checkBxGraphAll.isChecked():
-                   self.graphAll()
-
-        self.checkBxGraphAll.setCheckState(QtCore.Qt.Unchecked)
-        self.checkBxAmplitude.setCheckState(QtCore.Qt.Unchecked)
-        self.checkBxAmplitudeXWidth.setCheckState(QtCore.Qt.Unchecked)
-        self.checkBxPeakPosition.setCheckState(QtCore.Qt.Unchecked)
-        self.checkBxPeakWidth.setCheckState(QtCore.Qt.Unchecked)
     # ---------------------------------------------------------------------------------------------------#
     def  GraphRawData(self):
         self.PlotColorGraphRawData()
 
     def PlotColorGraphRawData(self):
-        if self.fileName is not None:
-            if os.path.isfile(self.fileName):
+        """This function uses the raw data to plot a color graph of the data
+        """
+        if self.fileNm is not None:
+            if os.path.isfile(self.fileNm):
                 mainGraph = QtGui.QWidget()
 
                 dpi = 100
@@ -553,17 +316,17 @@ class MainWindow (QtGui.QMainWindow):
                 canvas.setParent(mainGraph)
                 axes = fig.add_subplot(111)
 
-                print(self.fileName)
+                print(self.fileNm)
                 title0 = 'file:'
                 # read file header
-                inF = open(self.fileName, 'r')
+                inF = open(self.fileNm, 'r')
                 lines = inF.readlines()
                 header = ''
                 for (iL, line) in enumerate(lines):
                     if line.startswith('#'):
                         header = line
                 inF.close()
-                data = np.loadtxt(open(self.fileName))
+                data = np.loadtxt(open(self.fileNm))
                 #    print data.shape, header
                 words = header.split()
                 ampl = ''
