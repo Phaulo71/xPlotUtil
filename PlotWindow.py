@@ -12,6 +12,7 @@ import numpy as np
 from pylab import *
 from matplotlib.backends import qt_compat
 
+
 use_pyside = qt_compat.QT_API == qt_compat.QT_API_PYSIDE
 if use_pyside:
     from PySide import QtGui, QtCore
@@ -42,15 +43,15 @@ class MainWindow (QtGui.QMainWindow):
 
         self.SetupComponents()
         self.windowTabs()
-        self.dockGraphingOptions()
+        self.dockFittingOptionOne()
         self.CheckGraphCheckBoxes()
         self.setCentralWidget(self.tabWidget)
 
     # -----------------------------------------------------------------------------#
-    def dockGraphingOptions(self):
-        """Function that creates the dockWidget, Graph Options"""
+    def dockFittingOptionOne(self):
+        """Function that creates the dockWidget, Graph Options for fitting one"""
 
-        self.dockDataGraphing = QtGui.QDockWidget("xPlot Options", self)
+        self.dockDataGraphing = QtGui.QDockWidget("xPlotting Options", self)
         self.dockDataGraphing.setFloating(False)
         self.dockDataGraphing.setMaximumWidth(300)
         self.dockDataGraphing.setAllowedAreas(QtCore.Qt.RightDockWidgetArea | QtCore.Qt.LeftDockWidgetArea)
@@ -62,8 +63,74 @@ class MainWindow (QtGui.QMainWindow):
 
         self.FileNameRdOnlyBox()
         self.BrowseButton()
+        self.GraphFittingOneButton()
+        self.GraphFittingOneCheckBox()
+
+        FileHLayout.addWidget(self.fileNameLabel)
+        FileHLayout.addWidget(self.rdOnlyFileName)
+        FileHLayout.addWidget(self.BrowseBtn)
+        FileHLayout.addStretch(1)
+
+        BtnLayout.addStretch(1)
+        BtnLayout.addWidget(self.GraphFittingOneBtn)
+
+        layout.addRow(FileHLayout)
+        layout.addRow(self.graphCheckBx)
+        layout.addRow(BtnLayout)
+        self.dataDocked.setLayout(layout)
+        self.dockDataGraphing.setWidget(self.dataDocked)
+
+        # Adding the docked widget to the main window
+        self.addDockWidget(QtCore.Qt.RightDockWidgetArea, self.dockDataGraphing)
+
+    def restoreDockFittingOptionOne(self):
+        """This funtion restores the Graphing Options Dock Widget for Fitting One, if it's closed"""
+        if self.dockDataGraphing.isVisible() == False:
+            self.dockFittingOptionOne()
+
+    def GraphFittingOneCheckBox(self):
+        """This function contains a group box with check boxes for fitting one"""
+        self.graphCheckBx = QtGui.QGroupBox("Select graphs")
+
+        self.checkBxAmplitude = QtGui.QCheckBox("Amplitude")
+        self.checkBxPeakPosition = QtGui.QCheckBox("Peak position")
+        self.checkBxPeakWidth = QtGui.QCheckBox("Peak width")
+        self.checkBxAmplitudeXWidth = QtGui.QCheckBox("Amplitude x Width")
+        self.checkBxGraphAll = QtGui.QCheckBox("Graph all")
+
+        vbox = QtGui.QVBoxLayout()
+        vbox.addWidget(self.checkBxAmplitude)
+        vbox.addWidget(self.checkBxPeakPosition)
+        vbox.addWidget(self.checkBxPeakWidth)
+        vbox.addWidget(self.checkBxAmplitudeXWidth)
+        vbox.addWidget(self.checkBxGraphAll)
+
+        self.checkBxAmplitude.stateChanged.connect(self.CheckGraphCheckBoxes)
+        self.checkBxAmplitudeXWidth.stateChanged.connect(self.CheckGraphCheckBoxes)
+        self.checkBxPeakWidth.stateChanged.connect(self.CheckGraphCheckBoxes)
+        self.checkBxPeakPosition.stateChanged.connect(self.CheckGraphCheckBoxes)
+        self.checkBxGraphAll.stateChanged.connect(self.CheckGraphCheckBoxes)
+
+        self.graphCheckBx.setLayout(vbox)
+
+    # ------------------------------------------------------------------------------------#
+    def dockPlotRawData(self):
+        """Function that creates the dockWidget, Graph Options for fitting one"""
+
+        self.dockRawData = QtGui.QDockWidget("xPlotting Options", self)
+        self.dockRawData.setFloating(False)
+        self.dockRawData.setMaximumWidth(300)
+        self.dockRawData.setAllowedAreas(QtCore.Qt.RightDockWidgetArea | QtCore.Qt.LeftDockWidgetArea)
+
+        layout = QtGui.QFormLayout()
+        FileHLayout = QtGui.QHBoxLayout()
+        BtnLayout = QtGui.QHBoxLayout()
+        self.dataDocked = QtGui.QWidget()
+
+        self.FileNameRdOnlyBox()
+        self.BrowseButton()
         self.GraphButton()
-        self.GraphingCheckBox()
+        self.RawDataPlotCheckBox()
 
         FileHLayout.addWidget(self.fileNameLabel)
         FileHLayout.addWidget(self.rdOnlyFileName)
@@ -77,17 +144,42 @@ class MainWindow (QtGui.QMainWindow):
         layout.addRow(self.graphCheckBx)
         layout.addRow(BtnLayout)
         self.dataDocked.setLayout(layout)
-        self.dockDataGraphing.setWidget(self.dataDocked)
+        self.dockRawData.setWidget(self.dataDocked)
 
         # Adding the docked widget to the main window
-        self.addDockWidget(QtCore.Qt.RightDockWidgetArea, self.dockDataGraphing)
+        self.addDockWidget(QtCore.Qt.RightDockWidgetArea, self.dockRawData)
 
-    def restoreDockGraphingOptions(self):
-        """This funtion restores the Graphing Options Dock Widget, if it closed"""
-        if self.dockDataGraphing.isVisible() == False:
-            self.dockGraphingOptions()
+    def restoreDockPlotRawData(self):
+        """This funtion restores the Graphing Options Dock Widget for Fitting One, if it's closed"""
+        if self.dockRawData.isVisible() == False:
+            self.dockFittingOptionOne()
 
-    # ------------------------------------------------------------------------------------#
+    def RawDataPlotCheckBox(self):
+        """This function contains a group box with check boxes"""
+        self.graphCheckBx = QtGui.QGroupBox("Select graphs")
+
+        self.checkBxAmplitude = QtGui.QCheckBox("Amplitude")
+        self.checkBxPeakPosition = QtGui.QCheckBox("Peak position")
+        self.checkBxPeakWidth = QtGui.QCheckBox("Peak width")
+        self.checkBxAmplitudeXWidth = QtGui.QCheckBox("Amplitude x Width")
+        self.checkBxGraphAll = QtGui.QCheckBox("Graph all")
+
+        vbox = QtGui.QVBoxLayout()
+        vbox.addWidget(self.checkBxAmplitude)
+        vbox.addWidget(self.checkBxPeakPosition)
+        vbox.addWidget(self.checkBxPeakWidth)
+        vbox.addWidget(self.checkBxAmplitudeXWidth)
+        vbox.addWidget(self.checkBxGraphAll)
+
+        self.checkBxAmplitude.stateChanged.connect(self.CheckGraphCheckBoxes)
+        self.checkBxAmplitudeXWidth.stateChanged.connect(self.CheckGraphCheckBoxes)
+        self.checkBxPeakWidth.stateChanged.connect(self.CheckGraphCheckBoxes)
+        self.checkBxPeakPosition.stateChanged.connect(self.CheckGraphCheckBoxes)
+        self.checkBxGraphAll.stateChanged.connect(self.CheckGraphCheckBoxes)
+
+        self.graphCheckBx.setLayout(vbox)
+
+    # ---------------------------------------------------------------------------------------------#
     def windowTabs(self):
         """This function creates the central widget QTabWidget and creates the Data tab"""
         self.tabWidget = QtGui.QTabWidget()
@@ -127,11 +219,11 @@ class MainWindow (QtGui.QMainWindow):
         self.fileNameLabel.setText("File Name:")
 
     # ------------------------------------------------------------------------------------#
-    def GraphButton(self):
+    def GraphFittingOneButton(self):
         """Funtion that creates a graph button, connects to the GraphData() method"""
-        self.GraphBtn = QtGui.QPushButton('Graph', self)
-        self.GraphBtn.clicked.connect(self.GraphData)
-        self.GraphBtn.setStatusTip("Graphs the check graphs")
+        self.GraphFittingOneBtn = QtGui.QPushButton('Graph', self)
+        self.GraphFittingOneBtn.clicked.connect(self.GraphDataFittingOne)
+        self.GraphFittingOneBtn.setStatusTip("Graphs the check graphs")
 
     def BrowseButton(self):
         """Funtion that creates a browse method, connects to the openFile() method"""
@@ -151,15 +243,11 @@ class MainWindow (QtGui.QMainWindow):
         self.CreateActions()
         self.CreateMenus()
         self.fileMenu.addAction(self.openAction)
-        self.fileMenu.addAction(self.graphingOptionsAction)
         self.fileMenu.addSeparator()
         self.fileMenu.addAction(self.exitAction)
-        self.graphMenu.addAction(self.graphAmplitudeAction)
-        self.graphMenu.addAction(self.graphPeakPositionAction)
-        self.graphMenu.addAction(self.graphPeakWidthAction)
-        self.graphMenu.addAction(self.graphAmplitudeXWidthAction)
-        self.graphMenu.addSeparator()
-        self.graphMenu.addAction(self.graphAllAction)
+        self.graphMenu.addAction(self.graphRawData)
+        self.graphMenu.addAction(self.graphingFittingOne)
+
         self.helpMenu.addSeparator()  
         self.helpMenu.addAction(self.aboutAction)
 
@@ -173,24 +261,11 @@ class MainWindow (QtGui.QMainWindow):
                                         self, shortcut="Ctrl+Q",
                                         statusTip="Exit the Application",
                                         triggered=self.exitFile)
-        self.graphingOptionsAction = QtGui.QAction('Graphing Options',
+        self.graphingFittingOne= QtGui.QAction('Fitting One',
                                                    self, statusTip="Dock the graphing options",
-                                                   triggered=self.restoreDockGraphingOptions)
-        self.graphAmplitudeAction = QtGui.QAction('Amplitude',
-                                            self, statusTip="Graphs the amplitude",
-                                            triggered=self.graphAmplitude)
-        self.graphPeakPositionAction = QtGui.QAction('Peak Position',
-                                               self, statusTip="Graphs the peak position",
-                                                     triggered=self.graphPeakPosition)
-        self.graphPeakWidthAction = QtGui.QAction('Peak &Width',
-                                            self, shortcut="Ctrl+W", statusTip="Graphs the peak width",
-                                                  triggered=self.graphPeakWidth)
-        self.graphAmplitudeXWidthAction = QtGui.QAction('Amplitude X Width',
-                                                  self, statusTip="Graphs the amplitude X width",
-                                                        triggered=self.graphAmplitudeXWidth)
-        self.graphAllAction = QtGui.QAction('Graph all',
-                                      self, statusTip="Graphs all the graphs",
-                                            triggered=self.graphAll)
+                                                   triggered=self.restoreDockFittingOptionOne)
+        self.graphRawData= QtGui.QAction('Raw Data',
+                                            self, statusTip="Plots different graphs for the raw data")
         self.aboutAction = QtGui.QAction(QtGui.QIcon('about.png'), 'A&bout',
                                          self, shortcut="Ctrl+B", statusTip="Displays info about the graph program",
                                          triggered=self.aboutHelp)
@@ -233,31 +308,6 @@ class MainWindow (QtGui.QMainWindow):
                           "then click to graph the graphs. If you close down the "
                           "graphing options you can click on the ")
 
-    # -----------------------------------------------------------------------------------------#
-    def GraphingCheckBox(self):
-        """This function contains a group box with check boxes"""
-        self.graphCheckBx = QtGui.QGroupBox("Select graphs")
-
-        self.checkBxAmplitude = QtGui.QCheckBox("Amplitude")
-        self.checkBxPeakPosition = QtGui.QCheckBox("Peak position")
-        self.checkBxPeakWidth = QtGui.QCheckBox("Peak width")
-        self.checkBxAmplitudeXWidth = QtGui.QCheckBox("Amplitude x Width")
-        self.checkBxGraphAll = QtGui.QCheckBox("Graph all")
-
-        vbox = QtGui.QVBoxLayout()
-        vbox.addWidget(self.checkBxAmplitude)
-        vbox.addWidget(self.checkBxPeakPosition)
-        vbox.addWidget(self.checkBxPeakWidth)
-        vbox.addWidget(self.checkBxAmplitudeXWidth)
-        vbox.addWidget(self.checkBxGraphAll)
-
-        self.checkBxAmplitude.stateChanged.connect(self.CheckGraphCheckBoxes)
-        self.checkBxAmplitudeXWidth.stateChanged.connect(self.CheckGraphCheckBoxes)
-        self.checkBxPeakWidth.stateChanged.connect(self.CheckGraphCheckBoxes)
-        self.checkBxPeakPosition.stateChanged.connect(self.CheckGraphCheckBoxes)
-        self.checkBxGraphAll.stateChanged.connect(self.CheckGraphCheckBoxes)
-
-        self.graphCheckBx.setLayout(vbox)
     # -----------------------------------------------------------------------------------------#
 
     def CheckGraphCheckBoxes(self):
@@ -453,10 +503,10 @@ class MainWindow (QtGui.QMainWindow):
                 self.graphAmplitudeXWidth()
 
     # -----------------------------------------------------------------------------------------#
-    def GraphData(self):
-        """Function that graphs the information from the file and codes on the different method to graph
+    def GraphDataFittingOne(self):
+        """Function that graphs the information from the file and calls on the different method to graph
         depending on the check boxes the user has chosen. Checks for the fileName not to be empty and
-        the path to lead to a file.
+        the path to lead to an actual file.
         """
         if self.fileName is "" or self.fileName is None:
             QtGui.QMessageBox.warning(self, "Error - No File", "There is no data to graph."
@@ -487,6 +537,81 @@ class MainWindow (QtGui.QMainWindow):
         self.checkBxAmplitudeXWidth.setCheckState(QtCore.Qt.Unchecked)
         self.checkBxPeakPosition.setCheckState(QtCore.Qt.Unchecked)
         self.checkBxPeakWidth.setCheckState(QtCore.Qt.Unchecked)
+    # ---------------------------------------------------------------------------------------------------#
+    def  GraphRawData(self):
+        self.PlotColorGraphRawData()
+
+    def PlotColorGraphRawData(self):
+        if self.fileName is not None:
+            if os.path.isfile(self.fileName):
+                mainGraph = QtGui.QWidget()
+
+                dpi = 100
+                fig = Figure((3.0, 3.0), dpi=dpi)
+                canvas = FigureCanvas(fig)
+                canvas.setParent(mainGraph)
+                axes = fig.add_subplot(111)
+
+                print(self.fileName)
+                title0 = 'file:'
+                # read file header
+                inF = open(self.fileName, 'r')
+                lines = inF.readlines()
+                header = ''
+                for (iL, line) in enumerate(lines):
+                    if line.startswith('#'):
+                        header = line
+                inF.close()
+                data = np.loadtxt(open(self.fileName))
+                #    print data.shape, header
+                words = header.split()
+                ampl = ''
+                if len(words) > 6:
+                    ampl = words[6]
+                # line1 = '[0] --> [-' +str(ampl) + '] --> [0] --> [+'+str(ampl) + '] --> [0]'
+                line1 = '[-' + str(ampl) + '] --> [0] --> [+' + str(ampl) + '] --> [0] --> [-' + str(ampl) + '] '
+                title0 = title0 + '\n' + header  # + '\t' + line1
+                nRow = data.shape[0]  # Gets the number of rows
+                nCol = data.shape[1]  # Gets the number of columns
+                x = 0
+                for f in range(nCol):
+                    if (np.mean(data[:, f]) == 0):
+                        pass
+                    else:
+                        x += 1
+                nCol = x
+
+                TT = np.zeros((nRow, nCol))
+                for i in range(nCol):
+                    TT[:, i] = data[:, i]
+
+                tMax = np.max(TT)
+                tMin = np.min(TT)
+
+                z = np.linspace(tMin, tMax, endpoint=True)
+                YY = range(nCol)
+                XX = range(nRow)
+
+                axes.contourf(YY, XX, TT, z)
+                fig.colorbar(axes.contourf(YY, XX, TT, z))
+                axes.set_title(title0)
+                axes.set_xlabel('array_index (voltage:' + line1 + ')')
+                axes.set_ylabel('spec_pnt: L')
+
+                canvas.draw()
+
+                tab = QtGui.QWidget()
+                tab.setStatusTip("Raw Data")
+                vbox = QtGui.QVBoxLayout()
+                graphNavigationBar = NavigationToolbar(canvas, self)
+                vbox.addWidget(graphNavigationBar)
+                vbox.addWidget(canvas)
+                tab.setLayout(vbox)
+                self.tabWidget.addTab(tab, "Raw Data")
+
+                self.canvasArray.append(canvas)
+                self.figArray.append(fig)
+
 
 def main():
     """Main method"""
