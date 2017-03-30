@@ -45,7 +45,7 @@ class MainWindow (QtGui.QMainWindow):
 
         self.SetupComponents()
         self.windowTabs()
-        self.grphUtil.dockFittingOneOptions()
+        self.grphUtil.DockRawDataOptions()
         self.setCentralWidget(self.tabWidget)
 
 
@@ -94,6 +94,9 @@ class MainWindow (QtGui.QMainWindow):
         self.helpMenu.addSeparator()  
         self.helpMenu.addAction(self.aboutAction)
 
+        # Disabling some of the actions until the raw data has been imported
+        self.graphingFittingOne.setEnabled(False)
+
     def CreateActions(self):
         """Function that creates the actions used in the menu bar"""
         self.openAction = QtGui.QAction(QtGui.QIcon('openFolder.png'), '&Open',
@@ -108,7 +111,8 @@ class MainWindow (QtGui.QMainWindow):
                                                    self, statusTip="Dock the graphing options",
                                                    triggered= self.grphUtil.restoreDockFittingOneOptions)
         self.graphRawData= QtGui.QAction('Raw Data',
-                                            self, statusTip="Plots different graphs for the raw data")
+                                            self, statusTip="Plots different graphs for the raw data",
+                                             triggered= self.grphUtil.restoreRawDataOptions)
         self.aboutAction = QtGui.QAction(QtGui.QIcon('about.png'), 'A&bout',
                                          self, shortcut="Ctrl+B", statusTip="Displays info about the graph program",
                                          triggered=self.aboutHelp)
@@ -300,81 +304,125 @@ class MainWindow (QtGui.QMainWindow):
         self.graphAmplitudeXWidth()
 
     # ---------------------------------------------------------------------------------------------------#
-    def  GraphRawData(self):
-        self.PlotColorGraphRawData()
-
     def PlotColorGraphRawData(self):
         """This function uses the raw data to plot a color graph of the data
         """
-        if self.fileNm is not None:
-            if os.path.isfile(self.fileNm):
-                mainGraph = QtGui.QWidget()
+        mainGraph = QtGui.QWidget()
 
-                dpi = 100
-                fig = Figure((3.0, 3.0), dpi=dpi)
-                canvas = FigureCanvas(fig)
-                canvas.setParent(mainGraph)
-                axes = fig.add_subplot(111)
+        dpi = 100
+        fig = Figure((3.0, 3.0), dpi=dpi)
+        canvas = FigureCanvas(fig)
+        canvas.setParent(mainGraph)
+        axes = fig.add_subplot(111)
 
-                print(self.fileNm)
-                title0 = 'file:'
-                # read file header
-                inF = open(self.fileNm, 'r')
-                lines = inF.readlines()
-                header = ''
-                for (iL, line) in enumerate(lines):
-                    if line.startswith('#'):
-                        header = line
-                inF.close()
-                data = np.loadtxt(open(self.fileNm))
-                #    print data.shape, header
-                words = header.split()
-                ampl = ''
-                if len(words) > 6:
-                    ampl = words[6]
-                # line1 = '[0] --> [-' +str(ampl) + '] --> [0] --> [+'+str(ampl) + '] --> [0]'
-                line1 = '[-' + str(ampl) + '] --> [0] --> [+' + str(ampl) + '] --> [0] --> [-' + str(ampl) + '] '
-                title0 = title0 + '\n' + header  # + '\t' + line1
-                nRow = data.shape[0]  # Gets the number of rows
-                nCol = data.shape[1]  # Gets the number of columns
-                x = 0
-                for f in range(nCol):
-                    if (np.mean(data[:, f]) == 0):
-                        pass
-                    else:
-                        x += 1
-                nCol = x
+        print(self.fileNm)
+        title0 = 'file:' + self.fileNm
+        # read file header
+        inF = open(self.fileNm, 'r')
+        lines = inF.readlines()
+        header = ''
+        for (iL, line) in enumerate(lines):
+            if line.startswith('#'):
+                header = line
+        inF.close()
+        data = np.loadtxt(open(self.fileNm))
+        #    print data.shape, header
+        words = header.split()
+        ampl = ''
+        if len(words) > 6:
+            ampl = words[6]
+        line1 = '[-' + str(ampl) + '] --> [0] --> [+' + str(ampl) + '] --> [0] --> [-' + str(ampl) + '] '
+        title0 = title0 + '\n' + header
+        nRow = data.shape[0]  # Gets the number of rows
+        nCol = data.shape[1]  # Gets the number of columns
+        x = 0
+        for f in range(nCol):
+            if (np.mean(data[:, f]) == 0):
+                pass
+            else:
+                x += 1
+        nCol = x
 
-                TT = np.zeros((nRow, nCol))
-                for i in range(nCol):
-                    TT[:, i] = data[:, i]
+        TT = np.zeros((nRow, nCol))
+        for i in range(nCol):
+            TT[:, i] = data[:, i]
 
-                tMax = np.max(TT)
-                tMin = np.min(TT)
+        tMax = np.max(TT)
+        tMin = np.min(TT)
 
-                z = np.linspace(tMin, tMax, endpoint=True)
-                YY = range(nCol)
-                XX = range(nRow)
+        z = np.linspace(tMin, tMax, endpoint=True)
+        YY = range(nCol)
+        XX = range(nRow)
 
-                axes.contourf(YY, XX, TT, z)
-                fig.colorbar(axes.contourf(YY, XX, TT, z))
-                axes.set_title(title0)
-                axes.set_xlabel('array_index (voltage:' + line1 + ')')
-                axes.set_ylabel('spec_pnt: L')
+        axes.contourf(YY, XX, TT, z)
+        fig.colorbar(axes.contourf(YY, XX, TT, z))
+        axes.set_title(title0)
+        axes.set_xlabel('array_index (voltage:' + line1 + ')')
+        axes.set_ylabel('spec_pnt: L')
 
-                canvas.draw()
+        canvas.draw()
 
-                tab = QtGui.QWidget()
-                tab.setStatusTip("Raw Data")
-                vbox = QtGui.QVBoxLayout()
-                graphNavigationBar = NavigationToolbar(canvas, self)
-                vbox.addWidget(graphNavigationBar)
-                vbox.addWidget(canvas)
-                tab.setLayout(vbox)
-                self.tabWidget.addTab(tab, "Raw Data")
+        tab = QtGui.QWidget()
+        tab.setStatusTip("Raw Data")
+        vbox = QtGui.QVBoxLayout()
+        graphNavigationBar = NavigationToolbar(canvas, self)
+        vbox.addWidget(graphNavigationBar)
+        vbox.addWidget(canvas)
+        tab.setLayout(vbox)
+        self.tabWidget.addTab(tab, "Raw Data")
 
-                self.canvasArray.append(canvas)
-                self.figArray.append(fig)
+        self.canvasArray.append(canvas)
+        self.figArray.append(fig)
+
+    # ----------------------------------------------------------------------------------------------#
+    def PlotLineGraphRawData(self):
+        """This method graphs the raw data into line graphs"""
+        mainGraph = QtGui.QWidget()
+
+        dpi = 100
+        fig = Figure((3.0, 3.0), dpi=dpi)
+        canvas = FigureCanvas(fig)
+        canvas.setParent(mainGraph)
+        axes = fig.add_subplot(111)
+
+        data = np.loadtxt(open(self.fileNm))
+
+        nRow = data.shape[0]  # Gets the number of rows
+        nCol = data.shape[1]  # Gets the number of columns
+        x = 0
+        for f in range(nCol):
+            if (np.mean(data[:, f]) == 0):
+                pass
+            else:
+                x += 1
+        nCol = x
+
+        TT = np.zeros((nRow, nCol))
+        for i in range(nCol):
+            TT[:, i] = data[:, i]
+
+        xx = arange(0, nRow)
+
+        for j in range(nCol):
+            yy = TT[:, j]
+            axes.plot(xx, yy)
+
+        axes.set_title('Fit for Time Constant')
+        axes.set_xlabel('Time (S)')
+        axes.set_ylabel('Voltage (V)')
+        canvas.draw()
+
+        tab = QtGui.QWidget()
+        tab.setStatusTip("Line Graph of Raw Data")
+        vbox = QtGui.QVBoxLayout()
+        graphNavigationBar = NavigationToolbar(canvas, self)
+        vbox.addWidget(graphNavigationBar)
+        vbox.addWidget(canvas)
+        tab.setLayout(vbox)
+        self.tabWidget.addTab(tab, "Line Graph Raw Data")
+
+        self.canvasArray.append(canvas)
+        self.figArray.append(fig)
 
 
 def main():

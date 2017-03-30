@@ -30,11 +30,11 @@ class GraphingUtil (QtGui.QDockWidget):
         """Function that creates the dockWidget, Graph Options for fitting one
         """
 
-        self.dockDataGraphing = QtGui.QDockWidget("xPlotting Fitting One", self)
-        self.dockDataGraphing.setFloating(False)
-        self.dockDataGraphing.setMaximumWidth(320)
-        self.dockDataGraphing.setMinimumWidth(320)
-        self.dockDataGraphing.setAllowedAreas(QtCore.Qt.RightDockWidgetArea | QtCore.Qt.LeftDockWidgetArea)
+        self.dockDataFittingOne = QtGui.QDockWidget("xPlotting Fitting One", self)
+        self.dockDataFittingOne.setFloating(False)
+        self.dockDataFittingOne.setMaximumWidth(320)
+        self.dockDataFittingOne.setMinimumWidth(320)
+        self.dockDataFittingOne.setAllowedAreas(QtCore.Qt.RightDockWidgetArea | QtCore.Qt.LeftDockWidgetArea)
 
         layout = QtGui.QFormLayout()
         FileHLayout = QtGui.QHBoxLayout()
@@ -58,10 +58,10 @@ class GraphingUtil (QtGui.QDockWidget):
         layout.addRow(self.graphCheckBx)
         layout.addRow(BtnLayout)
         self.dataDocked.setLayout(layout)
-        self.dockDataGraphing.setWidget(self.dataDocked)
+        self.dockDataFittingOne.setWidget(self.dataDocked)
 
         # Adding the docked widget to the main window
-        self.myMainWindow.addDockWidget(QtCore.Qt.RightDockWidgetArea, self.dockDataGraphing)
+        self.myMainWindow.addDockWidget(QtCore.Qt.RightDockWidgetArea, self.dockDataFittingOne)
 
 
     def GraphFittingOneCheckBox(self):
@@ -93,11 +93,15 @@ class GraphingUtil (QtGui.QDockWidget):
     def restoreDockFittingOneOptions(self):
         """This funtion restores the Graphing Options Dock Widget for Fitting One, if it's closed
             uses the GraphingUtilities.py"""
-        if self.dockDataGraphing.isVisible() == False:
+        if self.dockDataFittingOne.isVisible() == False:
             self.dockFittingOneOptions()
             if self.fileName is not "" and self.fileName is not None:
                 self.rdOnlyFileName.setText(self.fileName)
                 self.rdOnlyFileName.setStatusTip(self.fileName)
+
+    # ----------------------------------------------------------------------------------------------------------#
+    def DockFittingOne(self):
+        self.dockFittingOneOptions()
 
     # -----------------------------------------------------------------------------------------#
     def GraphDataFittingOne(self):
@@ -157,21 +161,27 @@ class GraphingUtil (QtGui.QDockWidget):
 
         self.rdOnlyFileName.setText(self.fileName)
         self.rdOnlyFileName.setStatusTip(self.fileName)
-    # ------------------------------------------------------------------------------------#
 
+    # ------------------------------------------------------------------------------------#
     def GraphFittingOneButton(self):
-        """Funtion that creates a graph button, connects to the GraphData() method"""
+        """Funtion that creates a graph button, connects to the GraphDataFittingOne() method"""
         self.GraphFittingOneBtn = QtGui.QPushButton('Graph', self)
         self.GraphFittingOneBtn.setStatusTip("Graphs the check graphs")
         self.GraphFittingOneBtn.clicked.connect(self.GraphDataFittingOne)
 
 
     def BrowseButton(self):
-        """Funtion that creates a browse method, connects to the openFile() method"""
+        """Function that creates a browse method, connects to the openFile() method"""
         # Button next to the FileNameRdOnly label and LineEdit
         self.BrowseBtn = QtGui.QPushButton('Browse', self)
         self.BrowseBtn.clicked.connect(self.openFile)
         self.BrowseBtn.setStatusTip("Browse and open an existing file")
+
+    def GraphRawDataButton(self):
+        """Function that creates a graph button, connects to the GraphData() method"""
+        self.GraphRawDataBtn = QtGui.QPushButton('Graph', self)
+        self.GraphRawDataBtn.setStatusTip("Graphs the check graphs")
+        self.GraphRawDataBtn.clicked.connect(self.GraphRawData)
 
     # ------------------------------------------------------------------------------------#
     def CheckFittingOneCheckBoxes(self):
@@ -204,3 +214,86 @@ class GraphingUtil (QtGui.QDockWidget):
         if self.checkBxAmplitude.isChecked() and self.checkBxPeakPosition.isChecked() \
                 and self.checkBxPeakWidth.isChecked() and self.checkBxAmplitudeXWidth.isChecked():
             self.checkBxGraphAll.setChecked(True)
+
+    # --------------------------------------------------------------------------------------------#
+    def DockRawDataOptions(self):
+        """Function that creates the dockWidget, Graph Options for fitting one
+        """
+        self.dockRawData = QtGui.QDockWidget("Raw Data", self)
+        self.dockRawData.setFloating(False)
+        self.dockRawData.setMaximumWidth(320)
+        self.dockRawData.setMinimumWidth(320)
+        self.dockRawData.setAllowedAreas(QtCore.Qt.RightDockWidgetArea | QtCore.Qt.LeftDockWidgetArea)
+
+        layout = QtGui.QFormLayout()
+        FileHLayout = QtGui.QHBoxLayout()
+        BtnLayout = QtGui.QHBoxLayout()
+        self.dataDockedWidget = QtGui.QWidget()
+
+        self.FileNameRdOnlyBox()
+        self.BrowseButton()
+        self.GraphRawDataCheckBox()
+        self.GraphRawDataButton()
+
+        FileHLayout.addWidget(self.fileNameLabel)
+        FileHLayout.addWidget(self.rdOnlyFileName)
+        FileHLayout.addStretch(1)
+        FileHLayout.addWidget(self.BrowseBtn)
+
+        BtnLayout.addStretch(1)
+        BtnLayout.addWidget(self.GraphRawDataBtn)
+
+        layout.addRow(FileHLayout)
+        layout.addRow(self.graphCheckBx)
+        layout.addRow(BtnLayout)
+        self.dataDockedWidget.setLayout(layout)
+        self.dockRawData.setWidget(self.dataDockedWidget)
+
+        # Adding the docked widget to the main window
+        self.myMainWindow.addDockWidget(QtCore.Qt.RightDockWidgetArea, self.dockRawData)
+
+    def GraphRawDataCheckBox(self):
+        """This function contains a group box with check boxes for fitting one"""
+        self.graphCheckBx = QtGui.QGroupBox("Select graphs")
+
+        self.checkBxColorGraph = QtGui.QCheckBox("Color Graph")
+        self.checkBxLineGraph = QtGui.QCheckBox("Line Graph")
+
+        vbox = QtGui.QVBoxLayout()
+        vbox.addWidget(self.checkBxColorGraph)
+        vbox.addWidget(self.checkBxLineGraph)
+
+        self.graphCheckBx.setLayout(vbox)
+
+    # ----------------------------------------------------------------------------------------------------------#
+    def restoreRawDataOptions(self):
+        """This funtion restores the Graphing Options Dock Widget for Fitting One, if it's closed
+            uses the GraphingUtilities.py"""
+        if self.dockRawData.isVisible() == False:
+            self.DockRawDataOptions()
+            if self.fileName is not "" and self.fileName is not None:
+                self.rdOnlyFileName.setText(self.fileName)
+                self.rdOnlyFileName.setStatusTip(self.fileName)
+
+    # ----------------------------------------------------------------------------------------------------------#
+    def GraphRawData(self):
+        """Function that depending on the check boxes the user has chosen it plots the raw data."""
+
+        self.myMainWindow.fileNm = self.fileName
+        if self.fileName is "" or self.fileName is None:
+            QtGui.QMessageBox.warning(self, "Error - No File", "There is no data to graph."
+                                                               " Make sure a file has been open.")
+        else:
+            if os.path.isfile(self.fileName) == False:
+                QtGui.QMessageBox.warning(self, "Error - No File", "There is no data to graph."
+                                                                   " Make sure a file has been open.")
+            else:
+                if self.checkBxColorGraph.isChecked():
+                    self.myMainWindow.PlotColorGraphRawData()
+
+                if self.checkBxLineGraph.isChecked():
+                    self.myMainWindow.PlotLineGraphRawData()
+
+        self.checkBxColorGraph.setCheckState(QtCore.Qt.Unchecked)
+        self.checkBxLineGraph.setCheckState(QtCore.Qt.Unchecked)
+
