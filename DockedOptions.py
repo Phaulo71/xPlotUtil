@@ -61,7 +61,7 @@ class DockedOption(QtGui.QDockWidget):
 
         # Adding the docked widget to the main window
         self.myMainWindow.addDockWidget(QtCore.Qt.RightDockWidgetArea, self.dockDataGausFit)
-        self.myMainWindow.tabifyDockWidget(self.dockRawData, self.dockDataFittingOne)
+        self.myMainWindow.tabifyDockWidget(self.dockRawData, self.dockDataGausFit)
 
 
     def GraphFittingOneCheckBox(self):
