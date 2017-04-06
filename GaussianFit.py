@@ -1,0 +1,231 @@
+#!/usr/bin/env python
+
+"""
+Copyright (c) UChicago Argonne, LLC. All rights reserved.
+See LICENSE file.
+"""
+
+# --------------------------------------------------------------------------------------#
+
+import sys
+import numpy as np
+from pylab import *
+from matplotlib.backends import qt_compat
+use_pyside = qt_compat.QT_API == qt_compat.QT_API_PYSIDE
+if use_pyside:
+    from PySide import QtGui, QtCore
+else:
+    from PyQt4 import QtGui, QtCore
+from scipy.optimize import curve_fit
+from scipy import exp
+from matplotlib.figure import Figure
+from matplotlib.backends.backend_qt4agg import FigureCanvasQTAgg as FigureCanvas
+from matplotlib.backends.backend_qt4 import NavigationToolbar2QT as NavigationToolbar
+class GaussianFitting:
+
+    def __init__ (self, parent=None):
+        self.myMainWindow = parent
+        self.TwoPkFitData = [0][0]
+        self.dockedOpt = parent
+
+    # --------------------------------------------------------------------------------------#
+    # Gaussian Fitting for Two Peaks [Updated April 4, 2017]
+    def TwoPeakFitting(self, filename):
+        data = np.loadtxt(open(filename))
+        nRow = data.shape[0]  # Number of rows
+        nCol = data.shape[1]  # Number of columns
+        x = 0
+        for f in range(nCol):
+            if (np.mean(data[:, f]) == 0):
+                pass
+            else:
+                x += 1
+        nCol = x  # Gets the number of columns with data in them
+
+        TT = np.zeros((nRow, nCol))
+        for i in range(nCol):
+            TT[:, i] = data[:, i]
+
+        self.TwoPkFitData = zeros((nCol, 12))  # Creats the empty 2D List
+
+        for j in range(nCol):
+            col_data = data[:, j]
+            xx = arange(0, len(col_data))
+            param = self.twoPkfitting(xx, col_data)
+            fit_result = param[0]
+            fit_error = param[1]
+
+            self.TwoPkFitData[j, :] = (fit_result[0], fit_error[0], fit_result[1], fit_error[1], fit_result[2],
+                                     fit_error[2], fit_result[3], fit_error[3], fit_result[4], fit_error[4],
+                                     fit_result[5], fit_error[5])
+        print(self.TwoPkFitData)
+
+
+    def twoPkfitting(self, xx, yy):
+        mean = sum(xx * yy) / sum(yy)
+        sigma = np.sqrt(sum(yy * (xx - mean) ** 2)) / sqrt(sum(yy))
+
+        bg0 = min(yy)  # min value of yy
+        popt, pcov = curve_fit(self.gaus, xx, yy, p0=[1500, 1500, 18, 35, 6, 6, bg0])
+        perr = np.sqrt(np.diag(pcov))
+        return popt, perr
+
+
+    def gaus(self, x, a1, a2, x01, x02, sigma1, sigma2, background):
+        return a1 * exp(-(x - x01) ** 2 / (2 * sigma1 ** 2))\
+               + a2 *exp(-(x - x02) ** 2 / (2 * sigma2 ** 2)) + background
+
+    # -----------------------------------------------------------------------------------------------------------#
+    def graphAmplitude(self):
+        """This method graphs the Amplitude graph"""
+
+        mainGraph = QtGui.QWidget()
+
+        dpi = 100
+        fig = Figure((5.0, 4.0), dpi=dpi)
+        canvas = FigureCanvas(fig)
+        canvas.setParent(mainGraph)
+
+        axes = fig.add_subplot(111)
+
+        yy0 = self.TwoPkFitData[:, 0]
+        yy_err0 = self.TwoPkFitData[:, 1]
+        xx = [-5, -4, -3, -2, -1, 0, 1, 2, 3, 4, 5, 5, 4, 3, 2, 1, 0, -1, -2, -3, -4, -5]
+
+        axes.plot(xx, yy0)
+        axes.errorbar(xx, yy0, yerr=yy_err0, fmt='o')
+        axes.set_title('Amplitude')
+        canvas.draw()
+
+        tab = QtGui.QWidget()
+        tab.setStatusTip("Amplitude graph")
+        vbox = QtGui.QVBoxLayout()
+        graphNavigationBar = NavigationToolbar(canvas)
+        vbox.addWidget(graphNavigationBar)
+        vbox.addWidget(canvas)
+        tab.setLayout(vbox)
+
+        self.dockedOpt.myMainWindow.tabWidget.addTab(tab, "Amplitude")
+
+        self.dockedOpt.myMainWindow.canvasArray.append(canvas)
+        self.dockedOpt.myMainWindow.figArray.append(fig)
+    # -----------------------------------------------------------------------------------------#
+
+    def graphPeakPosition(self):
+        """This method graphs the Peak and position graph"""
+
+        mainGraph = QtGui.QWidget()
+
+        dpi = 100
+        fig = Figure((5.0, 4.0), dpi=dpi)
+        canvas = FigureCanvas(fig)
+        canvas.setParent(mainGraph)
+
+        axes = fig.add_subplot(111)
+
+        xx = [-7, -6, -5, -4, -3, -2, -1, 0, 1, 2, 3, 4, 5, 6, 7, 7, 6, 5, 4, 3, 2, 1, 0, -1, -2, -3, -4, -5, -6,
+              -7]
+        yy1 = self.TwoPkFitData[:, 2]
+        yy_err1 = self.TwoPkFitData[:, 3]
+        axes.plot(xx, yy1)
+        axes.errorbar(xx, yy1, yerr=yy_err1, fmt='o')
+        axes.set_title('Peak Position')
+        canvas.draw()
+
+        tab = QtGui.QWidget()
+        tab.setStatusTip("Peak position graph")
+
+        vbox = QtGui.QVBoxLayout()
+        graphNavigationBar = NavigationToolbar(canvas, self)
+        vbox.addWidget(graphNavigationBar)
+        vbox.addWidget(canvas)
+        tab.setLayout(vbox)
+
+        self.tabWidget.addTab(tab, "Peak Position")
+        self.tabWidget.setCurrentWidget(tab)
+
+        self.dockedOpt.myMainWindow.canvasArray.append(canvas)
+        self.dockedOpt.myMainWindow.figArray.append(fig)
+
+    # ----------------------------------------------------------------------------------------------------#
+
+    def graphPeakWidth(self):
+        """This method graphs the Peak width graph"""
+
+        mainGraph = QtGui.QWidget()
+
+        dpi = 100
+        fig = Figure((5.0, 4.0), dpi=dpi)
+        canvas = FigureCanvas(fig)
+        canvas.setParent(mainGraph)
+
+        axes = fig.add_subplot(111)
+
+        xx = [-7, -6, -5, -4, -3, -2, -1, 0, 1, 2, 3, 4, 5, 6, 7, 7, 6, 5, 4, 3, 2, 1, 0, -1, -2, -3, -4, -5, -6,
+              -7]
+        yy2 = self.TwoPkFitData[:, 4]
+        yy_err2 = self.TwoPkFitData[:, 5]
+        axes.plot(xx, yy2)
+        axes.errorbar(xx, yy2, yerr=yy_err2, fmt='o')
+        axes.set_title('Peak Width')
+        canvas.draw()
+
+        tab = QtGui.QWidget()
+        tab.setStatusTip("Peak width graph")
+        vbox = QtGui.QVBoxLayout()
+        graphNavigationBar = NavigationToolbar(canvas, self)
+        vbox.addWidget(graphNavigationBar)
+        vbox.addWidget(canvas)
+        tab.setLayout(vbox)
+        self.dockedOpt.myMainWindow.addTab(tab, "Peak Width")
+        self.dockedOpt.myMainWindow.setCurrentWidget(tab)
+
+        self.dockedOpt.myMainWindow.canvasArray.append(canvas)
+        self.dockedOpt.myMainWindow.figArray.append(fig)
+
+    # ----------------------------------------------------------------------------------------------------#
+    def graphAmplitudeXWidth(self):
+        """This method graphs the amplitude x width graph"""
+
+        mainGraph = QtGui.QWidget()
+
+        dpi = 100
+        fig = Figure((5.0, 4.0), dpi=dpi)
+        canvas = FigureCanvas(fig)
+        canvas.setParent(mainGraph)
+        axes = fig.add_subplot(111)
+
+        xx = [-7, -6, -5, -4, -3, -2, -1, 0, 1, 2, 3, 4, 5, 6, 7, 7, 6, 5, 4, 3, 2, 1, 0, -1, -2, -3, -4, -5, -6,
+              -7]
+        yy2 = self.TwoPkFitData[:, 4]
+        yy0 = self.TwoPkFitData[:, 0]
+        yy3 = yy0 * yy2
+        axes.plot(xx, yy3)
+        axes.plot(xx, yy3, 'go')
+        axes.set_title('Amplitude Times Width')
+        canvas.draw()
+
+        tab = QtGui.QWidget()
+        tab.setStatusTip("Amplitude times width graph")
+        vbox = QtGui.QVBoxLayout()
+        graphNavigationBar = NavigationToolbar(canvas, self)
+        vbox.addWidget(graphNavigationBar)
+        vbox.addWidget(canvas)
+        tab.setLayout(vbox)
+        self.dockedOpt.myMainWindow.addTab(tab, "Amplitude Times Width")
+        self.dockedOpt.myMainWindow.setCurrentWidget(tab)
+
+        self.dockedOpt.myMainWindow.canvasArray.append(canvas)
+        self.dockedOpt.myMainWindow.figArray.append(fig)
+
+    # ------------------------------------------------------------------------------------------------------------#
+    def graphAll(self):
+        """Fuction graphs all the graphs. Makes sure the fileName is not empty
+            and that the path leads to a file
+        """
+
+        self.graphAmplitude()
+        self.graphPeakPosition()
+        self.graphPeakWidth()
+        self.graphAmplitudeXWidth()
+

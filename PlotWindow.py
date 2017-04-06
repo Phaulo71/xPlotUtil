@@ -21,7 +21,8 @@ else:
 
 import matplotlib.pyplot as plt
 matplotlib.use('Qt4Agg')
-from GraphingUtilities import GraphingUtil
+from DockedOptions import DockedOption
+from GaussianFit import GaussianFitting
 from matplotlib.figure import Figure
 from matplotlib.backends.backend_qt4agg import FigureCanvasQTAgg as FigureCanvas
 from matplotlib.backends.backend_qt4 import NavigationToolbar2QT as NavigationToolbar
@@ -37,16 +38,17 @@ class MainWindow (QtGui.QMainWindow):
         self.setMinimumSize(800, 700)
         self.setWindowTitle("xPlot Util")
         self.setWindowIcon(QtGui.QIcon('Icons/Graph.png'))
-        self.grphUtil = GraphingUtil(parent = self)
-        self.fileNm = self.grphUtil.fileName
+        self.dockedOpt = DockedOption(parent = self)
+        self.fileNm = self.dockedOpt.fileName
         self.canvasArray = []
         self.figArray = []
 
 
         self.SetupComponents()
         self.windowTabs()
-        self.grphUtil.DockRawDataOptions()
+        self.dockedOpt.DockRawDataOptions()
         self.setCentralWidget(self.tabWidget)
+        self.setDockNestingEnabled(True)
 
 
     # ---------------------------------------------------------------------------------------------#
@@ -89,30 +91,27 @@ class MainWindow (QtGui.QMainWindow):
         self.fileMenu.addSeparator()
         self.fileMenu.addAction(self.exitAction)
         self.graphMenu.addAction(self.graphRawData)
-        self.graphMenu.addAction(self.graphingFittingOne)
+        self.graphMenu.addAction(self.fittingOne)
 
         self.helpMenu.addSeparator()  
         self.helpMenu.addAction(self.aboutAction)
-
-        # Disabling some of the actions until the raw data has been imported
-        self.graphingFittingOne.setEnabled(False)
 
     def CreateActions(self):
         """Function that creates the actions used in the menu bar"""
         self.openAction = QtGui.QAction(QtGui.QIcon('openFolder.png'), '&Open',
                                         self, shortcut=QtGui.QKeySequence.Open,
                                         statusTip="Open an existing file",
-                                        triggered=self.grphUtil.openFile)
+                                        triggered=self.dockedOpt.openFile)
         self.exitAction = QtGui.QAction(QtGui.QIcon('exit.png'), 'E&xit',
                                         self, shortcut="Ctrl+Q",
                                         statusTip="Exit the Application",
                                         triggered=self.exitFile)
-        self.graphingFittingOne= QtGui.QAction('Fitting One',
+        self.fittingOne= QtGui.QAction('Fitting One',
                                                    self, statusTip="Dock the graphing options",
-                                                   triggered= self.grphUtil.restoreDockFittingOneOptions)
+                                                   triggered= self.dockedOpt.restoreDockGaussianFitOptions)
         self.graphRawData= QtGui.QAction('Raw Data',
                                             self, statusTip="Plots different graphs for the raw data",
-                                             triggered= self.grphUtil.restoreRawDataOptions)
+                                             triggered= self.dockedOpt.restoreRawDataOptions)
         self.aboutAction = QtGui.QAction(QtGui.QIcon('about.png'), 'A&bout',
                                          self, shortcut="Ctrl+B", statusTip="Displays info about the graph program",
                                          triggered=self.aboutHelp)
@@ -146,163 +145,6 @@ class MainWindow (QtGui.QMainWindow):
                           "then click to graph the graphs. If you close down the "
                           "graphing options you can click on the ")
 
-    # ----------------------------------------------------------------------------------------------------------#
-    def graphAmplitude(self):
-        """This method graphs the Amplitude graph"""
-
-        mainGraph = QtGui.QWidget()
-
-        dpi = 100
-        fig = Figure((5.0, 4.0), dpi=dpi)
-        canvas = FigureCanvas(fig)
-        canvas.setParent(mainGraph)
-
-        data = np.loadtxt(open(self.fileNm))
-        axes = fig.add_subplot(111)
-
-        yy0 = data[:, 0]
-        yy_err0 = data[:, 1]
-        xx = [-7, -6, -5, -4, -3, -2, -1, 0, 1, 2, 3, 4, 5, 6, 7, 7, 6, 5, 4, 3, 2, 1, 0, -1, -2, -3, -4, -5, -6,
-              -7]
-        axes.plot(xx, yy0)
-        axes.errorbar(xx, yy0, yerr=yy_err0, fmt='o')
-        axes.set_title('Amplitude')
-        canvas.draw()
-
-        tab = QtGui.QWidget()
-        tab.setStatusTip("Amplitude graph")
-        vbox = QtGui.QVBoxLayout()
-        graphNavigationBar = NavigationToolbar(canvas, self)
-        vbox.addWidget(graphNavigationBar)
-        vbox.addWidget(canvas)
-        tab.setLayout(vbox)
-
-        self.tabWidget.addTab(tab, "Amplitude")
-
-        self.canvasArray.append(canvas)
-        self.figArray.append(fig)
-
-
-    # -----------------------------------------------------------------------------------------#
-    def graphPeakPosition(self):
-        """This method graphs the Peak and position graph"""
-
-        mainGraph = QtGui.QWidget()
-
-        dpi = 100
-        fig = Figure((5.0, 4.0), dpi=dpi)
-        canvas = FigureCanvas(fig)
-        canvas.setParent(mainGraph)
-
-        data = np.loadtxt(open(self.fileNm))
-        axes = fig.add_subplot(111)
-
-        xx = [-7, -6, -5, -4, -3, -2, -1, 0, 1, 2, 3, 4, 5, 6, 7, 7, 6, 5, 4, 3, 2, 1, 0, -1, -2, -3, -4, -5, -6,
-              -7]
-        yy1 = data[:, 2]
-        yy_err1 = data[:, 3]
-        axes.plot(xx, yy1)
-        axes.errorbar(xx, yy1, yerr=yy_err1, fmt='o')
-        axes.set_title('Peak Position')
-        canvas.draw()
-
-        tab = QtGui.QWidget()
-        tab.setStatusTip("Peak position graph")
-
-        vbox = QtGui.QVBoxLayout()
-        graphNavigationBar = NavigationToolbar(canvas, self)
-        vbox.addWidget(graphNavigationBar)
-        vbox.addWidget(canvas)
-        tab.setLayout(vbox)
-
-        self.tabWidget.addTab(tab, "Peak Position")
-
-
-        self.canvasArray.append(canvas)
-        self.figArray.append(fig)
-
-    # ----------------------------------------------------------------------------------------------------#
-    def graphPeakWidth(self):
-        """This method graphs the Peak width graph"""
-
-        mainGraph = QtGui.QWidget()
-
-        dpi = 100
-        fig = Figure((5.0, 4.0), dpi=dpi)
-        canvas = FigureCanvas(fig)
-        canvas.setParent(mainGraph)
-
-        data = np.loadtxt(open(self.fileNm))
-        axes = fig.add_subplot(111)
-
-        xx = [-7, -6, -5, -4, -3, -2, -1, 0, 1, 2, 3, 4, 5, 6, 7, 7, 6, 5, 4, 3, 2, 1, 0, -1, -2, -3, -4, -5, -6,
-              -7]
-        yy2 = data[:, 4]
-        yy_err2 = data[:, 5]
-        axes.plot(xx, yy2)
-        axes.errorbar(xx, yy2, yerr=yy_err2, fmt='o')
-        axes.set_title('Peak Width')
-        canvas.draw()
-
-        tab = QtGui.QWidget()
-        tab.setStatusTip("Peak width graph")
-        vbox = QtGui.QVBoxLayout()
-        graphNavigationBar = NavigationToolbar(canvas, self)
-        vbox.addWidget(graphNavigationBar)
-        vbox.addWidget(canvas)
-        tab.setLayout(vbox)
-        self.tabWidget.addTab(tab, "Peak Width")
-
-        self.canvasArray.append(canvas)
-        self.figArray.append(fig)
-
-    # ----------------------------------------------------------------------------------------------------#
-    def graphAmplitudeXWidth(self):
-        """This method graphs the amplitude x width graph"""
-
-        mainGraph = QtGui.QWidget()
-
-        dpi = 100
-        fig = Figure((5.0, 4.0), dpi=dpi)
-        canvas = FigureCanvas(fig)
-        canvas.setParent(mainGraph)
-
-        data = np.loadtxt(open(self.fileNm))
-        axes = fig.add_subplot(111)
-
-        xx = [-7, -6, -5, -4, -3, -2, -1, 0, 1, 2, 3, 4, 5, 6, 7, 7, 6, 5, 4, 3, 2, 1, 0, -1, -2, -3, -4, -5, -6,
-              -7]
-        yy2 = data[:, 4]
-        yy0 = data[:, 0]
-        yy3 = yy0 * yy2
-        axes.plot(xx, yy3)
-        axes.plot(xx, yy3, 'go')
-        axes.set_title('Amplitude Times Width')
-        canvas.draw()
-
-        tab = QtGui.QWidget()
-        tab.setStatusTip("Amplitude times width graph")
-        vbox = QtGui.QVBoxLayout()
-        graphNavigationBar = NavigationToolbar(canvas, self)
-        vbox.addWidget(graphNavigationBar)
-        vbox.addWidget(canvas)
-        tab.setLayout(vbox)
-        self.tabWidget.addTab(tab, "Amplitude Times Width")
-
-        self.canvasArray.append(canvas)
-        self.figArray.append(fig)
-
-    # ------------------------------------------------------------------------------------------------------------#
-    def graphAll(self):
-        """Fuction graphs all the graphs. Makes sure the fileName is not empty
-            and that the path leads to a file
-        """
-
-        self.graphAmplitude()
-        self.graphPeakPosition()
-        self.graphPeakWidth()
-        self.graphAmplitudeXWidth()
-
     # ---------------------------------------------------------------------------------------------------#
     def PlotColorGraphRawData(self):
         """This function uses the raw data to plot a color graph of the data
@@ -315,7 +157,6 @@ class MainWindow (QtGui.QMainWindow):
         canvas.setParent(mainGraph)
         axes = fig.add_subplot(111)
 
-        print(self.fileNm)
         title0 = 'file:' + self.fileNm
         # read file header
         inF = open(self.fileNm, 'r')
@@ -326,7 +167,6 @@ class MainWindow (QtGui.QMainWindow):
                 header = line
         inF.close()
         data = np.loadtxt(open(self.fileNm))
-        #    print data.shape, header
         words = header.split()
         ampl = ''
         if len(words) > 6:
@@ -359,7 +199,6 @@ class MainWindow (QtGui.QMainWindow):
         axes.set_title(title0)
         axes.set_xlabel('array_index (voltage:' + line1 + ')')
         axes.set_ylabel('spec_pnt: L')
-
         canvas.draw()
 
         tab = QtGui.QWidget()
@@ -370,6 +209,7 @@ class MainWindow (QtGui.QMainWindow):
         vbox.addWidget(canvas)
         tab.setLayout(vbox)
         self.tabWidget.addTab(tab, "Raw Data")
+        self.tabWidget.setCurrentWidget(tab)
 
         self.canvasArray.append(canvas)
         self.figArray.append(fig)
@@ -420,6 +260,7 @@ class MainWindow (QtGui.QMainWindow):
         vbox.addWidget(canvas)
         tab.setLayout(vbox)
         self.tabWidget.addTab(tab, "Line Graph Raw Data")
+        self.tabWidget.setCurrentWidget(tab)
 
         self.canvasArray.append(canvas)
         self.figArray.append(fig)
