@@ -48,8 +48,7 @@ class MainWindow (QtGui.QMainWindow):
         self.windowTabs()
         self.dockedOpt.DockRawDataOptions()
         self.setCentralWidget(self.tabWidget)
-        self.setDockNestingEnabled(True)
-
+        self.setTabPosition(QtCore.Qt.RightDockWidgetArea | QtCore.Qt.LeftDockWidgetArea, QtGui.QTabWidget.North)
 
     # ---------------------------------------------------------------------------------------------#
     def windowTabs(self):
@@ -106,9 +105,9 @@ class MainWindow (QtGui.QMainWindow):
                                         self, shortcut="Ctrl+Q",
                                         statusTip="Exit the Application",
                                         triggered=self.exitFile)
-        self.fittingOne= QtGui.QAction('Fitting One',
+        self.fittingOne= QtGui.QAction('Gaussian Fit',
                                                    self, statusTip="Dock the graphing options",
-                                                   triggered= self.dockedOpt.restoreDockGaussianFitOptions)
+                                                   triggered= self.dockedOpt.GaussianFittingData)
         self.graphRawData= QtGui.QAction('Raw Data',
                                             self, statusTip="Plots different graphs for the raw data",
                                              triggered= self.dockedOpt.restoreRawDataOptions)

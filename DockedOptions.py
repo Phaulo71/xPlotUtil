@@ -47,7 +47,7 @@ class DockedOption(QtGui.QDockWidget):
         self.GraphFittingOneButton()
 
         FileHLayout.addWidget(self.fileNameLabel)
-        FileHLayout.addWidget(self.rdOnlyFileName)
+        FileHLayout.addWidget(self.rdOnlyFileNameG)
         FileHLayout.addStretch(1)
 
         BtnLayout.addStretch(1)
@@ -93,11 +93,11 @@ class DockedOption(QtGui.QDockWidget):
     def restoreDockGaussianFitOptions(self):
         """This funtion restores the Graphing Options Dock Widget for Fitting One, if it's close"""
         if self.gaussianFitStat == True:
-            if self.dockRawData.isVisible() == False:
+            if self.dockDataGausFit.isVisible() == False:
                 self.dockGaussianFitOptions()
                 if self.fileName is not "" and self.fileName is not None:
-                    self.rdOnlyFileName.setText(self.fileName)
-                    self.rdOnlyFileName.setStatusTip(self.fileName)
+                    self.rdOnlyFileNameG.setText(self.fileName)
+                    self.rdOnlyFileNameG.setStatusTip(self.fileName)
         else:
             if self.fileName is "" or self.fileName is None:
                 QtGui.QMessageBox.warning(self, "Error - No File", "There is no data."
@@ -107,10 +107,9 @@ class DockedOption(QtGui.QDockWidget):
                     QtGui.QMessageBox.warning(self, "Error - No File", "There is no data."
                                                                        " Make sure a file has been open.")
                 else:
-                    self.gausFit.TwoPeakFitting(self.fileName)
                     self.dockGaussianFitOptions()
-                    self.rdOnlyFileName.setText(self.fileName)
-                    self.rdOnlyFileName.setStatusTip(self.fileName)
+                    self.rdOnlyFileNameG.setText(self.fileName)
+                    self.rdOnlyFileNameG.setStatusTip(self.fileName)
                     self.gaussianFitStat = True
 
 
@@ -161,15 +160,43 @@ class DockedOption(QtGui.QDockWidget):
         self.rdOnlyFileName.setTextMargins(0, 0, 10, 0)
         self.rdOnlyFileName.setFixedWidth(125)
 
+        #For the Gaussioan Fit
+        self.rdOnlyFileNameG = QtGui.QLineEdit()
+        self.rdOnlyFileNameG.setReadOnly(True)
+        self.rdOnlyFileNameG.setTextMargins(0, 0, 10, 0)
+        self.rdOnlyFileNameG.setFixedWidth(200)
+
+        # Label
         self.fileNameLabel = QtGui.QLabel()
         self.fileNameLabel.setText("File Name:")
+
+    # ------------------------------------------------------------------------------------#
+    def GaussianFittingData(self):
+        chosePeak = self.PeakDialog()
+
+        if (chosePeak == 'One'):
+            self.gausFit.OnePeakFitting(self.fileName)
+            self.dockGaussianFitOptions()
+        elif (chosePeak == 'Two'):
+            self.gausFit.TwoPeakFitting(self.fileName)
+            self.dockGaussianFitOptions()
+
+
+    def PeakDialog(self):
+        peakList = ['One', 'Two']
+        Peak = ' '
+        text, ok = QtGui.QInputDialog.getItem(self, 'Peak Fit', 'Choose Peak: ', peakList)
+
+        if ok:
+            return text
 
     # ------------------------------------------------------------------------------------#
     def openFile(self):
         """This method opens the file """
         openDlg = QtGui.QFileDialog()
+        openDlg.setNameFilters(["Text Files (*.txt)", "Python (*.py)"])
+        openDlg.selectNameFilter("Text Files (*.txt)")
         self.fileName = openDlg.getOpenFileName()
-
         self.rdOnlyFileName.setText(self.fileName)
         self.rdOnlyFileName.setStatusTip(self.fileName)
 
@@ -286,7 +313,7 @@ class DockedOption(QtGui.QDockWidget):
                 self.rdOnlyFileName.setStatusTip(self.fileName)
 
                 if(self.gaussianFitStat == True):
-                    self.myMainWindow.tabifyDockWidget(self.dockRawData, self.dockDataFittingOne)
+                    self.myMainWindow.tabifyDockWidget(self.dockRawData, self.dockDataGausFit)
 
     # ----------------------------------------------------------------------------------------------------------#
     def GraphRawData(self):
@@ -309,4 +336,5 @@ class DockedOption(QtGui.QDockWidget):
 
         self.checkBxColorGraph.setCheckState(QtCore.Qt.Unchecked)
         self.checkBxLineGraph.setCheckState(QtCore.Qt.Unchecked)
+
 
