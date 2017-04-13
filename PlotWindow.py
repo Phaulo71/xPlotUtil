@@ -27,6 +27,7 @@ from matplotlib.figure import Figure
 from matplotlib.backends.backend_qt4agg import FigureCanvasQTAgg as FigureCanvas
 from matplotlib.backends.backend_qt4 import NavigationToolbar2QT as NavigationToolbar
 import gc
+import ntpath
 # --------------------------------------------------------------------------------------#
 
 class MainWindow (QtGui.QMainWindow):
@@ -119,7 +120,7 @@ class MainWindow (QtGui.QMainWindow):
         """This is where I initialize the menu bar and create the menus"""
         self.mainMenu = self.menuBar()
         self.fileMenu = self.mainMenu.addMenu("File")
-        self.graphMenu = self.mainMenu.addMenu("Graph")
+        self.graphMenu = self.mainMenu.addMenu("xPlot")
         self.helpMenu = self.mainMenu.addMenu("Help")
     # ---------------------------------------------------------------------------------------------#
     def exitFile(self):
@@ -139,24 +140,24 @@ class MainWindow (QtGui.QMainWindow):
             return "N"
 
     def aboutHelp(self):
-        QtGui.QMessageBox.about(self, "About Data Graphing",
-                          "Open a file and select the graphs you want to graph, "
-                          "then click to graph the graphs. If you close down the "
-                          "graphing options you can click on the ")
+        QtGui.QMessageBox.about(self, "About xPlot Util",
+                          "Open a file and graph the raw data or click on the xPlot tab\n "
+                          "to fit the data. Also under xPlot you can restore the Graphing options "
+                          "if you close them.")
 
     # ---------------------------------------------------------------------------------------------------#
     def PlotColorGraphRawData(self):
         """This function uses the raw data to plot a color graph of the data
         """
         mainGraph = QtGui.QWidget()
-
+        fN = str(self.fileNm)
         dpi = 100
         fig = Figure((3.0, 3.0), dpi=dpi)
         canvas = FigureCanvas(fig)
         canvas.setParent(mainGraph)
         axes = fig.add_subplot(111)
 
-        title0 = 'file:' + self.fileNm
+        title0 = 'file:' + ntpath.basename(fN)
         # read file header
         inF = open(self.fileNm, 'r')
         lines = inF.readlines()

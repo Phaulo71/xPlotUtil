@@ -30,8 +30,8 @@ class GaussianFitting:
         self.myMainWindow = self.dockedOpt.myMainWindow
 
     # --------------------------------------------------------------------------------------#
-    # Gaussian Fitting for Two Peaks [Updated April 4, 2017]
     def TwoPeakFitting(self, filename):
+        """Gaussian Fitting for Two Peaks [Updated April 4, 2017]"""
         data = np.loadtxt(open(filename))
         nRow = data.shape[0]  # Number of rows
         nCol = data.shape[1]  # Number of columns
@@ -65,9 +65,8 @@ class GaussianFitting:
     def twoPkFitting(self, xx, yy):
         mean = sum(xx * yy) / sum(yy)
         sigma = np.sqrt(sum(yy * (xx - mean) ** 2)) / sqrt(sum(yy))
-
+        print(sigma)
         bg0 = min(yy)  # min value of yy
-        print(bg0)
         popt, pcov = curve_fit(self.gaus2, xx, yy, p0=[2500, 1500, 18, 35, 6, 6, bg0])
         perr = np.sqrt(np.diag(pcov))
         return popt, perr
@@ -150,6 +149,7 @@ class GaussianFitting:
         tab.setLayout(vbox)
 
         self.myMainWindow.tabWidget.addTab(tab, "Amplitude")
+        self.myMainWindow.tabWidget.setCurrentWidget(tab)
 
         self.myMainWindow.canvasArray.append(canvas)
         self.myMainWindow.figArray.append(fig)

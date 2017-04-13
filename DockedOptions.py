@@ -92,26 +92,11 @@ class DockedOption(QtGui.QDockWidget):
     # ----------------------------------------------------------------------------------------------------------#
     def restoreDockGaussianFitOptions(self):
         """This funtion restores the Graphing Options Dock Widget for Fitting One, if it's close"""
-        if self.gaussianFitStat == True:
-            if self.dockDataGausFit.isVisible() == False:
-                self.dockGaussianFitOptions()
-                if self.fileName is not "" and self.fileName is not None:
-                    self.rdOnlyFileNameG.setText(self.fileName)
-                    self.rdOnlyFileNameG.setStatusTip(self.fileName)
-        else:
-            if self.fileName is "" or self.fileName is None:
-                QtGui.QMessageBox.warning(self, "Error - No File", "There is no data."
-                                                                   " Make sure a file has been open.")
-            else:
-                if os.path.isfile(self.fileName) == False:
-                    QtGui.QMessageBox.warning(self, "Error - No File", "There is no data."
-                                                                       " Make sure a file has been open.")
-                else:
-                    self.dockGaussianFitOptions()
-                    self.rdOnlyFileNameG.setText(self.fileName)
-                    self.rdOnlyFileNameG.setStatusTip(self.fileName)
-                    self.gaussianFitStat = True
-
+        if (self.dockDataGausFit.isVisible() == False):
+            self.dockGaussianFitOptions()
+            if self.fileName is not "" and self.fileName is not None:
+                self.rdOnlyFileNameG.setText(self.fileName)
+                self.rdOnlyFileNameG.setStatusTip(self.fileName)
 
     # -----------------------------------------------------------------------------------------#
     def GraphDataGausFit(self):
@@ -172,19 +157,32 @@ class DockedOption(QtGui.QDockWidget):
 
     # ------------------------------------------------------------------------------------#
     def GaussianFittingData(self):
-        chosePeak = self.PeakDialog()
-
-        if (chosePeak == 'One'):
-            self.gausFit.OnePeakFitting(self.fileName)
-            self.dockGaussianFitOptions()
-        elif (chosePeak == 'Two'):
-            self.gausFit.TwoPeakFitting(self.fileName)
-            self.dockGaussianFitOptions()
+        if self.fileName is " " or self.fileName == None:
+            QtGui.QMessageBox.warning(self, "Error - No File", "There is no data to fit."
+                                                               " Make sure a file has been open.")
+        else:
+            if os.path.isfile(self.fileName) == False:
+                QtGui.QMessageBox.warning(self, "Error - No File", "There is no data to fit."
+                                                                   " Make sure a file has been open.")
+            else:
+                if (self.gaussianFitStat == True):
+                    self.restoreDockGaussianFitOptions()
+                else:
+                    chosePeak = self.PeakDialog()
+                    self.gaussianFitStat == True
+                    if (chosePeak == 'One'):
+                        self.gausFit.OnePeakFitting(self.fileName)
+                        self.dockGaussianFitOptions()
+                    elif (chosePeak == 'Two'):
+                        self.gausFit.TwoPeakFitting(self.fileName)
+                        self.dockGaussianFitOptions()
+                    self.rdOnlyFileNameG.setText(self.fileName)
+                    self.rdOnlyFileNameG.setStatusTip(self.fileName)
 
 
     def PeakDialog(self):
+        """Method that asks the user to import """
         peakList = ['One', 'Two']
-        Peak = ' '
         text, ok = QtGui.QInputDialog.getItem(self, 'Peak Fit', 'Choose Peak: ', peakList)
 
         if ok:
@@ -193,10 +191,9 @@ class DockedOption(QtGui.QDockWidget):
     # ------------------------------------------------------------------------------------#
     def openFile(self):
         """This method opens the file """
-        openDlg = QtGui.QFileDialog()
-        openDlg.setNameFilters(["Text Files (*.txt)", "Python (*.py)"])
-        openDlg.selectNameFilter("Text Files (*.txt)")
-        self.fileName = openDlg.getOpenFileName()
+        filters = "Text files (*.txt);;Python files (*.py)"
+        selectedFilter = "Any file (*.*);;Text files (*.txt);;Python files (*.py)"
+        self.fileName = QtGui.QFileDialog.getOpenFileName(self, "Open File", filters, selectedFilter)
         self.rdOnlyFileName.setText(self.fileName)
         self.rdOnlyFileName.setStatusTip(self.fileName)
 
