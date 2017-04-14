@@ -25,7 +25,8 @@ class DockedOption(QtGui.QDockWidget):
         self.fileName = None
         self.myMainWindow = parent
         self.gausFit = GaussianFitting(self)
-        self.gaussianFitStat = False
+        self.gausFitStat = False
+        self.dockGaussianFitOptions
 
  # -----------------------------------------------------------------------------#
     def dockGaussianFitOptions(self):
@@ -105,7 +106,6 @@ class DockedOption(QtGui.QDockWidget):
         the path to lead to an actual file. This method is called in the Graphing Utilities file
         """
 
-        self.myMainWindow.fileNm = self.fileName
         if self.fileName is "" or self.fileName is None:
             QtGui.QMessageBox.warning(self, "Error - No File", "There is no data to graph."
                                                                " Make sure a file has been open.")
@@ -165,19 +165,16 @@ class DockedOption(QtGui.QDockWidget):
                 QtGui.QMessageBox.warning(self, "Error - No File", "There is no data to fit."
                                                                    " Make sure a file has been open.")
             else:
-                if (self.gaussianFitStat == True):
+                if (self.gausFitStat == True):
                     self.restoreDockGaussianFitOptions()
                 else:
                     chosePeak = self.PeakDialog()
-                    self.gaussianFitStat == True
+                    self.gausFitStat = True
                     if (chosePeak == 'One'):
                         self.gausFit.OnePeakFitting(self.fileName)
                         self.dockGaussianFitOptions()
                     elif (chosePeak == 'Two'):
-                        self.gausFit.TwoPeakFitting(self.fileName)
-                        self.dockGaussianFitOptions()
-                    self.rdOnlyFileNameG.setText(self.fileName)
-                    self.rdOnlyFileNameG.setStatusTip(self.fileName)
+                        self.gausFit.gausInputDialog()
 
 
     def PeakDialog(self):
@@ -191,11 +188,17 @@ class DockedOption(QtGui.QDockWidget):
     # ------------------------------------------------------------------------------------#
     def openFile(self):
         """This method opens the file """
+        #Sets the fileName rdOnlyBox to blank, if they try to open another file
+        self.rdOnlyFileName.setText(" ")
+        self.rdOnlyFileName.setStatusTip(" ")
+
         filters = "Text files (*.txt);;Python files (*.py)"
         selectedFilter = "Any file (*.*);;Text files (*.txt);;Python files (*.py)"
         self.fileName = QtGui.QFileDialog.getOpenFileName(self, "Open File", filters, selectedFilter)
+
         self.rdOnlyFileName.setText(self.fileName)
         self.rdOnlyFileName.setStatusTip(self.fileName)
+        self.gausFitStat = False
 
     # ------------------------------------------------------------------------------------#
     def GraphFittingOneButton(self):
@@ -308,9 +311,6 @@ class DockedOption(QtGui.QDockWidget):
             if self.fileName is not "" and self.fileName is not None:
                 self.rdOnlyFileName.setText(self.fileName)
                 self.rdOnlyFileName.setStatusTip(self.fileName)
-
-                if(self.gaussianFitStat == True):
-                    self.myMainWindow.tabifyDockWidget(self.dockRawData, self.dockDataGausFit)
 
     # ----------------------------------------------------------------------------------------------------------#
     def GraphRawData(self):

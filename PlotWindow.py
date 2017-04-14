@@ -35,12 +35,11 @@ class MainWindow (QtGui.QMainWindow):
     def __init__ (self, parent=None):
         super(MainWindow, self).__init__(parent)
 
-        self.setGeometry(50, 50, 1000, 700)
+        self.setGeometry(50, 50, 1000, 800)
         self.setMinimumSize(800, 700)
         self.setWindowTitle("xPlot Util")
         self.setWindowIcon(QtGui.QIcon('Icons/Graph.png'))
         self.dockedOpt = DockedOption(parent = self)
-        self.fileNm = self.dockedOpt.fileName
         self.canvasArray = []
         self.figArray = []
 
@@ -150,7 +149,7 @@ class MainWindow (QtGui.QMainWindow):
         """This function uses the raw data to plot a color graph of the data
         """
         mainGraph = QtGui.QWidget()
-        fN = str(self.fileNm)
+        fN = str(self.dockedOpt.fileName)
         dpi = 100
         fig = Figure((3.0, 3.0), dpi=dpi)
         canvas = FigureCanvas(fig)
@@ -159,14 +158,14 @@ class MainWindow (QtGui.QMainWindow):
 
         title0 = 'file:' + ntpath.basename(fN)
         # read file header
-        inF = open(self.fileNm, 'r')
+        inF = open(self.dockedOpt.fileName, 'r')
         lines = inF.readlines()
         header = ''
         for (iL, line) in enumerate(lines):
             if line.startswith('#'):
                 header = line
         inF.close()
-        data = np.loadtxt(open(self.fileNm))
+        data = np.loadtxt(open(self.dockedOpt.fileName))
         words = header.split()
         ampl = ''
         if len(words) > 6:
@@ -225,7 +224,7 @@ class MainWindow (QtGui.QMainWindow):
         canvas.setParent(mainGraph)
         axes = fig.add_subplot(111)
 
-        data = np.loadtxt(open(self.fileNm))
+        data = np.loadtxt(open(self.dockedOpt.fileName))
 
         nRow = data.shape[0]  # Gets the number of rows
         nCol = data.shape[1]  # Gets the number of columns

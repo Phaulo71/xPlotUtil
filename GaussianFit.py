@@ -65,9 +65,9 @@ class GaussianFitting:
     def twoPkFitting(self, xx, yy):
         mean = sum(xx * yy) / sum(yy)
         sigma = np.sqrt(sum(yy * (xx - mean) ** 2)) / sqrt(sum(yy))
-        print(sigma)
         bg0 = min(yy)  # min value of yy
-        popt, pcov = curve_fit(self.gaus2, xx, yy, p0=[2500, 1500, 18, 35, 6, 6, bg0])
+        popt, pcov = curve_fit(self.gaus2, xx, yy, p0=[self.peak1Amp, self.peak2Amp, self.peak1Pos, self.peak2Pos,
+                                                       self.peak1Wid, self.peak2Wid, bg0])
         perr = np.sqrt(np.diag(pcov))
         return popt, perr
 
@@ -103,6 +103,7 @@ class GaussianFitting:
             fit_error = param[1]
             self.PkFitData[j, :] =(fit_result[0], fit_error[0], fit_result[1], fit_error[1], fit_result[2],
                                              fit_error[2])
+            print(self.PkFitData)
 
 
     def OnePkFitting(self, xx, yy):
@@ -272,4 +273,65 @@ class GaussianFitting:
         self.graphPeakPosition()
         self.graphPeakWidth()
         self.graphAmplitudeXWidth()
+    # ------------------------------------------------------------------------------___#
+    def gausInputDialog(self):
+        """Dialog where the user import """
+        self.dialogGausFit = QtGui.QDialog()
+        inputForm = QtGui.QFormLayout()
+        buttonLayout = QtGui.QHBoxLayout()
+        spaceLayout = QtGui.QVBoxLayout()
+
+        spaceLayout.addStretch(1)
+
+        self.peak1AmpSpin = QtGui.QSpinBox()
+        self.peak1AmpSpin.setMaximum(100000)
+        self.peak1PosSpin = QtGui.QSpinBox()
+        self.peak1WidthSpin = QtGui.QSpinBox()
+
+        self.peak2AmpSpin = QtGui.QSpinBox()
+        self.peak2AmpSpin.setMaximum(100000)
+        self.peak2PosSpin = QtGui.QSpinBox()
+        self.peak2WidthSpin = QtGui.QSpinBox()
+
+        ok = QtGui.QPushButton("Ok")
+        cancel = QtGui.QPushButton("Cancel")
+
+        cancel.clicked.connect(self.dialogGausFit.close)
+        ok.clicked.connect(self.returnGausUserInput)
+        buttonLayout.addWidget(cancel)
+        buttonLayout.addStretch(1)
+        buttonLayout.addWidget(ok)
+
+        inputForm.addRow("Peak#1 Amplitude: ", self.peak1AmpSpin)
+        inputForm.addRow("Peak#1 Position: ", self.peak1PosSpin)
+        inputForm.addRow("Peak#1 Width: ", self.peak1WidthSpin)
+        inputForm.addRow("Peak#2 Amplitude: ", self.peak2AmpSpin)
+        inputForm.addRow("Peak#2 Position: ", self.peak2PosSpin)
+        inputForm.addRow("Peak#2 Width: ", self.peak2WidthSpin)
+        inputForm.addRow(spaceLayout)
+        inputForm.addRow(buttonLayout)
+
+        self.dialogGausFit.setWindowTitle("Input Guess Data for Fit")
+        self.dialogGausFit.setLayout(inputForm)
+        self.dialogGausFit.setGeometry(300,200, 250, 200)
+        self.dialogGausFit.exec_()
+
+    def returnGausUserInput(self):
+        """Sets the values of the variables in the method twoPkFitting, that are used as parameters.
+        It also sets the Gaussian fit options available"""
+        self.peak1Amp = float(self.peak1AmpSpin.value())
+        self.peak1Pos = float(self.peak1PosSpin.value())
+        self.peak1Wid = float(self.peak1WidthSpin.value())
+
+        self.peak2Amp = float(self.peak2AmpSpin.value())
+        self.peak2Pos = float(self.peak2PosSpin.value())
+        self.peak2Wid = float(self.peak2WidthSpin.value())
+
+        self.dialogGausFit.close()
+        self.TwoPeakFitting(self.dockedOpt.fileName)
+        self.dockedOpt.dockGaussianFitOptions()
+        self.dockedOpt.rdOnlyFileNameG.setText(self.dockedOpt.fileName)
+        self.dockedOpt.rdOnlyFileNameG.setStatusTip(self.dockedOpt.fileName)
+
+
 
