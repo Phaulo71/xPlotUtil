@@ -42,7 +42,6 @@ class GaussianFitting:
             else:
                 x += 1
         nCol = x  # Gets the number of columns with data in them
-
         TT = np.zeros((nRow, nCol))
         for i in range(nCol):
             TT[:, i] = data[:, i]
@@ -134,7 +133,7 @@ class GaussianFitting:
 
         yy0 = self.PkFitData[:, 0]
         yy_err0 = self.PkFitData[:, 1]
-        xx = [-7, -6, -5, -4, -3, -2, -1, 0, 1, 2, 3, 4,5,6,7,7,6,5,4,3,2,1,0,-1,-2,-3,-4,-5,-6,-7]
+        xx = self.getXAxis(self.dockedOpt.fileName)
 
         axes.plot(xx, yy0)
         axes.errorbar(xx, yy0, yerr=yy_err0, fmt='o')
@@ -168,8 +167,7 @@ class GaussianFitting:
 
         axes = fig.add_subplot(111)
 
-        xx = [-7, -6, -5, -4, -3, -2, -1, 0, 1, 2, 3, 4, 5, 6, 7, 7, 6, 5, 4, 3, 2, 1, 0, -1, -2, -3, -4, -5, -6,
-              -7]
+        xx = self.getXAxis(self.dockedOpt.fileName)
         yy1 = self.PkFitData[:, 2]
         yy_err1 = self.PkFitData[:, 3]
         axes.plot(xx, yy1)
@@ -206,8 +204,7 @@ class GaussianFitting:
 
         axes = fig.add_subplot(111)
 
-        xx = [-7, -6, -5, -4, -3, -2, -1, 0, 1, 2, 3, 4, 5, 6, 7, 7, 6, 5, 4, 3, 2, 1, 0, -1, -2, -3, -4, -5, -6,
-              -7]
+        xx = self.getXAxis(self.dockedOpt.fileName)
         yy2 = self.PkFitData[:, 4]
         yy_err2 = self.PkFitData[:, 5]
         axes.plot(xx, yy2)
@@ -240,8 +237,7 @@ class GaussianFitting:
         canvas.setParent(mainGraph)
         axes = fig.add_subplot(111)
 
-        xx = [-7, -6, -5, -4, -3, -2, -1, 0, 1, 2, 3, 4, 5, 6, 7, 7, 6, 5, 4, 3, 2, 1, 0, -1, -2, -3, -4, -5, -6,
-              -7]
+        xx = self.getXAxis(self.dockedOpt.fileName)
         yy2 = self.PkFitData[:, 4]
         yy0 = self.PkFitData[:, 0]
         yy3 = yy0 * yy2
@@ -264,6 +260,51 @@ class GaussianFitting:
         self.dockedOpt.myMainWindow.figArray.append(fig)
 
     # ------------------------------------------------------------------------------------------------------------#
+    def getXAxis(self, fileName):
+        x = []
+        # Gets the amplitude
+        inF = open(fileName, 'r')
+        lines = inF.readlines()
+        header = ''
+        for (iL, line) in enumerate(lines):
+            if line.startswith('#'):
+                header = line
+        inF.close()
+        words = header.split()
+        amplWord = words[6]
+        ampl = amplWord.split('.')
+        amp = float(ampl[0])
+
+        # get the bins
+        data = np.loadtxt(open(fileName))
+        nCol = data.shape[1]  # Number of columns
+        c = 0
+        for f in range(nCol):
+            if (np.mean(data[:, f]) == 0):
+                pass
+            else:
+                c += 1
+        bins = c  # Gets the number of bins
+
+        # Uses the data to find the x axis
+        amplStart = amp/2
+        points = bins/2
+        xDif = amp/points
+        xStart = xDif/2
+        startX = (-1*amplStart) + xStart
+        x.append(startX)
+        for j in range(points-1):
+            startX = startX + xDif
+            x.append(startX)
+
+        x.append(startX)
+        for j in range(points-1):
+            startX = startX - xDif
+            x.append(startX)
+
+        return x
+
+    #-------------------------------------------------------------------------------------------------------------#
     def graphAll(self):
         """Fuction graphs all the graphs. Makes sure the fileName is not empty
             and that the path leads to a file
@@ -273,7 +314,7 @@ class GaussianFitting:
         self.graphPeakPosition()
         self.graphPeakWidth()
         self.graphAmplitudeXWidth()
-    # ------------------------------------------------------------------------------___#
+    # -------------------------------------------------------------------------------------------------------------#
     def gausInputDialog(self):
         """Dialog where the user import """
         self.dialogGausFit = QtGui.QDialog()
@@ -333,5 +374,5 @@ class GaussianFitting:
         self.dockedOpt.rdOnlyFileNameG.setText(self.dockedOpt.fileName)
         self.dockedOpt.rdOnlyFileNameG.setStatusTip(self.dockedOpt.fileName)
 
-
+    # -------------------------------------------------------------------------------------------------------------#
 

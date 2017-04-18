@@ -170,12 +170,13 @@ class DockedOption(QtGui.QDockWidget):
                     self.restoreDockGaussianFitOptions()
                 else:
                     chosePeak = self.PeakDialog()
-                    self.gausFitStat = True
                     if (chosePeak == 'One'):
                         self.gausFit.OnePeakFitting(self.fileName)
                         self.dockGaussianFitOptions()
+                        self.gausFitStat = True
                     elif (chosePeak == 'Two'):
                         self.gausFit.gausInputDialog()
+                        self.gausFitStat = True
 
 
     def PeakDialog(self):
@@ -195,7 +196,7 @@ class DockedOption(QtGui.QDockWidget):
 
         filters = "Text files (*.txt);;Python files (*.py)"
         selectedFilter = "Any file (*.*);;Text files (*.txt);;Python files (*.py)"
-        self.fileName = QtGui.QFileDialog.getOpenFileName(self, "Open File", filters, selectedFilter)
+        self.fileName = QtGui.QFileDialog.getOpenFileName(self, "Open File")
 
         self.rdOnlyFileName.setText(self.fileName)
         self.rdOnlyFileName.setStatusTip(self.fileName)
