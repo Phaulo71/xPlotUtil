@@ -119,8 +119,8 @@ class GaussianFitting:
         return a * exp(-(x - x0) ** 2 / (2 * sigma ** 2)) + a0 * x + b
 
     # -----------------------------------------------------------------------------------------------------------#
-    def graphAmplitude(self):
-        """This method graphs the Amplitude graph"""
+    def graphAmplitude1(self):
+        """This method graphs the Amplitude for peak one"""
 
         mainGraph = QtGui.QWidget()
 
@@ -137,26 +137,26 @@ class GaussianFitting:
 
         axes.plot(xx, yy0)
         axes.errorbar(xx, yy0, yerr=yy_err0, fmt='o')
-        axes.set_title('Amplitude')
+        axes.set_title('Peak #1 Amplitude')
         canvas.draw()
 
         tab = QtGui.QWidget()
-        tab.setStatusTip("Amplitude graph")
+        tab.setStatusTip("Peak #1 Amplitude")
         vbox = QtGui.QVBoxLayout()
         graphNavigationBar = NavigationToolbar(canvas, mainGraph)
         vbox.addWidget(graphNavigationBar)
         vbox.addWidget(canvas)
         tab.setLayout(vbox)
 
-        self.myMainWindow.tabWidget.addTab(tab, "Amplitude")
+        self.myMainWindow.tabWidget.addTab(tab, "Peak #1 Amplitude")
         self.myMainWindow.tabWidget.setCurrentWidget(tab)
 
         self.myMainWindow.canvasArray.append(canvas)
         self.myMainWindow.figArray.append(fig)
     # -----------------------------------------------------------------------------------------#
 
-    def graphPeakPosition(self):
-        """This method graphs the Peak and position graph"""
+    def graphPeakPosition1(self):
+        """This method graphs the peak position for peak one"""
 
         mainGraph = QtGui.QWidget()
 
@@ -168,15 +168,15 @@ class GaussianFitting:
         axes = fig.add_subplot(111)
 
         xx = self.getXAxis(self.dockedOpt.fileName)
-        yy1 = self.PkFitData[:, 2]
-        yy_err1 = self.PkFitData[:, 3]
+        yy1 = self.PkFitData[:, 4]
+        yy_err1 = self.PkFitData[:, 5]
         axes.plot(xx, yy1)
         axes.errorbar(xx, yy1, yerr=yy_err1, fmt='o')
-        axes.set_title('Peak Position')
+        axes.set_title('Peak #1 Position')
         canvas.draw()
 
         tab = QtGui.QWidget()
-        tab.setStatusTip("Peak position graph")
+        tab.setStatusTip("Peak #1 Position")
 
         vbox = QtGui.QVBoxLayout()
         graphNavigationBar = NavigationToolbar(canvas, mainGraph)
@@ -184,7 +184,7 @@ class GaussianFitting:
         vbox.addWidget(canvas)
         tab.setLayout(vbox)
 
-        self.myMainWindow.tabWidget.addTab(tab, "Peak Position")
+        self.myMainWindow.tabWidget.addTab(tab, "Peak #1 Position")
         self.myMainWindow.tabWidget.setCurrentWidget(tab)
 
         self.myMainWindow.canvasArray.append(canvas)
@@ -192,8 +192,8 @@ class GaussianFitting:
 
     # ----------------------------------------------------------------------------------------------------#
 
-    def graphPeakWidth(self):
-        """This method graphs the Peak width graph"""
+    def graphPeakWidth1(self):
+        """This method graphs the Peak width for peak one"""
 
         mainGraph = QtGui.QWidget()
 
@@ -205,29 +205,29 @@ class GaussianFitting:
         axes = fig.add_subplot(111)
 
         xx = self.getXAxis(self.dockedOpt.fileName)
-        yy2 = self.PkFitData[:, 4]
-        yy_err2 = self.PkFitData[:, 5]
+        yy2 = self.PkFitData[:, 8]
+        yy_err2 = self.PkFitData[:, 9]
         axes.plot(xx, yy2)
         axes.errorbar(xx, yy2, yerr=yy_err2, fmt='o')
-        axes.set_title('Peak Width')
+        axes.set_title('Peak #1 Width')
         canvas.draw()
 
         tab = QtGui.QWidget()
-        tab.setStatusTip("Peak width graph")
+        tab.setStatusTip("Peak #1 Width")
         vbox = QtGui.QVBoxLayout()
         graphNavigationBar = NavigationToolbar(canvas, mainGraph)
         vbox.addWidget(graphNavigationBar)
         vbox.addWidget(canvas)
         tab.setLayout(vbox)
-        self.dockedOpt.myMainWindow.tabWidget.addTab(tab, "Peak Width")
+        self.dockedOpt.myMainWindow.tabWidget.addTab(tab, "Peak #1 Width")
         self.dockedOpt.myMainWindow.tabWidget.setCurrentWidget(tab)
 
         self.dockedOpt.myMainWindow.canvasArray.append(canvas)
         self.dockedOpt.myMainWindow.figArray.append(fig)
 
     # ----------------------------------------------------------------------------------------------------#
-    def graphAmplitudeXWidth(self):
-        """This method graphs the amplitude x width graph"""
+    def graphAmplitudeXWidth1(self):
+        """This method graphs the amplitude x width for the first peak"""
 
         mainGraph = QtGui.QWidget()
 
@@ -238,22 +238,163 @@ class GaussianFitting:
         axes = fig.add_subplot(111)
 
         xx = self.getXAxis(self.dockedOpt.fileName)
-        yy2 = self.PkFitData[:, 4]
+        yy2 = self.PkFitData[:, 8]
         yy0 = self.PkFitData[:, 0]
         yy3 = yy0 * yy2
         axes.plot(xx, yy3)
         axes.plot(xx, yy3, 'go')
-        axes.set_title('Amplitude Times Width')
+        axes.set_title('Peak #1 Amplitude X Width')
         canvas.draw()
 
         tab = QtGui.QWidget()
-        tab.setStatusTip("Amplitude times width graph")
+        tab.setStatusTip("Peak #1 Amplitude X Width")
         vbox = QtGui.QVBoxLayout()
         graphNavigationBar = NavigationToolbar(canvas, mainGraph)
         vbox.addWidget(graphNavigationBar)
         vbox.addWidget(canvas)
         tab.setLayout(vbox)
-        self.dockedOpt.myMainWindow.tabWidget.addTab(tab, "Amplitude Times Width")
+        self.dockedOpt.myMainWindow.tabWidget.addTab(tab, "Peak #1 Amplitude X Width")
+        self.dockedOpt.myMainWindow.tabWidget.setCurrentWidget(tab)
+
+        self.dockedOpt.myMainWindow.canvasArray.append(canvas)
+        self.dockedOpt.myMainWindow.figArray.append(fig)
+
+    # -----------------------------------------------------------------------------------------------------------#
+    def graphAmplitude2(self):
+        """This method graphs the Amplitude for peak one"""
+
+        mainGraph = QtGui.QWidget()
+
+        dpi = 100
+        fig = Figure((5.0, 4.0), dpi=dpi)
+        canvas = FigureCanvas(fig)
+        canvas.setParent(mainGraph)
+
+        axes = fig.add_subplot(111)
+
+        yy0 = self.PkFitData[:, 2]
+        yy_err0 = self.PkFitData[:, 3]
+        xx = self.getXAxis(self.dockedOpt.fileName)
+
+        axes.plot(xx, yy0)
+        axes.errorbar(xx, yy0, yerr=yy_err0, fmt='o')
+        axes.set_title('Peak #2 Amplitude')
+        canvas.draw()
+
+        tab = QtGui.QWidget()
+        tab.setStatusTip("Peak #2 Amplitude")
+        vbox = QtGui.QVBoxLayout()
+        graphNavigationBar = NavigationToolbar(canvas, mainGraph)
+        vbox.addWidget(graphNavigationBar)
+        vbox.addWidget(canvas)
+        tab.setLayout(vbox)
+
+        self.myMainWindow.tabWidget.addTab(tab, "Peak #2 Amplitude")
+        self.myMainWindow.tabWidget.setCurrentWidget(tab)
+
+        self.myMainWindow.canvasArray.append(canvas)
+        self.myMainWindow.figArray.append(fig)
+    # -----------------------------------------------------------------------------------------#
+
+    def graphPeakPosition2(self):
+        """This method graphs the peak position for peak one"""
+
+        mainGraph = QtGui.QWidget()
+
+        dpi = 100
+        fig = Figure((5.0, 4.0), dpi=dpi)
+        canvas = FigureCanvas(fig)
+        canvas.setParent(mainGraph)
+
+        axes = fig.add_subplot(111)
+
+        xx = self.getXAxis(self.dockedOpt.fileName)
+        yy1 = self.PkFitData[:, 6]
+        yy_err1 = self.PkFitData[:, 7]
+        axes.plot(xx, yy1)
+        axes.errorbar(xx, yy1, yerr=yy_err1, fmt='o')
+        axes.set_title('Peak #1 Position')
+        canvas.draw()
+
+        tab = QtGui.QWidget()
+        tab.setStatusTip("Peak #1 Position")
+
+        vbox = QtGui.QVBoxLayout()
+        graphNavigationBar = NavigationToolbar(canvas, mainGraph)
+        vbox.addWidget(graphNavigationBar)
+        vbox.addWidget(canvas)
+        tab.setLayout(vbox)
+
+        self.myMainWindow.tabWidget.addTab(tab, "Peak #2 Position")
+        self.myMainWindow.tabWidget.setCurrentWidget(tab)
+
+        self.myMainWindow.canvasArray.append(canvas)
+        self.myMainWindow.figArray.append(fig)
+
+    # ----------------------------------------------------------------------------------------------------#
+
+    def graphPeakWidth2(self):
+        """This method graphs the Peak width for peak one"""
+
+        mainGraph = QtGui.QWidget()
+
+        dpi = 100
+        fig = Figure((5.0, 4.0), dpi=dpi)
+        canvas = FigureCanvas(fig)
+        canvas.setParent(mainGraph)
+
+        axes = fig.add_subplot(111)
+
+        xx = self.getXAxis(self.dockedOpt.fileName)
+        yy2 = self.PkFitData[:, 10]
+        yy_err2 = self.PkFitData[:, 11]
+        axes.plot(xx, yy2)
+        axes.errorbar(xx, yy2, yerr=yy_err2, fmt='o')
+        axes.set_title('Peak #2 Width')
+        canvas.draw()
+
+        tab = QtGui.QWidget()
+        tab.setStatusTip("Peak #2 Width")
+        vbox = QtGui.QVBoxLayout()
+        graphNavigationBar = NavigationToolbar(canvas, mainGraph)
+        vbox.addWidget(graphNavigationBar)
+        vbox.addWidget(canvas)
+        tab.setLayout(vbox)
+        self.dockedOpt.myMainWindow.tabWidget.addTab(tab, "Peak #2 Width")
+        self.dockedOpt.myMainWindow.tabWidget.setCurrentWidget(tab)
+
+        self.dockedOpt.myMainWindow.canvasArray.append(canvas)
+        self.dockedOpt.myMainWindow.figArray.append(fig)
+
+    # ----------------------------------------------------------------------------------------------------#
+    def graphAmplitudeXWidth2(self):
+        """This method graphs the amplitude x width for the first peak"""
+
+        mainGraph = QtGui.QWidget()
+
+        dpi = 100
+        fig = Figure((5.0, 4.0), dpi=dpi)
+        canvas = FigureCanvas(fig)
+        canvas.setParent(mainGraph)
+        axes = fig.add_subplot(111)
+
+        xx = self.getXAxis(self.dockedOpt.fileName)
+        yy2 = self.PkFitData[:, 10]
+        yy0 = self.PkFitData[:, 2]
+        yy3 = yy0 * yy2
+        axes.plot(xx, yy3)
+        axes.plot(xx, yy3, 'go')
+        axes.set_title('Peak #2 Amplitude X Width')
+        canvas.draw()
+
+        tab = QtGui.QWidget()
+        tab.setStatusTip("Peak #2 Amplitude X Width")
+        vbox = QtGui.QVBoxLayout()
+        graphNavigationBar = NavigationToolbar(canvas, mainGraph)
+        vbox.addWidget(graphNavigationBar)
+        vbox.addWidget(canvas)
+        tab.setLayout(vbox)
+        self.dockedOpt.myMainWindow.tabWidget.addTab(tab, "Peak #2 Amplitude X Width")
         self.dockedOpt.myMainWindow.tabWidget.setCurrentWidget(tab)
 
         self.dockedOpt.myMainWindow.canvasArray.append(canvas)
@@ -309,11 +450,14 @@ class GaussianFitting:
         """Fuction graphs all the graphs. Makes sure the fileName is not empty
             and that the path leads to a file
         """
-
-        self.graphAmplitude()
-        self.graphPeakPosition()
-        self.graphPeakWidth()
-        self.graphAmplitudeXWidth()
+        self.graphAmplitude1()
+        self.graphPeakPosition1()
+        self.graphPeakWidth1()
+        self.graphAmplitudeXWidth1()
+        self.graphAmplitude2()
+        self.graphPeakPosition2()
+        self.graphPeakWidth2()
+        self.graphAmplitudeXWidth2()
     # -------------------------------------------------------------------------------------------------------------#
     def gausInputDialog(self):
         """Dialog where the user import """
@@ -354,8 +498,8 @@ class GaussianFitting:
 
         self.dialogGausFit.setWindowTitle("Input Guess Data for Fit")
         self.dialogGausFit.setLayout(inputForm)
-        self.dialogGausFit.setGeometry(300,200, 250, 200)
-        self.dialogGausFit.exec_()
+        self.dialogGausFit.resize(250, 200)
+        self.dialogGausFit.show()
 
     def returnGausUserInput(self):
         """Sets the values of the variables in the method twoPkFitting, that are used as parameters.
@@ -373,6 +517,9 @@ class GaussianFitting:
         self.dockedOpt.dockGaussianFitOptions()
         self.dockedOpt.rdOnlyFileNameG.setText(self.dockedOpt.fileName)
         self.dockedOpt.rdOnlyFileNameG.setStatusTip(self.dockedOpt.fileName)
+
+        # Marks the data has been fitted
+        self.dockedOpt.gausFitStat = True
 
     # -------------------------------------------------------------------------------------------------------------#
 

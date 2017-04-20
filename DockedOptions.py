@@ -47,16 +47,19 @@ class DockedOption(QtGui.QDockWidget):
         self.FileNameRdOnlyBox()
         self.GraphFittingOneCheckBox()
         self.GraphFittingOneButton()
+        self.GraphAllButton()
 
         FileHLayout.addWidget(self.fileNameLabel)
         FileHLayout.addWidget(self.rdOnlyFileNameG)
         FileHLayout.addStretch(1)
 
+        BtnLayout.addWidget(self.GraphAllBtn)
         BtnLayout.addStretch(1)
         BtnLayout.addWidget(self.GraphFittingOneBtn)
 
         layout.addRow(FileHLayout)
-        layout.addRow(self.graphCheckBx)
+        layout.addRow(self.graphCheckBx1)
+        layout.addRow(self.graphCheckBx2)
         layout.addRow(BtnLayout)
         self.dataDocked.setLayout(layout)
         self.dockDataGausFit.setWidget(self.dataDocked)
@@ -68,28 +71,33 @@ class DockedOption(QtGui.QDockWidget):
 
     def GraphFittingOneCheckBox(self):
         """This function contains a group box with check boxes for fitting one"""
-        self.graphCheckBx = QtGui.QGroupBox("Select Graphs")
+        self.graphCheckBx1 = QtGui.QGroupBox("Peak #1")
+        self.graphCheckBx2 = QtGui.QGroupBox("Peak #2")
 
-        self.checkBxAmplitude = QtGui.QCheckBox("Amplitude")
-        self.checkBxPeakPosition = QtGui.QCheckBox("Peak position")
-        self.checkBxPeakWidth = QtGui.QCheckBox("Peak width")
-        self.checkBxAmplitudeXWidth = QtGui.QCheckBox("Amplitude x Width")
+        self.checkBxAmplitude1 = QtGui.QCheckBox("Amplitude")
+        self.checkBxPeakPosition1 = QtGui.QCheckBox("Position")
+        self.checkBxPeakWidth1 = QtGui.QCheckBox("Width")
+        self.checkBxAmplitudeXWidth1 = QtGui.QCheckBox("Amplitude x Width")
+        self.checkBxAmplitude2 = QtGui.QCheckBox("Amplitude")
+        self.checkBxPeakPosition2 = QtGui.QCheckBox("Position")
+        self.checkBxPeakWidth2 = QtGui.QCheckBox("Width")
+        self.checkBxAmplitudeXWidth2  = QtGui.QCheckBox("Amplitude x Width")
         self.checkBxGraphAll = QtGui.QCheckBox("Graph all")
 
         vbox = QtGui.QVBoxLayout()
-        vbox.addWidget(self.checkBxAmplitude)
-        vbox.addWidget(self.checkBxPeakPosition)
-        vbox.addWidget(self.checkBxPeakWidth)
-        vbox.addWidget(self.checkBxAmplitudeXWidth)
-        vbox.addWidget(self.checkBxGraphAll)
+        vbox.addWidget(self.checkBxAmplitude1)
+        vbox.addWidget(self.checkBxPeakPosition1)
+        vbox.addWidget(self.checkBxPeakWidth1)
+        vbox.addWidget(self.checkBxAmplitudeXWidth1)
 
-        self.checkBxAmplitude.stateChanged.connect(self.CheckFittingOneCheckBoxes)
-        self.checkBxAmplitudeXWidth.stateChanged.connect(self.CheckFittingOneCheckBoxes)
-        self.checkBxPeakWidth.stateChanged.connect(self.CheckFittingOneCheckBoxes)
-        self.checkBxPeakPosition.stateChanged.connect(self.CheckFittingOneCheckBoxes)
-        self.checkBxGraphAll.stateChanged.connect(self.CheckFittingOneCheckBoxes)
+        vbox2 = QtGui.QVBoxLayout()
+        vbox2.addWidget(self.checkBxAmplitude2)
+        vbox2.addWidget(self.checkBxPeakPosition2)
+        vbox2.addWidget(self.checkBxPeakWidth2)
+        vbox2.addWidget(self.checkBxAmplitudeXWidth2)
 
-        self.graphCheckBx.setLayout(vbox)
+        self.graphCheckBx1.setLayout(vbox)
+        self.graphCheckBx2.setLayout(vbox2)
 
     # ----------------------------------------------------------------------------------------------------------#
     def restoreDockGaussianFitOptions(self):
@@ -116,26 +124,38 @@ class DockedOption(QtGui.QDockWidget):
                                                                    " Make sure a file has been open.")
             else:
 
-                if self.checkBxAmplitude.isChecked() and self.checkBxGraphAll.isChecked() == False:
-                    self.gausFit.graphAmplitude()
+                if self.checkBxAmplitude1.isChecked():
+                    self.gausFit.graphAmplitude1()
 
-                if self.checkBxPeakPosition.isChecked() and self.checkBxGraphAll.isChecked() == False:
-                    self.gausFit.graphPeakPosition()
+                if self.checkBxPeakPosition1.isChecked():
+                    self.gausFit.graphPeakPosition1()
 
-                if self.checkBxPeakWidth.isChecked() and self.checkBxGraphAll.isChecked() == False:
-                    self.gausFit.graphPeakWidth()
+                if self.checkBxPeakWidth1.isChecked():
+                    self.gausFit.graphPeakWidth1()
 
-                if self.checkBxAmplitudeXWidth.isChecked() and self.checkBxGraphAll.isChecked() == False:
-                    self.gausFit.graphAmplitudeXWidth()
+                if self.checkBxAmplitudeXWidth1.isChecked():
+                    self.gausFit.graphAmplitudeXWidth1()
 
-                if self.checkBxGraphAll.isChecked():
-                    self.gausFit.graphAll()
+                if self.checkBxAmplitude2.isChecked():
+                    self.gausFit.graphAmplitude2()
 
-        self.checkBxGraphAll.setCheckState(QtCore.Qt.Unchecked)
-        self.checkBxAmplitude.setCheckState(QtCore.Qt.Unchecked)
-        self.checkBxAmplitudeXWidth.setCheckState(QtCore.Qt.Unchecked)
-        self.checkBxPeakPosition.setCheckState(QtCore.Qt.Unchecked)
-        self.checkBxPeakWidth.setCheckState(QtCore.Qt.Unchecked)
+                if self.checkBxPeakPosition2.isChecked():
+                    self.gausFit.graphPeakPosition2()
+
+                if self.checkBxPeakWidth2.isChecked():
+                    self.gausFit.graphPeakWidth2()
+
+                if self.checkBxAmplitudeXWidth2.isChecked():
+                    self.gausFit.graphAmplitudeXWidth2()
+
+        self.checkBxAmplitude1.setCheckState(QtCore.Qt.Unchecked)
+        self.checkBxAmplitudeXWidth1.setCheckState(QtCore.Qt.Unchecked)
+        self.checkBxPeakPosition1.setCheckState(QtCore.Qt.Unchecked)
+        self.checkBxPeakWidth1.setCheckState(QtCore.Qt.Unchecked)
+        self.checkBxAmplitude2.setCheckState(QtCore.Qt.Unchecked)
+        self.checkBxAmplitudeXWidth2.setCheckState(QtCore.Qt.Unchecked)
+        self.checkBxPeakPosition2.setCheckState(QtCore.Qt.Unchecked)
+        self.checkBxPeakWidth2.setCheckState(QtCore.Qt.Unchecked)
 
     # ------------------------------------------------------------------------------------#
     def FileNameRdOnlyBox(self):
@@ -173,10 +193,8 @@ class DockedOption(QtGui.QDockWidget):
                     if (chosePeak == 'One'):
                         self.gausFit.OnePeakFitting(self.fileName)
                         self.dockGaussianFitOptions()
-                        self.gausFitStat = True
                     elif (chosePeak == 'Two'):
                         self.gausFit.gausInputDialog()
-                        self.gausFitStat = True
 
 
     def PeakDialog(self):
@@ -223,37 +241,11 @@ class DockedOption(QtGui.QDockWidget):
         self.GraphRawDataBtn.setStatusTip("Graphs the check graphs")
         self.GraphRawDataBtn.clicked.connect(self.GraphRawData)
 
-    # ------------------------------------------------------------------------------------#
-    def CheckFittingOneCheckBoxes(self):
-        """This function contains different conditions for the check boxes in data tab"""
-        # Checks Graph all and unchecks the rest, if all are selected
-        if self.checkBxGraphAll.isChecked() is False and self.checkBxPeakPosition.isEnabled() is False \
-                and self.checkBxAmplitude.isEnabled() is False and self.checkBxPeakWidth.isEnabled() is False \
-                and self.checkBxAmplitudeXWidth.isEnabled() is False:
-            self.checkBxPeakPosition.setCheckState(QtCore.Qt.Unchecked)
-            self.checkBxAmplitude.setCheckState(QtCore.Qt.Unchecked)
-            self.checkBxPeakWidth.setCheckState(QtCore.Qt.Unchecked)
-            self.checkBxAmplitudeXWidth.setCheckState(QtCore.Qt.Unchecked)
-            self.checkBxPeakPosition.setEnabled(True)
-            self.checkBxAmplitude.setEnabled(True)
-            self.checkBxPeakWidth.setEnabled(True)
-            self.checkBxAmplitudeXWidth.setEnabled(True)
-
-        # Checks and disables other boxes when Graph all is checked
-        if self.checkBxGraphAll.isChecked():
-            self.checkBxPeakPosition.setCheckState(QtCore.Qt.Checked)
-            self.checkBxAmplitude.setCheckState(QtCore.Qt.Checked)
-            self.checkBxPeakWidth.setCheckState(QtCore.Qt.Checked)
-            self.checkBxAmplitudeXWidth.setCheckState(QtCore.Qt.Checked)
-            self.checkBxPeakPosition.setEnabled(False)
-            self.checkBxAmplitude.setEnabled(False)
-            self.checkBxPeakWidth.setEnabled(False)
-            self.checkBxAmplitudeXWidth.setEnabled(False)
-
-        # Checks Graph all if all other boxes are checked
-        if self.checkBxAmplitude.isChecked() and self.checkBxPeakPosition.isChecked() \
-                and self.checkBxPeakWidth.isChecked() and self.checkBxAmplitudeXWidth.isChecked():
-            self.checkBxGraphAll.setChecked(True)
+    def GraphAllButton(self):
+        """Function that creates a graph button, the connects to the method that graphs all the graphs"""
+        self.GraphAllBtn = QtGui.QPushButton('Graph all', self)
+        self.GraphAllBtn.setStatusTip("Graphs all the fitted data graphs")
+        self.GraphAllBtn.clicked.connect(self.gausFit.graphAll)
 
     # --------------------------------------------------------------------------------------------#
     def DockRawDataOptions(self):
