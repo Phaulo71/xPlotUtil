@@ -42,7 +42,7 @@ class MainWindow (QtGui.QMainWindow):
         self.dockedOpt = DockedOption(parent = self)
         self.canvasArray = []
         self.figArray = []
-
+        self.TT = [[]]
 
         self.SetupComponents()
         self.windowTabs()
@@ -90,8 +90,9 @@ class MainWindow (QtGui.QMainWindow):
         self.fileMenu.addSeparator()
         self.fileMenu.addAction(self.exitAction)
         self.graphMenu.addAction(self.graphRawData)
-        self.graphMenu.addAction(self.fittingOne)
-
+        self.graphMenu.addAction(self.LFit)
+        self.graphMenu.addAction(self.GaussianFit)
+        self.GaussianFit.setEnabled(False)
         self.helpMenu.addSeparator()  
         self.helpMenu.addAction(self.aboutAction)
 
@@ -105,12 +106,15 @@ class MainWindow (QtGui.QMainWindow):
                                         self, shortcut="Ctrl+Q",
                                         statusTip="Exit the Application",
                                         triggered=self.exitFile)
-        self.fittingOne= QtGui.QAction('Gaussian Fit',
+        self.GaussianFit= QtGui.QAction('Gaussian Fit',
                                                    self, statusTip="Dock the graphing options",
                                                    triggered= self.dockedOpt.GaussianFittingData)
         self.graphRawData= QtGui.QAction('Raw Data',
                                             self, statusTip="Plots different graphs for the raw data",
                                              triggered= self.dockedOpt.restoreRawDataOptions)
+        self.LFit = QtGui.QAction('L Fit',
+                                          self, statusTip="Fits the data to the L fit",
+                                          triggered= self.dockedOpt.LFittingData)
         self.aboutAction = QtGui.QAction(QtGui.QIcon('about.png'), 'A&bout',
                                          self, shortcut="Ctrl+B", statusTip="Displays info about the graph program",
                                          triggered=self.aboutHelp)
@@ -182,19 +186,18 @@ class MainWindow (QtGui.QMainWindow):
                 x += 1
         nCol = x
 
-        TT = np.zeros((nRow, nCol))
+        self.TT = np.zeros((nRow, nCol))
         for i in range(nCol):
-            TT[:, i] = data[:, i]
+            self.TT[:, i] = data[:, i]
 
-        tMax = np.max(TT)
-        tMin = np.min(TT)
-
+        tMax = np.max(self.TT)
+        tMin = np.min(self.TT)
         z = np.linspace(tMin, tMax, endpoint=True)
         YY = range(nCol)
         XX = range(nRow)
 
-        axes.contourf(YY, XX, TT, z)
-        fig.colorbar(axes.contourf(YY, XX, TT, z))
+        axes.contourf(YY, XX, self.TT, z)
+        fig.colorbar(axes.contourf(YY, XX, self.TT, z))
         axes.set_title(title0)
         axes.set_xlabel('array_index (voltage:' + line1 + ')')
         axes.set_ylabel('spec_pnt: L')
@@ -236,19 +239,19 @@ class MainWindow (QtGui.QMainWindow):
                 x += 1
         nCol = x
 
-        TT = np.zeros((nRow, nCol))
+        self.TT = np.zeros((nRow, nCol))
         for i in range(nCol):
-            TT[:, i] = data[:, i]
+            self.TT[:, i] = data[:, i]
 
         xx = arange(0, nRow)
 
         for j in range(nCol):
-            yy = TT[:, j]
+            yy = self.TT[:, j]
             axes.plot(xx, yy)
 
         axes.set_title('Fit for Time Constant')
         axes.set_xlabel('Time (S)')
-        axes.set_ylabel('Voltage (V)')
+        axes.set_ylabel('Intensity')
         canvas.draw()
 
         tab = QtGui.QWidget()

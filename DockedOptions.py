@@ -178,23 +178,15 @@ class DockedOption(QtGui.QDockWidget):
 
     # ------------------------------------------------------------------------------------#
     def GaussianFittingData(self):
-        if self.fileName is " " or self.fileName == None:
-            QtGui.QMessageBox.warning(self, "Error - No File", "There is no data to fit."
-                                                               " Make sure a file has been open.")
+        if (self.gausFitStat == True):
+            self.restoreDockGaussianFitOptions()
         else:
-            if os.path.isfile(self.fileName) == False:
-                QtGui.QMessageBox.warning(self, "Error - No File", "There is no data to fit."
-                                                                   " Make sure a file has been open.")
-            else:
-                if (self.gausFitStat == True):
-                    self.restoreDockGaussianFitOptions()
-                else:
-                    chosePeak = self.PeakDialog()
-                    if (chosePeak == 'One'):
-                        self.gausFit.OnePeakFitting(self.fileName)
-                        self.dockGaussianFitOptions()
-                    elif (chosePeak == 'Two'):
-                        self.gausFit.gausInputDialog()
+            chosePeak = self.PeakDialog()
+            if (chosePeak == 'One'):
+                self.gausFit.OnePeakFitting(self.fileName)
+                self.dockGaussianFitOptions()
+            elif (chosePeak == 'Two'):
+                self.gausFit.gausInputDialog()
 
 
     def PeakDialog(self):
@@ -283,6 +275,9 @@ class DockedOption(QtGui.QDockWidget):
 
         # Adding the docked widget to the main window
         self.myMainWindow.addDockWidget(QtCore.Qt.RightDockWidgetArea, self.dockRawData)
+        # Checks to see if the Raw data is being restored when the fitted options have been displayed
+        if (self.gausFitStat == True):
+            self.myMainWindow.tabifyDockWidget(self.dockRawData, self.dockDataGausFit)
 
     def GraphRawDataCheckBox(self):
         """This function contains a group box with check boxes for fitting one"""
@@ -328,4 +323,14 @@ class DockedOption(QtGui.QDockWidget):
         self.checkBxColorGraph.setCheckState(QtCore.Qt.Unchecked)
         self.checkBxLineGraph.setCheckState(QtCore.Qt.Unchecked)
 
-
+    # ----------------------------------------------------------------------------------------------------------#
+    def LFittingData(self):
+        if self.fileName is " " or self.fileName == None:
+            QtGui.QMessageBox.warning(self, "Error - No File", "There is no data to fit."
+                                                               " Make sure a file has been open.")
+        else:
+            if os.path.isfile(self.fileName) == False:
+                QtGui.QMessageBox.warning(self, "Error - No File", "There is no data to fit."
+                                                                   " Make sure a file has been open.")
+            else:
+                self.gausFit.LInputDialog()
