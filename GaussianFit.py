@@ -626,6 +626,7 @@ class GaussianFitting:
         l = (1/(((pos/rows)*(self.maxL-self.minL)+self.minL)/2))*self.elementL
         return l
 
+
     # -------------------------------------------------------------------------------------------------------------#
     def doLFit(self):
         self.dialogLFit.close
