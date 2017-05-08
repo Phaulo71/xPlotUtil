@@ -22,6 +22,7 @@ from scipy import exp
 from matplotlib.figure import Figure
 from matplotlib.backends.backend_qt4agg import FigureCanvasQTAgg as FigureCanvas
 from matplotlib.backends.backend_qt4 import NavigationToolbar2QT as NavigationToolbar
+from matplotlib.ticker import FormatStrFormatter
 
 class GaussianFitting:
 
@@ -96,8 +97,8 @@ class GaussianFitting:
             axes.plot(xx, yy, 'b+:', label='data')
             axes.plot(xx, self.gaus2(xx, *popt), 'ro:', label='fit')
             axes.legend()
-            axes.set_title('Fit for Time Constant')
-            axes.set_xlabel('Time (S)')
+            axes.set_title('Gaussian Fit')
+            axes.set_xlabel('Bins')
             axes.set_ylabel('Intensity')
             canvas.draw()
 
@@ -120,7 +121,7 @@ class GaussianFitting:
         """Button that allows the user to skip each fit graph, calls on the skipEachFit() method"""
         self.skipEachFitGraphBtn = QtGui.QPushButton('Skip')
         self.skipEachFitGraphBtn.setStatusTip("Skip the graphing of each fit")
-        self.skipEachFitGraphBtn.clicked.connect(self.skiEachFit)
+        self.skipEachFitGraphBtn.clicked.connect(self.skipEachFit)
 
     def nextFitGraphButton(self):
         """Button that shows the next fit graph, calls on nextFitGraph() method"""
@@ -133,7 +134,7 @@ class GaussianFitting:
         """Closes the current fit graph to show the next"""
         self.mainGraph.close()
 
-    def skiEachFit(self):
+    def skipEachFit(self):
         """Closes the current fit graph and sets continueGraphingEachFit to false
          so that other graphs are not showed"""
         self.continueGraphingEachFit = False
@@ -200,6 +201,8 @@ class GaussianFitting:
         xx = self.getXAxis(self.dockedOpt.fileName)
 
         axes.plot(xx, yy0)
+        axes.set_ylabel('Intensity')
+        axes.set_xlabel('Voltage')
         axes.errorbar(xx, yy0, yerr=yy_err0, fmt='o')
         axes.set_title('Peak #1 Amplitude')
         canvas.draw()
@@ -235,6 +238,8 @@ class GaussianFitting:
         yy1 = self.PkFitData[:, 4]
         yy_err1 = self.PkFitData[:, 5]
         axes.plot(xx, yy1)
+        axes.set_ylabel('Position')
+        axes.set_xlabel('Voltage')
         axes.errorbar(xx, yy1, yerr=yy_err1, fmt='o')
         axes.set_title('Peak #1 Position')
         canvas.draw()
@@ -272,6 +277,8 @@ class GaussianFitting:
         yy2 = self.PkFitData[:, 8]
         yy_err2 = self.PkFitData[:, 9]
         axes.plot(xx, yy2)
+        axes.set_ylabel('Width')
+        axes.set_xlabel('Voltage')
         axes.errorbar(xx, yy2, yerr=yy_err2, fmt='o')
         axes.set_title('Peak #1 Width')
         canvas.draw()
@@ -306,6 +313,8 @@ class GaussianFitting:
         yy0 = self.PkFitData[:, 0]
         yy3 = yy0 * yy2
         axes.plot(xx, yy3)
+        axes.set_ylabel('A x W')
+        axes.set_xlabel('Voltage')
         axes.plot(xx, yy3, 'go')
         axes.set_title('Peak #1 Amplitude X Width')
         canvas.draw()
@@ -341,6 +350,8 @@ class GaussianFitting:
         xx = self.getXAxis(self.dockedOpt.fileName)
 
         axes.plot(xx, yy0)
+        axes.set_xlabel('Voltage')
+        axes.set_ylabel('Intensity')
         axes.errorbar(xx, yy0, yerr=yy_err0, fmt='o')
         axes.set_title('Peak #2 Amplitude')
         canvas.draw()
@@ -376,6 +387,8 @@ class GaussianFitting:
         yy1 = self.PkFitData[:, 6]
         yy_err1 = self.PkFitData[:, 7]
         axes.plot(xx, yy1)
+        axes.set_xlabel('Voltage')
+        axes.set_ylabel('Position')
         axes.errorbar(xx, yy1, yerr=yy_err1, fmt='o')
         axes.set_title('Peak #1 Position')
         canvas.draw()
@@ -413,6 +426,8 @@ class GaussianFitting:
         yy2 = self.PkFitData[:, 10]
         yy_err2 = self.PkFitData[:, 11]
         axes.plot(xx, yy2)
+        axes.set_xlabel('Voltage')
+        axes.set_ylabel('Width')
         axes.errorbar(xx, yy2, yerr=yy_err2, fmt='o')
         axes.set_title('Peak #2 Width')
         canvas.draw()
@@ -447,6 +462,8 @@ class GaussianFitting:
         yy0 = self.PkFitData[:, 2]
         yy3 = yy0 * yy2
         axes.plot(xx, yy3)
+        axes.set_xlabel('Voltage')
+        axes.set_ylabel('A x W')
         axes.plot(xx, yy3, 'go')
         axes.set_title('Peak #2 Amplitude X Width')
         canvas.draw()
@@ -486,7 +503,7 @@ class GaussianFitting:
         c = 0
         for f in range(nCol):
             if (np.mean(data[:, f]) == 0):
-                pass
+                break
             else:
                 c += 1
         bins = c  # Gets the number of bins
@@ -580,6 +597,7 @@ class GaussianFitting:
         self.dockedOpt.dockGaussianFitOptions()
         self.dockedOpt.rdOnlyFileNameG.setText(self.dockedOpt.fileName)
         self.dockedOpt.rdOnlyFileNameG.setStatusTip(self.dockedOpt.fileName)
+        self.myMainWindow.LFit.setEnabled(True)
 
         # Marks the data has been fitted
         self.dockedOpt.gausFitStat = True
@@ -599,6 +617,7 @@ class GaussianFitting:
         self.maxLSpin.setMaximum(100000)
         self.minLSpin = QtGui.QDoubleSpinBox()
         self.lElementSpin = QtGui.QDoubleSpinBox()
+        self.lElementSpin.setDecimals(4)
 
         ok = QtGui.QPushButton("Ok")
         cancel = QtGui.QPushButton("Cancel")
@@ -629,7 +648,7 @@ class GaussianFitting:
 
     # -------------------------------------------------------------------------------------------------------------#
     def doLFit(self):
-        self.dialogLFit.close
+        self.dialogLFit.close()
         self.maxL = float(self.maxLSpin.value())
         self.minL = float(self.minLSpin.value())
         self.elementL = float(self.lElementSpin.value())
@@ -649,19 +668,93 @@ class GaussianFitting:
         self.TT = np.zeros((nRow, nCol))
         for i in range(nCol):
             self.TT[:, i] = data[:, i]
-        self.LPos1 = []
+
+        self.LPos1Data = []
+        self.LPos2Data = []
+
         # Position 1
-        for i in range(nRow):
-          self.LPos1.append(self.PositionLFit(self.TT[i, 2], nRow))
+        for i in range(nRow-1):
+          self.LPos1Data.append(self.PositionLFit(self.PkFitData[i, 4], nRow))
 
-        print(self.LPos1)
-        print()
+        # Position 2
+        for i in range(nRow - 1):
+          self.LPos2Data.append(self.PositionLFit(self.PkFitData[i, 6], nRow))
 
-    # -------------------------------------------------------------------------------------------------------------#
-    def LFitting(self):
+        self.dockedOpt.DockLFitOptions()
+        self.dockedOpt.rdOnlyFileNameG.setText(self.dockedOpt.fileName)
+        self.dockedOpt.rdOnlyFileNameG.setStatusTip(self.dockedOpt.fileName)
+        # Marks that the data has been fitted
+        self.dockedOpt.LFitStat = True
 
-        pass
+    # ----------------------------------------------------------------------------------------------------#
+    def graphLFitPos1(self):
+        """This method graphs the amplitude x width for the first peak"""
 
+        mainGraph = QtGui.QWidget()
+
+        dpi = 100
+        fig = Figure((5.0, 4.0), dpi=dpi)
+        canvas = FigureCanvas(fig)
+        canvas.setParent(mainGraph)
+        axes = fig.add_subplot(111)
+
+        xx = self.getXAxis(self.dockedOpt.fileName)
+        yy = self.LPos1Data
+        axes.plot(xx, yy)
+        axes.plot(xx, yy, 'go')
+        axes.set_title('L Fit - Position #1')
+        axes.set_xlabel('Voltage')
+        axes.set_ylabel('L R U')
+        axes.yaxis.set_major_formatter(FormatStrFormatter('%.4f'))
+        canvas.draw()
+
+        tab = QtGui.QWidget()
+        tab.setStatusTip("L Fit - Position #1")
+        vbox = QtGui.QVBoxLayout()
+        graphNavigationBar = NavigationToolbar(canvas, mainGraph)
+        vbox.addWidget(graphNavigationBar)
+        vbox.addWidget(canvas)
+        tab.setLayout(vbox)
+        self.dockedOpt.myMainWindow.tabWidget.addTab(tab, "L Fit - Position #1")
+        self.dockedOpt.myMainWindow.tabWidget.setCurrentWidget(tab)
+
+        self.dockedOpt.myMainWindow.canvasArray.append(canvas)
+        self.dockedOpt.myMainWindow.figArray.append(fig)
+
+    # ----------------------------------------------------------------------------------------------------#
+    def graphLFitPos2(self):
+        """This method graphs the amplitude x width for the first peak"""
+
+        mainGraph = QtGui.QWidget()
+
+        dpi = 100
+        fig = Figure((5.0, 4.0), dpi=dpi)
+        canvas = FigureCanvas(fig)
+        canvas.setParent(mainGraph)
+        axes = fig.add_subplot(111)
+
+        xx = self.getXAxis(self.dockedOpt.fileName)
+        yy = self.LPos2Data
+        axes.plot(xx, yy)
+        axes.plot(xx, yy, 'go')
+        axes.set_xlabel('Voltage')
+        axes.set_ylabel('L R U')
+        axes.set_title('L Fit - Position #2')
+        axes.yaxis.set_major_formatter(FormatStrFormatter('%.4f'))
+        canvas.draw()
+
+        tab = QtGui.QWidget()
+        tab.setStatusTip("L Fit - Position #2")
+        vbox = QtGui.QVBoxLayout()
+        graphNavigationBar = NavigationToolbar(canvas, mainGraph)
+        vbox.addWidget(graphNavigationBar)
+        vbox.addWidget(canvas)
+        tab.setLayout(vbox)
+        self.dockedOpt.myMainWindow.tabWidget.addTab(tab, "L Fit - Position #2")
+        self.dockedOpt.myMainWindow.tabWidget.setCurrentWidget(tab)
+
+        self.dockedOpt.myMainWindow.canvasArray.append(canvas)
+        self.dockedOpt.myMainWindow.figArray.append(fig)
 
 
 

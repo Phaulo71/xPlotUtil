@@ -90,9 +90,9 @@ class MainWindow (QtGui.QMainWindow):
         self.fileMenu.addSeparator()
         self.fileMenu.addAction(self.exitAction)
         self.graphMenu.addAction(self.graphRawData)
-        self.graphMenu.addAction(self.LFit)
         self.graphMenu.addAction(self.GaussianFit)
-        self.GaussianFit.setEnabled(False)
+        self.graphMenu.addAction(self.LFit)
+        self.LFit.setEnabled(False)
         self.helpMenu.addSeparator()  
         self.helpMenu.addAction(self.aboutAction)
 
@@ -250,7 +250,7 @@ class MainWindow (QtGui.QMainWindow):
             axes.plot(xx, yy)
 
         axes.set_title('Fit for Time Constant')
-        axes.set_xlabel('Time (S)')
+        axes.set_xlabel('Bins')
         axes.set_ylabel('Intensity')
         canvas.draw()
 

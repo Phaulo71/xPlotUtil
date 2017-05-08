@@ -27,6 +27,7 @@ class DockedOption(QtGui.QDockWidget):
         self.myMainWindow = parent
         self.gausFit = GaussianFitting(self)
         self.gausFitStat = False
+        self.LFitStat = False
         self.dockGaussianFitOptions
 
  # -----------------------------------------------------------------------------#
@@ -203,6 +204,8 @@ class DockedOption(QtGui.QDockWidget):
         #Sets the fileName rdOnlyBox to blank, if they try to open another file
         self.rdOnlyFileName.setText(" ")
         self.rdOnlyFileName.setStatusTip(" ")
+        self.rdOnlyFileNameG.setText(" ")
+        self.rdOnlyFileNameG.setStatusTip(" ")
 
         filters = "Text files (*.txt);;Python files (*.py)"
         selectedFilter = "Any file (*.*);;Text files (*.txt);;Python files (*.py)"
@@ -211,6 +214,7 @@ class DockedOption(QtGui.QDockWidget):
         self.rdOnlyFileName.setText(self.fileName)
         self.rdOnlyFileName.setStatusTip(self.fileName)
         self.gausFitStat = False
+        self.LFitStat = False
 
     # ------------------------------------------------------------------------------------#
     def GraphFittingOneButton(self):
@@ -230,7 +234,7 @@ class DockedOption(QtGui.QDockWidget):
     def GraphRawDataButton(self):
         """Function that creates a graph button, connects to the GraphData() method"""
         self.GraphRawDataBtn = QtGui.QPushButton('Graph', self)
-        self.GraphRawDataBtn.setStatusTip("Graphs the check graphs")
+        self.GraphRawDataBtn.setStatusTip("Graphs the checked boxes")
         self.GraphRawDataBtn.clicked.connect(self.GraphRawData)
 
     def GraphAllButton(self):
@@ -238,6 +242,12 @@ class DockedOption(QtGui.QDockWidget):
         self.GraphAllBtn = QtGui.QPushButton('Graph all', self)
         self.GraphAllBtn.setStatusTip("Graphs all the fitted data graphs")
         self.GraphAllBtn.clicked.connect(self.gausFit.graphAll)
+
+    def GraphLFitButton(self):
+        """Function that creates a graph button, connects to the GraphLFit()"""
+        self.GraphLFitBtn = QtGui.QPushButton('Graph', self)
+        self.GraphLFitBtn.setStatusTip("Graphs the selected L Fit check boxes")
+        self.GraphLFitBtn.clicked.connect(self.GraphLFit)
 
     # --------------------------------------------------------------------------------------------#
     def DockRawDataOptions(self):
@@ -334,3 +344,84 @@ class DockedOption(QtGui.QDockWidget):
                                                                    " Make sure a file has been open.")
             else:
                 self.gausFit.LInputDialog()
+
+    def DockLFitOptions(self):
+        """Function that creates the dockWidget, Graph Options for fitting one
+        """
+        self.dockLFit = QtGui.QDockWidget("L Fit", self)
+        self.dockLFit.setFloating(False)
+        self.dockLFit.setMaximumWidth(320)
+        self.dockLFit.setMinimumWidth(320)
+        self.dockLFit.setAllowedAreas(QtCore.Qt.RightDockWidgetArea | QtCore.Qt.LeftDockWidgetArea)
+
+        layout = QtGui.QFormLayout()
+        FileHLayout = QtGui.QHBoxLayout()
+        BtnLayout = QtGui.QHBoxLayout()
+        self.dataDockedWidget = QtGui.QWidget()
+
+        self.FileNameRdOnlyBox()
+        self.GraphLFitButton()
+        self.GraphLFitCheckBox()
+
+        FileHLayout.addWidget(self.fileNameLabel)
+        FileHLayout.addWidget(self.rdOnlyFileNameG)
+        FileHLayout.addStretch(1)
+
+        BtnLayout.addStretch(1)
+        BtnLayout.addWidget(self.GraphLFitBtn)
+
+        layout.addRow(FileHLayout)
+        layout.addRow(self.graphLCheckBx)
+        layout.addRow(BtnLayout)
+        self.dataDockedWidget.setLayout(layout)
+        self.dockLFit.setWidget(self.dataDockedWidget)
+
+        # Adding the docked widget to the main window
+        self.myMainWindow.addDockWidget(QtCore.Qt.RightDockWidgetArea, self.dockLFit)
+
+        if (self.dockDataGausFit.isVisible() == True):
+            self.myMainWindow.tabifyDockWidget(self.dockDataGausFit, self.dockLFit)
+        elif (self.dockRawData.isVisible() == True):
+            self.myMainWindow.tabifyDockWidget(self.dockRawData, self.dockLFit)
+
+    def GraphLFitCheckBox(self):
+        """This function contains a group box with check boxes for fitting one"""
+        self.graphLCheckBx = QtGui.QGroupBox("Select Graphs")
+
+        self.checkBxLPos1Graph = QtGui.QCheckBox("Position #1")
+        self.checkBxLPos2Graph = QtGui.QCheckBox("Position #2")
+
+        vbox = QtGui.QVBoxLayout()
+        vbox.addWidget(self.checkBxLPos1Graph)
+        vbox.addWidget(self.checkBxLPos2Graph)
+
+        self.graphLCheckBx.setLayout(vbox)
+
+    # ----------------------------------------------------------------------------------------------------------#
+    def restoreLFitOptions(self):
+        """This funtion restores the Graphing Options Dock Widget for Fitting One, if it's closed """
+        if self.dockLFit.isVisible() == False:
+            self.DockLFitOptions()
+            if self.fileName is not "" and self.fileName is not None:
+                self.rdOnlyFileNameG.setText(self.fileName)
+                self.rdOnlyFileNameG.setStatusTip(self.fileName)
+
+    # ----------------------------------------------------------------------------------------------------------#
+    def GraphLFit(self):
+        """Function that depending on the check boxes the user has chosen it plots the raw data."""
+        if self.checkBxLPos1Graph.isChecked():
+            self.gausFit.graphLFitPos1()
+
+        if self.checkBxLPos2Graph.isChecked():
+            self.gausFit.graphLFitPos2()
+
+        self.checkBxLPos1Graph.setCheckState(QtCore.Qt.Unchecked)
+        self.checkBxLPos2Graph.setCheckState(QtCore.Qt.Unchecked)
+
+    # ------------------------------------------------------------------------------------#
+    def LFittingData(self):
+        if (self.LFitStat == True):
+            self.restoreLFitOptions()
+        else:
+           self.gausFit.LInputDialog()
+
