@@ -22,7 +22,6 @@ else:
 import matplotlib.pyplot as plt
 matplotlib.use('Qt4Agg')
 from DockedOptions import DockedOption
-from GaussianFit import GaussianFitting
 from matplotlib.figure import Figure
 from matplotlib.backends.backend_qt4agg import FigureCanvasQTAgg as FigureCanvas
 from matplotlib.backends.backend_qt4 import NavigationToolbar2QT as NavigationToolbar
@@ -40,9 +39,9 @@ class MainWindow (QtGui.QMainWindow):
         self.setWindowTitle("xPlot Util")
         self.setWindowIcon(QtGui.QIcon('Icons/Graph.png'))
         self.dockedOpt = DockedOption(parent = self)
+        self.gausFit = self.dockedOpt.gausFit
         self.canvasArray = []
         self.figArray = []
-        self.TT = [[]]
 
         self.SetupComponents()
         self.windowTabs()
@@ -194,13 +193,13 @@ class MainWindow (QtGui.QMainWindow):
         tMin = np.min(self.TT)
         z = np.linspace(tMin, tMax, endpoint=True)
         YY = range(nCol)
-        XX = range(nRow)
+        XX = self.gausFit.LData
 
         axes.contourf(YY, XX, self.TT, z)
         fig.colorbar(axes.contourf(YY, XX, self.TT, z))
         axes.set_title(title0)
         axes.set_xlabel('array_index (voltage:' + line1 + ')')
-        axes.set_ylabel('spec_pnt: L')
+        axes.set_xlabel('RLU (Reciprocal Lattice Unit)')
         canvas.draw()
 
         tab = QtGui.QWidget()
@@ -210,7 +209,7 @@ class MainWindow (QtGui.QMainWindow):
         vbox.addWidget(graphNavigationBar)
         vbox.addWidget(canvas)
         tab.setLayout(vbox)
-        self.tabWidget.addTab(tab, "Raw Data")
+        self.tabWidget.addTab(tab, "Color Graph Raw Data")
         self.tabWidget.setCurrentWidget(tab)
 
         self.canvasArray.append(canvas)
@@ -243,14 +242,14 @@ class MainWindow (QtGui.QMainWindow):
         for i in range(nCol):
             self.TT[:, i] = data[:, i]
 
-        xx = arange(0, nRow)
+        xx = self.gausFit.LData
 
         for j in range(nCol):
             yy = self.TT[:, j]
             axes.plot(xx, yy)
 
-        axes.set_title('Fit for Time Constant')
-        axes.set_xlabel('Bins')
+        axes.set_title('Raw Data')
+        axes.set_xlabel('RLU (Reciprocal Lattice Unit)')
         axes.set_ylabel('Intensity')
         canvas.draw()
 

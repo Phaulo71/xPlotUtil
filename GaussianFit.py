@@ -31,6 +31,7 @@ class GaussianFitting:
         self.dockedOpt = parent
         self.myMainWindow = self.dockedOpt.myMainWindow
         self.continueGraphingEachFit = True #Boolean to stop on Each fit graphing
+        self.TT = [0][0]
 
     # --------------------------------------------------------------------------------------#
     def TwoPeakFitting(self, filename):
@@ -315,6 +316,10 @@ class GaussianFitting:
         axes.plot(xx, yy3)
         axes.set_ylabel('A x W')
         axes.set_xlabel('Voltage')
+        a_err0 = self.PkFitData[:, 1]
+        w_err2 = self.PkFitData[:, 9]
+        yy_err0 = (yy3 * a_err0) + (yy3 * w_err2)
+        axes.errorbar(xx, yy0, yerr=yy_err0, fmt='o')
         axes.plot(xx, yy3, 'go')
         axes.set_title('Peak #1 Amplitude X Width')
         canvas.draw()
@@ -623,7 +628,7 @@ class GaussianFitting:
         cancel = QtGui.QPushButton("Cancel")
 
         cancel.clicked.connect(self.dialogLFit.close)
-        ok.clicked.connect(self.doLFit)
+        ok.clicked.connect(self.LInput)
         buttonLayout.addWidget(cancel)
         buttonLayout.addStretch(1)
         buttonLayout.addWidget(ok)
@@ -645,33 +650,29 @@ class GaussianFitting:
         l = (1/(((pos/rows)*(self.maxL-self.minL)+self.minL)/2))*self.elementL
         return l
 
-
     # -------------------------------------------------------------------------------------------------------------#
-    def doLFit(self):
+    def LInput(self):
         self.dialogLFit.close()
         self.maxL = float(self.maxLSpin.value())
         self.minL = float(self.minLSpin.value())
         self.elementL = float(self.lElementSpin.value())
 
-        data = np.loadtxt(open(self.dockedOpt.fileName))
+        self.LData = []
 
-        nRow = data.shape[0]  # Gets the number of rows
-        nCol = data.shape[1]  # Gets the number of columns
-        x = 0
-        for f in range(nCol):
-            if (np.mean(data[:, f]) == 0):
-                pass
-            else:
-                x += 1
-        nCol = x
+        nRow, nCol = self.dockedOpt.fileInfo()
+        increment = (self.maxL - self.minL)/nRow
+        L = self.minL
+        self.LData.append(L)
+        for i in range(nRow - 1):
+            L += increment
+            self.LData.append(float(format(L, '.4f')))
 
-        self.TT = np.zeros((nRow, nCol))
-        for i in range(nCol):
-            self.TT[:, i] = data[:, i]
-
+    # -------------------------------------------------------------------------------------------------------------#
+    def doLFit(self):
         self.LPos1Data = []
         self.LPos2Data = []
 
+        nRow, nCol = self.dockedOpt.fileInfo()
         # Position 1
         for i in range(nRow-1):
           self.LPos1Data.append(self.PositionLFit(self.PkFitData[i, 4], nRow))
@@ -683,6 +684,7 @@ class GaussianFitting:
         self.dockedOpt.DockLFitOptions()
         self.dockedOpt.rdOnlyFileNameG.setText(self.dockedOpt.fileName)
         self.dockedOpt.rdOnlyFileNameG.setStatusTip(self.dockedOpt.fileName)
+
         # Marks that the data has been fitted
         self.dockedOpt.LFitStat = True
 

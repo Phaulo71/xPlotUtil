@@ -215,6 +215,30 @@ class DockedOption(QtGui.QDockWidget):
         self.rdOnlyFileName.setStatusTip(self.fileName)
         self.gausFitStat = False
         self.LFitStat = False
+        self.gausFit.continueGraphingEachFit = True
+        self.gausFit.LInputDialog()
+
+    # ------------------------------------------------------------------------------------#
+    """This is where the methods used to get some information from the file"""
+    def fileInfo(self):
+        data = np.loadtxt(open(self.fileName))
+
+        nRow = data.shape[0]  # Gets the number of rows
+        nCol = data.shape[1]  # Gets the number of columns
+        x = 0
+        for f in range(nCol):
+            if (np.mean(data[:, f]) == 0):
+                pass
+            else:
+                x += 1
+        nCol = x
+
+        self.TT = np.zeros((nRow, nCol))
+
+        for i in range(nCol):
+            self.TT[:, i] = data[:, i]
+
+        return nRow, nCol
 
     # ------------------------------------------------------------------------------------#
     def GraphFittingOneButton(self):
@@ -334,17 +358,6 @@ class DockedOption(QtGui.QDockWidget):
         self.checkBxLineGraph.setCheckState(QtCore.Qt.Unchecked)
 
     # ----------------------------------------------------------------------------------------------------------#
-    def LFittingData(self):
-        if self.fileName is " " or self.fileName == None:
-            QtGui.QMessageBox.warning(self, "Error - No File", "There is no data to fit."
-                                                               " Make sure a file has been open.")
-        else:
-            if os.path.isfile(self.fileName) == False:
-                QtGui.QMessageBox.warning(self, "Error - No File", "There is no data to fit."
-                                                                   " Make sure a file has been open.")
-            else:
-                self.gausFit.LInputDialog()
-
     def DockLFitOptions(self):
         """Function that creates the dockWidget, Graph Options for fitting one
         """
@@ -423,5 +436,5 @@ class DockedOption(QtGui.QDockWidget):
         if (self.LFitStat == True):
             self.restoreLFitOptions()
         else:
-           self.gausFit.LInputDialog()
+            self.gausFit.doLFit()
 
