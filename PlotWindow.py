@@ -124,6 +124,7 @@ class MainWindow (QtGui.QMainWindow):
         self.fileMenu = self.mainMenu.addMenu("File")
         self.graphMenu = self.mainMenu.addMenu("xPlot")
         self.helpMenu = self.mainMenu.addMenu("Help")
+
     # ---------------------------------------------------------------------------------------------#
     def exitFile(self):
         response = self.msgApp("Exiting Form", "Would you like to exit the form")
@@ -146,6 +147,14 @@ class MainWindow (QtGui.QMainWindow):
                           "Open a file and graph the raw data or click on the xPlot tab\n "
                           "to fit the data. Also under xPlot you can restore the Graphing options "
                           "if you close them.")
+
+    # ---------------------------------------------------------------------------------------------------#
+    def savingCanvasTabs(self,tab, name, canvas, fig):
+        self.tabWidget.addTab(tab, name)
+        self.tabWidget.setCurrentWidget(tab)
+
+        self.canvasArray.append(canvas)
+        self.figArray.append(fig)
 
     # ---------------------------------------------------------------------------------------------------#
     def PlotColorGraphRawData(self):
@@ -175,31 +184,20 @@ class MainWindow (QtGui.QMainWindow):
             ampl = words[6]
         line1 = '[-' + str(ampl) + '] --> [0] --> [+' + str(ampl) + '] --> [0] --> [-' + str(ampl) + '] '
         title0 = title0 + '\n' + header
-        nRow = data.shape[0]  # Gets the number of rows
-        nCol = data.shape[1]  # Gets the number of columns
-        x = 0
-        for f in range(nCol):
-            if (np.mean(data[:, f]) == 0):
-                pass
-            else:
-                x += 1
-        nCol = x
 
-        self.TT = np.zeros((nRow, nCol))
-        for i in range(nCol):
-            self.TT[:, i] = data[:, i]
+        nRow, nCol = self.dockedOpt.fileInfo()
 
-        tMax = np.max(self.TT)
-        tMin = np.min(self.TT)
+        tMax = np.max(self.dockedOpt.TT)
+        tMin = np.min(self.dockedOpt.TT)
         z = np.linspace(tMin, tMax, endpoint=True)
         YY = range(nCol)
         XX = self.gausFit.LData
 
-        axes.contourf(YY, XX, self.TT, z)
-        fig.colorbar(axes.contourf(YY, XX, self.TT, z))
+        axes.contourf(YY, XX, self.dockedOpt.TT, z)
+        fig.colorbar(axes.contourf(YY, XX, self.dockedOpt.TT, z))
         axes.set_title(title0)
         axes.set_xlabel('array_index (voltage:' + line1 + ')')
-        axes.set_xlabel('RLU (Reciprocal Lattice Unit)')
+        axes.set_ylabel('RLU (Reciprocal Lattice Unit)')
         canvas.draw()
 
         tab = QtGui.QWidget()
@@ -209,15 +207,13 @@ class MainWindow (QtGui.QMainWindow):
         vbox.addWidget(graphNavigationBar)
         vbox.addWidget(canvas)
         tab.setLayout(vbox)
-        self.tabWidget.addTab(tab, "Color Graph Raw Data")
-        self.tabWidget.setCurrentWidget(tab)
+        name = 'Color Graph Raw Data'
 
-        self.canvasArray.append(canvas)
-        self.figArray.append(fig)
+        self.savingCanvasTabs(tab, name, canvas, fig)
 
     # ----------------------------------------------------------------------------------------------#
-    def PlotLineGraphRawData(self):
-        """This method graphs the raw data into line graphs"""
+    def PlotLineGraphRawDataRLU(self):
+        """This method graphs the raw data into a line graph wiith RLU as x-axis"""
         mainGraph = QtGui.QWidget()
 
         dpi = 100
@@ -226,26 +222,12 @@ class MainWindow (QtGui.QMainWindow):
         canvas.setParent(mainGraph)
         axes = fig.add_subplot(111)
 
-        data = np.loadtxt(open(self.dockedOpt.fileName))
-
-        nRow = data.shape[0]  # Gets the number of rows
-        nCol = data.shape[1]  # Gets the number of columns
-        x = 0
-        for f in range(nCol):
-            if (np.mean(data[:, f]) == 0):
-                pass
-            else:
-                x += 1
-        nCol = x
-
-        self.TT = np.zeros((nRow, nCol))
-        for i in range(nCol):
-            self.TT[:, i] = data[:, i]
+        nRow, nCol = self.dockedOpt.fileInfo()
 
         xx = self.gausFit.LData
 
         for j in range(nCol):
-            yy = self.TT[:, j]
+            yy = self.dockedOpt.TT[:, j]
             axes.plot(xx, yy)
 
         axes.set_title('Raw Data')
@@ -254,18 +236,50 @@ class MainWindow (QtGui.QMainWindow):
         canvas.draw()
 
         tab = QtGui.QWidget()
-        tab.setStatusTip("Line Graph of Raw Data")
+        tab.setStatusTip("Raw Data in RLU")
         vbox = QtGui.QVBoxLayout()
         graphNavigationBar = NavigationToolbar(canvas, self)
         vbox.addWidget(graphNavigationBar)
         vbox.addWidget(canvas)
         tab.setLayout(vbox)
-        self.tabWidget.addTab(tab, "Line Graph Raw Data")
-        self.tabWidget.setCurrentWidget(tab)
+        name = 'Raw Data RLU'
 
-        self.canvasArray.append(canvas)
-        self.figArray.append(fig)
+        self.savingCanvasTabs(tab, name, canvas, fig)
 
+    # ----------------------------------------------------------------------------------------------#
+    def PlotLineGraphRawDataBins(self):
+        """This method graphs the raw data into a line graph into bins"""
+        mainGraph = QtGui.QWidget()
+
+        dpi = 100
+        fig = Figure((3.0, 3.0), dpi=dpi)
+        canvas = FigureCanvas(fig)
+        canvas.setParent(mainGraph)
+        axes = fig.add_subplot(111)
+
+        nRow, nCol = self.dockedOpt.fileInfo()
+
+        xx = range(nRow)
+
+        for j in range(nCol):
+            yy = self.dockedOpt.TT[:, j]
+            axes.plot(xx, yy)
+
+        axes.set_title('Raw Data in Bins')
+        axes.set_xlabel('Bins')
+        axes.set_ylabel('Intensity')
+        canvas.draw()
+
+        tab = QtGui.QWidget()
+        tab.setStatusTip("Raw Data in Bins")
+        vbox = QtGui.QVBoxLayout()
+        graphNavigationBar = NavigationToolbar(canvas, self)
+        vbox.addWidget(graphNavigationBar)
+        vbox.addWidget(canvas)
+        tab.setLayout(vbox)
+        name = 'Raw Data Bins'
+
+        self.savingCanvasTabs(tab, name, canvas, fig)
 
 def main():
     """Main method"""

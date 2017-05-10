@@ -30,7 +30,9 @@ class DockedOption(QtGui.QDockWidget):
         self.LFitStat = False
         self.dockGaussianFitOptions
 
- # -----------------------------------------------------------------------------#
+        self.TT = [0][0] # 2D array where raw data is stored
+
+    # -----------------------------------------------------------------------------#
     def dockGaussianFitOptions(self):
         """Function that creates the dockWidget, Graph Options for fitting one
         """
@@ -184,10 +186,9 @@ class DockedOption(QtGui.QDockWidget):
         else:
             chosePeak = self.PeakDialog()
             if (chosePeak == 'One'):
-                self.gausFit.OnePeakFitting(self.fileName)
-                self.dockGaussianFitOptions()
+                self.gausFit.gausOnePeakInputDialog()
             elif (chosePeak == 'Two'):
-                self.gausFit.gausInputDialog()
+                self.gausFit.gausTwoPeakInputDialog()
 
 
     def PeakDialog(self):
@@ -216,11 +217,13 @@ class DockedOption(QtGui.QDockWidget):
         self.gausFitStat = False
         self.LFitStat = False
         self.gausFit.continueGraphingEachFit = True
-        self.gausFit.LInputDialog()
+        if (self.rdOnlyFileName.text() != ""):
+            self.gausFit.LInputDialog()
 
     # ------------------------------------------------------------------------------------#
-    """This is where the methods used to get some information from the file"""
     def fileInfo(self):
+        """This method is used to get the rows and columns of the data. It also sets the
+        array with the raw data, which is the TT"""
         data = np.loadtxt(open(self.fileName))
 
         nRow = data.shape[0]  # Gets the number of rows
@@ -228,7 +231,7 @@ class DockedOption(QtGui.QDockWidget):
         x = 0
         for f in range(nCol):
             if (np.mean(data[:, f]) == 0):
-                pass
+                break
             else:
                 x += 1
         nCol = x
@@ -311,18 +314,27 @@ class DockedOption(QtGui.QDockWidget):
         self.myMainWindow.addDockWidget(QtCore.Qt.RightDockWidgetArea, self.dockRawData)
         # Checks to see if the Raw data is being restored when the fitted options have been displayed
         if (self.gausFitStat == True):
-            self.myMainWindow.tabifyDockWidget(self.dockRawData, self.dockDataGausFit)
+            if(self.LFitStat == True):
+                if (self.dockLFit.isVisible() == True):
+                    self.myMainWindow.tabifyDockWidget(self.dockRawData, self.dockDataGausFit)
+                    self.myMainWindow.tabifyDockWidget(self.dockDataGausFit, self.dockLFit)
+                elif (self.dockDataGausFit.isVisible() == True):
+                    self.myMainWindow.tabifyDockWidget(self.dockRawData, self.dockDataGausFit)
+            elif (self.dockDataGausFit.isVisible() == True):
+                self.myMainWindow.tabifyDockWidget(self.dockRawData, self.dockDataGausFit)
 
     def GraphRawDataCheckBox(self):
         """This function contains a group box with check boxes for fitting one"""
         self.graphCheckBx = QtGui.QGroupBox("Select Graphs")
 
         self.checkBxColorGraph = QtGui.QCheckBox("Color Graph")
-        self.checkBxLineGraph = QtGui.QCheckBox("Line Graph")
+        self.checkBxLineGraphRLU = QtGui.QCheckBox("Line Graph (RLU)")
+        self.checkBxLineGraphBins = QtGui.QCheckBox("Line Graph (Bins)")
 
         vbox = QtGui.QVBoxLayout()
         vbox.addWidget(self.checkBxColorGraph)
-        vbox.addWidget(self.checkBxLineGraph)
+        vbox.addWidget(self.checkBxLineGraphRLU)
+        vbox.addWidget(self.checkBxLineGraphBins)
 
         self.graphCheckBx.setLayout(vbox)
 
@@ -351,11 +363,15 @@ class DockedOption(QtGui.QDockWidget):
                 if self.checkBxColorGraph.isChecked():
                     self.myMainWindow.PlotColorGraphRawData()
 
-                if self.checkBxLineGraph.isChecked():
-                    self.myMainWindow.PlotLineGraphRawData()
+                if self.checkBxLineGraphRLU.isChecked():
+                    self.myMainWindow.PlotLineGraphRawDataRLU()
+
+                if self.checkBxLineGraphBins.isChecked():
+                    self.myMainWindow.PlotLineGraphRawDataBins()
 
         self.checkBxColorGraph.setCheckState(QtCore.Qt.Unchecked)
-        self.checkBxLineGraph.setCheckState(QtCore.Qt.Unchecked)
+        self.checkBxLineGraphRLU.setCheckState(QtCore.Qt.Unchecked)
+        self.checkBxLineGraphBins.setCheckState(QtCore.Qt.Unchecked)
 
     # ----------------------------------------------------------------------------------------------------------#
     def DockLFitOptions(self):
@@ -433,6 +449,8 @@ class DockedOption(QtGui.QDockWidget):
 
     # ------------------------------------------------------------------------------------#
     def LFittingData(self):
+        """This function either restores or initializes the L Fit Docked Options
+        """
         if (self.LFitStat == True):
             self.restoreLFitOptions()
         else:

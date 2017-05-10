@@ -31,29 +31,17 @@ class GaussianFitting:
         self.dockedOpt = parent
         self.myMainWindow = self.dockedOpt.myMainWindow
         self.continueGraphingEachFit = True #Boolean to stop on Each fit graphing
-        self.TT = [0][0]
 
     # --------------------------------------------------------------------------------------#
-    def TwoPeakFitting(self, filename):
+    def TwoPeakFitting(self):
         """Gaussian Fitting for Two Peaks [Updated April 4, 2017]"""
-        data = np.loadtxt(open(filename))
-        nRow = data.shape[0]  # Number of rows
-        nCol = data.shape[1]  # Number of columns
-        x = 0
-        for f in range(nCol):
-            if (np.mean(data[:, f]) == 0):
-                pass
-            else:
-                x += 1
-        nCol = x  # Gets the number of columns with data in them
-        TT = np.zeros((nRow, nCol))
-        for i in range(nCol):
-            TT[:, i] = data[:, i]
+
+        nRow, nCol = self.dockedOpt.fileInfo()
 
         self.PkFitData = zeros((nCol, 12))  # Creats the empty 2D List
 
         for j in range(nCol):
-            col_data = data[:, j]
+            col_data = self.dockedOpt.TT[:, j]
             xx = arange(0, len(col_data))
             param = self.twoPkFitting(xx, col_data)
             fit_result = param[0]
@@ -61,30 +49,30 @@ class GaussianFitting:
             self.PkFitData[j, :] = (fit_result[0], fit_error[0], fit_result[1], fit_error[1], fit_result[2],
                                     fit_error[2], fit_result[3], fit_error[3], fit_result[4], fit_error[4],
                                     fit_result[5], fit_error[5])
-        print(self.PkFitData)
-
 
     def twoPkFitting(self, xx, yy):
-        mean = sum(xx * yy) / sum(yy)
-        sigma = np.sqrt(sum(yy * (xx - mean) ** 2)) / sqrt(sum(yy))
-        bg0 = min(yy)  # min value of yy
-        popt, pcov = curve_fit(self.gaus2, xx, yy, p0=[self.peak1Amp, self.peak2Amp, self.peak1Pos, self.peak2Pos,
-                                                       self.peak1Wid, self.peak2Wid, bg0])
-        perr = np.sqrt(np.diag(pcov))
-        self.graphEachFitRawData(xx, yy, popt)
-        return popt, perr
+        try:
+            mean = sum(xx * yy) / sum(yy)
+            sigma = np.sqrt(sum(yy * (xx - mean) ** 2)) / sqrt(sum(yy))
+            bg0 = min(yy)  # min value of yy
+            popt, pcov = curve_fit(self.gaus2, xx, yy, p0=[self.twoPeak1Amp, self.twoPeak2Amp, self.twoPeak1Pos, self.twoPeak2Pos,
+                                                           self.twoPeak1Wid, self.twoPeak2Wid, bg0])
+            perr = np.sqrt(np.diag(pcov))
+            self.graphEachFitRawData(xx, yy, popt, 2)
+            return popt, perr
+        except TypeError and RuntimeError:
+            print("Please make sure the fitted data is correct")
 
     def gaus2(self, x, a1, a2, x01, x02, sigma1, sigma2, background):
         return a1 * exp(-(x - x01) ** 2 / (2 * sigma1 ** 2))\
                + a2 *exp(-(x - x02) ** 2 / (2 * sigma2 ** 2)) + background
+
     # -------------------------------------------------------------------------------------------------------------#
-    def graphEachFitRawData(self, xx, yy, popt):
-        """
-        This method graphs the raw data and the fitted data.
+    def graphEachFitRawData(self, xx, yy, popt, whichPeak):
+        """This method graphs the raw data and the fitted data for each column.
         :param xx: bins
         :param yy: raw data column
         :param popt: from the gaussian fit
-        :return:
         """
         if (self.continueGraphingEachFit == True):
             self.mainGraph = QtGui.QDialog(self.myMainWindow)
@@ -96,7 +84,10 @@ class GaussianFitting:
             axes = fig.add_subplot(111)
 
             axes.plot(xx, yy, 'b+:', label='data')
-            axes.plot(xx, self.gaus2(xx, *popt), 'ro:', label='fit')
+            if(whichPeak == 1):
+                axes.plot(xx, self.gaus1(xx, *popt), 'ro:', label='fit')
+            elif(whichPeak == 2):
+                axes.plot(xx, self.gaus2(xx, *popt), 'ro:', label='fit')
             axes.legend()
             axes.set_title('Gaussian Fit')
             axes.set_xlabel('Bins')
@@ -142,47 +133,38 @@ class GaussianFitting:
         self.mainGraph.close()
 
     # -----------------------------------------------------------------------------------------------------------#
-    def OnePeakFitting(self, filename):
+    def OnePeakFitting(self):
         """Gaussian Fit for one Peak [Updated April 11, 2017]"""
-        data = np.loadtxt(open(filename))
-        nRow = data.shape[0]  # num of points, 76
-        nCol = data.shape[1]  # size of array from epics, 100
-        x = 0
-        for f in range(nCol):
-            if (np.mean(data[:, f]) == 0):
-                pass
-            else:
-                x += 1
-        nCol = x  # Gets the number of columns
 
-        TT = np.zeros((nRow, nCol))
-        for i in range(nCol):
-            TT[:, i] = data[:, i]
+        nRow, nCol = self.dockedOpt.fileInfo()
 
-        self.PkFitData = zeros((nCol, 6))  # Creates the empty 2D List
+        self.OnePkFitData = zeros((nCol, 6))  # Creates the empty 2D List
         for j in range(nCol):
-            col_data = data[:, j]
+            col_data = self.dockedOpt.TT[:, j]
             xx = arange(0, len(col_data))
             param = self.OnePkFitting(xx, col_data)
             fit_result = param[0]
             fit_error = param[1]
-            self.PkFitData[j, :] =(fit_result[0], fit_error[0], fit_result[1], fit_error[1], fit_result[2],
-                                             fit_error[2])
-        print(self.PkFitData)
+            self.OnePkFitData[j, :] = (fit_result[0], fit_error[0], fit_result[1], fit_error[1], fit_result[2],
+                                    fit_error[2])
+        print(self.OnePkFitData)
 
 
     def OnePkFitting(self, xx, yy):
-        n = len(xx)  # the number of data
-        mean = sum(xx * yy) / sum(yy)  # note this correction
-        #    #sigma = sum(y*(x-mean)**2)/n        #note this correction
-        sigma = np.sqrt(sum(yy * (xx - mean) ** 2)) / sqrt(sum(yy))
-        popt, pcov = curve_fit(self.gaus1, xx, yy, p0=[1000, mean, sigma, 1, 100])
-        perr = np.sqrt(np.diag(pcov))
-        return popt, perr
+        try:
+            mean = sum(xx * yy) / sum(yy)  # note this correction
+            sigma = np.sqrt(sum(yy * (xx - mean) ** 2)) / sqrt(sum(yy))
+            bg0 = min(yy)  # min value of yy
+            popt, pcov = curve_fit(self.gaus1, xx, yy, p0=[self.onePeakAmp, self.onePeakPos, self.onePeakWid, bg0])
+            perr = np.sqrt(np.diag(pcov))
+            self.graphEachFitRawData(xx, yy, popt, 1)
+            return popt, perr
 
+        except TypeError and RuntimeError:
+            print("Please make sure the fitted data is correct")
 
-    def gaus1(self, x, a, x0, sigma, a0, b):
-        return a * exp(-(x - x0) ** 2 / (2 * sigma ** 2)) + a0 * x + b
+    def gaus1(self, x, a, x0, sigma, b):
+        return a * exp(-(x - x0) ** 2 / (2 * sigma ** 2)) + b
 
     # -----------------------------------------------------------------------------------------------------------#
     def graphAmplitude1(self):
@@ -199,7 +181,7 @@ class GaussianFitting:
 
         yy0 = self.PkFitData[:, 0]
         yy_err0 = self.PkFitData[:, 1]
-        xx = self.getXAxis(self.dockedOpt.fileName)
+        xx = self.getXAxis()
 
         axes.plot(xx, yy0)
         axes.set_ylabel('Intensity')
@@ -215,14 +197,11 @@ class GaussianFitting:
         vbox.addWidget(graphNavigationBar)
         vbox.addWidget(canvas)
         tab.setLayout(vbox)
+        name = 'Peak #1 Amplitude'
 
-        self.myMainWindow.tabWidget.addTab(tab, "Peak #1 Amplitude")
-        self.myMainWindow.tabWidget.setCurrentWidget(tab)
+        self.myMainWindow.savingCanvasTabs(tab, name, canvas, fig)
 
-        self.myMainWindow.canvasArray.append(canvas)
-        self.myMainWindow.figArray.append(fig)
     # -----------------------------------------------------------------------------------------#
-
     def graphPeakPosition1(self):
         """This method graphs the peak position for peak one"""
 
@@ -235,7 +214,7 @@ class GaussianFitting:
 
         axes = fig.add_subplot(111)
 
-        xx = self.getXAxis(self.dockedOpt.fileName)
+        xx = self.getXAxis()
         yy1 = self.PkFitData[:, 4]
         yy_err1 = self.PkFitData[:, 5]
         axes.plot(xx, yy1)
@@ -253,15 +232,11 @@ class GaussianFitting:
         vbox.addWidget(graphNavigationBar)
         vbox.addWidget(canvas)
         tab.setLayout(vbox)
+        name = 'Peak #1 Position'
 
-        self.myMainWindow.tabWidget.addTab(tab, "Peak #1 Position")
-        self.myMainWindow.tabWidget.setCurrentWidget(tab)
-
-        self.myMainWindow.canvasArray.append(canvas)
-        self.myMainWindow.figArray.append(fig)
+        self.myMainWindow.savingCanvasTabs(tab, name, canvas, fig)
 
     # ----------------------------------------------------------------------------------------------------#
-
     def graphPeakWidth1(self):
         """This method graphs the Peak width for peak one"""
 
@@ -274,7 +249,7 @@ class GaussianFitting:
 
         axes = fig.add_subplot(111)
 
-        xx = self.getXAxis(self.dockedOpt.fileName)
+        xx = self.getXAxis()
         yy2 = self.PkFitData[:, 8]
         yy_err2 = self.PkFitData[:, 9]
         axes.plot(xx, yy2)
@@ -291,11 +266,9 @@ class GaussianFitting:
         vbox.addWidget(graphNavigationBar)
         vbox.addWidget(canvas)
         tab.setLayout(vbox)
-        self.dockedOpt.myMainWindow.tabWidget.addTab(tab, "Peak #1 Width")
-        self.dockedOpt.myMainWindow.tabWidget.setCurrentWidget(tab)
+        name = 'Peak #1 Width'
 
-        self.dockedOpt.myMainWindow.canvasArray.append(canvas)
-        self.dockedOpt.myMainWindow.figArray.append(fig)
+        self.myMainWindow.savingCanvasTabs(tab, name, canvas, fig)
 
     # ----------------------------------------------------------------------------------------------------#
     def graphAmplitudeXWidth1(self):
@@ -309,7 +282,7 @@ class GaussianFitting:
         canvas.setParent(mainGraph)
         axes = fig.add_subplot(111)
 
-        xx = self.getXAxis(self.dockedOpt.fileName)
+        xx = self.getXAxis()
         yy2 = self.PkFitData[:, 8]
         yy0 = self.PkFitData[:, 0]
         yy3 = yy0 * yy2
@@ -318,9 +291,8 @@ class GaussianFitting:
         axes.set_xlabel('Voltage')
         a_err0 = self.PkFitData[:, 1]
         w_err2 = self.PkFitData[:, 9]
-        yy_err0 = (yy3 * a_err0) + (yy3 * w_err2)
+        yy_err0 = ((yy3 * a_err0) + (yy3 * w_err2))/yy3
         axes.errorbar(xx, yy0, yerr=yy_err0, fmt='o')
-        axes.plot(xx, yy3, 'go')
         axes.set_title('Peak #1 Amplitude X Width')
         canvas.draw()
 
@@ -331,11 +303,9 @@ class GaussianFitting:
         vbox.addWidget(graphNavigationBar)
         vbox.addWidget(canvas)
         tab.setLayout(vbox)
-        self.dockedOpt.myMainWindow.tabWidget.addTab(tab, "Peak #1 Amplitude X Width")
-        self.dockedOpt.myMainWindow.tabWidget.setCurrentWidget(tab)
+        name = 'Peak #1 Amplitude X Width'
 
-        self.dockedOpt.myMainWindow.canvasArray.append(canvas)
-        self.dockedOpt.myMainWindow.figArray.append(fig)
+        self.myMainWindow.savingCanvasTabs(tab, name, canvas, fig)
 
     # -----------------------------------------------------------------------------------------------------------#
     def graphAmplitude2(self):
@@ -352,7 +322,7 @@ class GaussianFitting:
 
         yy0 = self.PkFitData[:, 2]
         yy_err0 = self.PkFitData[:, 3]
-        xx = self.getXAxis(self.dockedOpt.fileName)
+        xx = self.getXAxis()
 
         axes.plot(xx, yy0)
         axes.set_xlabel('Voltage')
@@ -368,14 +338,11 @@ class GaussianFitting:
         vbox.addWidget(graphNavigationBar)
         vbox.addWidget(canvas)
         tab.setLayout(vbox)
+        name = 'Peak #2 Amplitude'
 
-        self.myMainWindow.tabWidget.addTab(tab, "Peak #2 Amplitude")
-        self.myMainWindow.tabWidget.setCurrentWidget(tab)
+        self.myMainWindow.savingCanvasTabs(tab, name, canvas, fig)
 
-        self.myMainWindow.canvasArray.append(canvas)
-        self.myMainWindow.figArray.append(fig)
     # -----------------------------------------------------------------------------------------#
-
     def graphPeakPosition2(self):
         """This method graphs the peak position for peak one"""
 
@@ -388,7 +355,7 @@ class GaussianFitting:
 
         axes = fig.add_subplot(111)
 
-        xx = self.getXAxis(self.dockedOpt.fileName)
+        xx = self.getXAxis()
         yy1 = self.PkFitData[:, 6]
         yy_err1 = self.PkFitData[:, 7]
         axes.plot(xx, yy1)
@@ -406,15 +373,11 @@ class GaussianFitting:
         vbox.addWidget(graphNavigationBar)
         vbox.addWidget(canvas)
         tab.setLayout(vbox)
+        name = 'Peak #2 Position'
 
-        self.myMainWindow.tabWidget.addTab(tab, "Peak #2 Position")
-        self.myMainWindow.tabWidget.setCurrentWidget(tab)
-
-        self.myMainWindow.canvasArray.append(canvas)
-        self.myMainWindow.figArray.append(fig)
+        self.myMainWindow.savingCanvasTabs(tab, name, canvas, fig)
 
     # ----------------------------------------------------------------------------------------------------#
-
     def graphPeakWidth2(self):
         """This method graphs the Peak width for peak one"""
 
@@ -427,7 +390,7 @@ class GaussianFitting:
 
         axes = fig.add_subplot(111)
 
-        xx = self.getXAxis(self.dockedOpt.fileName)
+        xx = self.getXAxis()
         yy2 = self.PkFitData[:, 10]
         yy_err2 = self.PkFitData[:, 11]
         axes.plot(xx, yy2)
@@ -444,11 +407,9 @@ class GaussianFitting:
         vbox.addWidget(graphNavigationBar)
         vbox.addWidget(canvas)
         tab.setLayout(vbox)
-        self.dockedOpt.myMainWindow.tabWidget.addTab(tab, "Peak #2 Width")
-        self.dockedOpt.myMainWindow.tabWidget.setCurrentWidget(tab)
+        name = 'Peak #2 Width'
 
-        self.dockedOpt.myMainWindow.canvasArray.append(canvas)
-        self.dockedOpt.myMainWindow.figArray.append(fig)
+        self.myMainWindow.savingCanvasTabs(tab, name, canvas, fig)
 
     # ----------------------------------------------------------------------------------------------------#
     def graphAmplitudeXWidth2(self):
@@ -462,7 +423,7 @@ class GaussianFitting:
         canvas.setParent(mainGraph)
         axes = fig.add_subplot(111)
 
-        xx = self.getXAxis(self.dockedOpt.fileName)
+        xx = self.getXAxis()
         yy2 = self.PkFitData[:, 10]
         yy0 = self.PkFitData[:, 2]
         yy3 = yy0 * yy2
@@ -480,17 +441,19 @@ class GaussianFitting:
         vbox.addWidget(graphNavigationBar)
         vbox.addWidget(canvas)
         tab.setLayout(vbox)
-        self.dockedOpt.myMainWindow.tabWidget.addTab(tab, "Peak #2 Amplitude X Width")
-        self.dockedOpt.myMainWindow.tabWidget.setCurrentWidget(tab)
+        name = 'Peak #2 Amplitude X Width'
 
-        self.dockedOpt.myMainWindow.canvasArray.append(canvas)
-        self.dockedOpt.myMainWindow.figArray.append(fig)
+        self.myMainWindow.savingCanvasTabs(tab, name, canvas, fig)
 
     # ------------------------------------------------------------------------------------------------------------#
-    def getXAxis(self, fileName):
-        x = []
+    def getXAxis(self):
+        """This method gets the voltage of the bins
+        :return: returns the x axis in array x
+        """
+        x = [] # X array initialized
+
         # Gets the amplitude
-        inF = open(fileName, 'r')
+        inF = open(self.dockedOpt.fileName, 'r')
         lines = inF.readlines()
         header = ''
         for (iL, line) in enumerate(lines):
@@ -503,15 +466,7 @@ class GaussianFitting:
         amp = float(ampl[0])
 
         # get the bins
-        data = np.loadtxt(open(fileName))
-        nCol = data.shape[1]  # Number of columns
-        c = 0
-        for f in range(nCol):
-            if (np.mean(data[:, f]) == 0):
-                break
-            else:
-                c += 1
-        bins = c  # Gets the number of bins
+        nRow, bins = self.dockedOpt.fileInfo()
 
         # Uses the data to find the x axis
         amplStart = amp/2
@@ -530,7 +485,7 @@ class GaussianFitting:
             x.append(startX)
         return x
 
-    #-------------------------------------------------------------------------------------------------------------#
+    # -------------------------------------------------------------------------------------------------------------#
     def graphAll(self):
         """Fuction graphs all the graphs. Makes sure the fileName is not empty
             and that the path leads to a file
@@ -543,8 +498,9 @@ class GaussianFitting:
         self.graphPeakPosition2()
         self.graphPeakWidth2()
         self.graphAmplitudeXWidth2()
+
     # -------------------------------------------------------------------------------------------------------------#
-    def gausInputDialog(self):
+    def gausTwoPeakInputDialog(self):
         """Dialog where the user import """
         self.dialogGausFit = QtGui.QDialog()
         inputForm = QtGui.QFormLayout()
@@ -553,31 +509,31 @@ class GaussianFitting:
 
         spaceLayout.addStretch(1)
 
-        self.peak1AmpSpin = QtGui.QDoubleSpinBox()
-        self.peak1AmpSpin.setMaximum(100000)
-        self.peak1PosSpin = QtGui.QDoubleSpinBox()
-        self.peak1WidthSpin = QtGui.QDoubleSpinBox()
+        self.twoPeak1AmpSpin = QtGui.QDoubleSpinBox()
+        self.twoPeak1AmpSpin.setMaximum(100000)
+        self.twoPeak1PosSpin = QtGui.QDoubleSpinBox()
+        self.twoPeak1WidthSpin = QtGui.QDoubleSpinBox()
 
-        self.peak2AmpSpin = QtGui.QDoubleSpinBox()
-        self.peak2AmpSpin.setMaximum(100000)
-        self.peak2PosSpin = QtGui.QDoubleSpinBox()
-        self.peak2WidthSpin = QtGui.QDoubleSpinBox()
+        self.twoPeak2AmpSpin = QtGui.QDoubleSpinBox()
+        self.twoPeak2AmpSpin.setMaximum(100000)
+        self.twoPeak2PosSpin = QtGui.QDoubleSpinBox()
+        self.twoPeak2WidthSpin = QtGui.QDoubleSpinBox()
 
         ok = QtGui.QPushButton("Ok")
         cancel = QtGui.QPushButton("Cancel")
 
         cancel.clicked.connect(self.dialogGausFit.close)
-        ok.clicked.connect(self.returnGausUserInput)
+        ok.clicked.connect(self.returnTwoPeakGausUserInput)
         buttonLayout.addWidget(cancel)
         buttonLayout.addStretch(1)
         buttonLayout.addWidget(ok)
 
-        inputForm.addRow("Peak#1 Amplitude: ", self.peak1AmpSpin)
-        inputForm.addRow("Peak#1 Position: ", self.peak1PosSpin)
-        inputForm.addRow("Peak#1 Width: ", self.peak1WidthSpin)
-        inputForm.addRow("Peak#2 Amplitude: ", self.peak2AmpSpin)
-        inputForm.addRow("Peak#2 Position: ", self.peak2PosSpin)
-        inputForm.addRow("Peak#2 Width: ", self.peak2WidthSpin)
+        inputForm.addRow("Peak#1 Amplitude: ", self.twoPeak1AmpSpin)
+        inputForm.addRow("Peak#1 Position: ", self.twoPeak1PosSpin)
+        inputForm.addRow("Peak#1 Width: ", self.twoPeak1WidthSpin)
+        inputForm.addRow("Peak#2 Amplitude: ", self.twoPeak2AmpSpin)
+        inputForm.addRow("Peak#2 Position: ", self.twoPeak2PosSpin)
+        inputForm.addRow("Peak#2 Width: ", self.twoPeak2WidthSpin)
         inputForm.addRow(spaceLayout)
         inputForm.addRow(buttonLayout)
 
@@ -586,19 +542,19 @@ class GaussianFitting:
         self.dialogGausFit.resize(250, 200)
         self.dialogGausFit.show()
 
-    def returnGausUserInput(self):
+    def returnTwoPeakGausUserInput(self):
         """Sets the values of the variables in the method twoPkFitting, that are used as parameters.
         It also sets the Gaussian fit options available"""
-        self.peak1Amp = float(self.peak1AmpSpin.value())
-        self.peak1Pos = float(self.peak1PosSpin.value())
-        self.peak1Wid = float(self.peak1WidthSpin.value())
+        self.twoPeak1Amp = float(self.twoPeak1AmpSpin.value())
+        self.twoPeak1Pos = float(self.twoPeak1PosSpin.value())
+        self.twoPeak1Wid = float(self.twoPeak1WidthSpin.value())
 
-        self.peak2Amp = float(self.peak2AmpSpin.value())
-        self.peak2Pos = float(self.peak2PosSpin.value())
-        self.peak2Wid = float(self.peak2WidthSpin.value())
+        self.twoPeak2Amp = float(self.twoPeak2AmpSpin.value())
+        self.twoPeak2Pos = float(self.twoPeak2PosSpin.value())
+        self.twoPeak2Wid = float(self.twoPeak2WidthSpin.value())
 
         self.dialogGausFit.close()
-        self.TwoPeakFitting(self.dockedOpt.fileName)
+        self.TwoPeakFitting()
         self.dockedOpt.dockGaussianFitOptions()
         self.dockedOpt.rdOnlyFileNameG.setText(self.dockedOpt.fileName)
         self.dockedOpt.rdOnlyFileNameG.setStatusTip(self.dockedOpt.fileName)
@@ -608,9 +564,60 @@ class GaussianFitting:
         self.dockedOpt.gausFitStat = True
 
     # -------------------------------------------------------------------------------------------------------------#
+    def gausOnePeakInputDialog(self):
+        """Dialog where the user inputs guesses about the peak"""
+        self.dialogOnePeakGausFit = QtGui.QDialog()
+        inputForm = QtGui.QFormLayout()
+        buttonLayout = QtGui.QHBoxLayout()
+        spaceLayout = QtGui.QVBoxLayout()
+
+        spaceLayout.addStretch(1)
+
+        self.onePeakAmpSpin = QtGui.QDoubleSpinBox()
+        self.onePeakAmpSpin.setMaximum(100000)
+        self.onePeakPosSpin = QtGui.QDoubleSpinBox()
+        self.onePeakWidthSpin = QtGui.QDoubleSpinBox()
+
+        ok = QtGui.QPushButton("Ok")
+        cancel = QtGui.QPushButton("Cancel")
+
+        cancel.clicked.connect(self.dialogOnePeakGausFit.close)
+        ok.clicked.connect(self.returnOnePeakGausUserInput)
+        buttonLayout.addWidget(cancel)
+        buttonLayout.addStretch(1)
+        buttonLayout.addWidget(ok)
+
+        inputForm.addRow("Peak Amplitude: ", self.onePeakAmpSpin)
+        inputForm.addRow("Peak Position: ", self.onePeakPosSpin)
+        inputForm.addRow("Peak Width: ", self.onePeakWidthSpin)
+        inputForm.addRow(spaceLayout)
+        inputForm.addRow(buttonLayout)
+
+        self.dialogOnePeakGausFit.setWindowTitle("Input Guesses")
+        self.dialogOnePeakGausFit.setLayout(inputForm)
+        self.dialogOnePeakGausFit.resize(250, 200)
+        self.dialogOnePeakGausFit.show()
+
+    def returnOnePeakGausUserInput(self):
+        """Sets the values of the variables in the method twoPkFitting, that are used as parameters.
+        It also sets the Gaussian fit options available"""
+        self.onePeakAmp = float(self.onePeakAmpSpin.value())
+        self.onePeakPos = float(self.onePeakPosSpin.value())
+        self.onePeakWid = float(self.onePeakWidthSpin.value())
+
+        self.dialogOnePeakGausFit.close()
+        self.OnePeakFitting()
+        # self.dockedOpt.dockGaussianFitOptions()
+        # self.dockedOpt.rdOnlyFileNameG.setText(self.dockedOpt.fileName)
+        # self.dockedOpt.rdOnlyFileNameG.setStatusTip(self.dockedOpt.fileName)
+        # self.myMainWindow.LFit.setEnabled(True)
+
+        # Marks the data has been fitted
+        # self.dockedOpt.gausFitStat = True
+    # -------------------------------------------------------------------------------------------------------------#
     def LInputDialog(self):
         """Dialog where the user import """
-        self.dialogLFit = QtGui.QDialog()
+        self.dialogLFit = QtGui.QDialog(self.myMainWindow)
         inputForm = QtGui.QFormLayout()
         buttonLayout = QtGui.QHBoxLayout()
         spaceLayout = QtGui.QVBoxLayout()
@@ -700,13 +707,13 @@ class GaussianFitting:
         canvas.setParent(mainGraph)
         axes = fig.add_subplot(111)
 
-        xx = self.getXAxis(self.dockedOpt.fileName)
+        xx = self.getXAxis()
         yy = self.LPos1Data
         axes.plot(xx, yy)
         axes.plot(xx, yy, 'go')
         axes.set_title('L Fit - Position #1')
         axes.set_xlabel('Voltage')
-        axes.set_ylabel('L R U')
+        axes.set_ylabel('RLU')
         axes.yaxis.set_major_formatter(FormatStrFormatter('%.4f'))
         canvas.draw()
 
@@ -735,12 +742,12 @@ class GaussianFitting:
         canvas.setParent(mainGraph)
         axes = fig.add_subplot(111)
 
-        xx = self.getXAxis(self.dockedOpt.fileName)
+        xx = self.getXAxis()
         yy = self.LPos2Data
         axes.plot(xx, yy)
         axes.plot(xx, yy, 'go')
         axes.set_xlabel('Voltage')
-        axes.set_ylabel('L R U')
+        axes.set_ylabel('RLU')
         axes.set_title('L Fit - Position #2')
         axes.yaxis.set_major_formatter(FormatStrFormatter('%.4f'))
         canvas.draw()
