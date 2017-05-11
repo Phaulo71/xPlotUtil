@@ -212,74 +212,66 @@ class MainWindow (QtGui.QMainWindow):
         self.savingCanvasTabs(tab, name, canvas, fig)
 
     # ----------------------------------------------------------------------------------------------#
-    def PlotLineGraphRawDataRLU(self):
-        """This method graphs the raw data into a line graph wiith RLU as x-axis"""
+    def GraphUtilRawDataLineGraphs(self, canvas, fig, gTitle, xLabel, yLabel, statTip, tabName, whichGraph):
         mainGraph = QtGui.QWidget()
 
-        dpi = 100
-        fig = Figure((3.0, 3.0), dpi=dpi)
-        canvas = FigureCanvas(fig)
         canvas.setParent(mainGraph)
         axes = fig.add_subplot(111)
 
         nRow, nCol = self.dockedOpt.fileInfo()
 
-        xx = self.gausFit.LData
+        if whichGraph == 'B':
+            xx = range(nRow)
+        elif whichGraph == 'L':
+            xx = self.gausFit.LData
 
         for j in range(nCol):
             yy = self.dockedOpt.TT[:, j]
             axes.plot(xx, yy)
 
-        axes.set_title('Raw Data')
-        axes.set_xlabel('RLU (Reciprocal Lattice Unit)')
-        axes.set_ylabel('Intensity')
+        axes.set_title(gTitle)
+        axes.set_xlabel(xLabel)
+        axes.set_ylabel(yLabel)
         canvas.draw()
 
         tab = QtGui.QWidget()
-        tab.setStatusTip("Raw Data in RLU")
+        tab.setStatusTip(statTip)
         vbox = QtGui.QVBoxLayout()
         graphNavigationBar = NavigationToolbar(canvas, self)
         vbox.addWidget(graphNavigationBar)
         vbox.addWidget(canvas)
         tab.setLayout(vbox)
-        name = 'Raw Data RLU'
 
-        self.savingCanvasTabs(tab, name, canvas, fig)
+        self.savingCanvasTabs(tab, tabName, canvas, fig)
+
+
+    # ----------------------------------------------------------------------------------------------#
+    def PlotLineGraphRawDataRLU(self):
+        """This method graphs the raw data into a line graph wiith RLU as x-axis"""
+        fig = Figure((3.0, 3.0), dpi=100)
+        canvas = FigureCanvas(fig)
+
+        gTitle = 'Raw Data in RLU'
+        xLabel = 'RLU (Reciprocal Lattice Unit)'
+        yLabel = 'Intensity'
+        statTip = 'Raw Data in RLU'
+        tabName = 'Raw Data RLU'
+
+        self.GraphUtilRawDataLineGraphs(canvas, fig, gTitle, xLabel, yLabel, statTip, tabName, 'L')
 
     # ----------------------------------------------------------------------------------------------#
     def PlotLineGraphRawDataBins(self):
         """This method graphs the raw data into a line graph into bins"""
-        mainGraph = QtGui.QWidget()
-
-        dpi = 100
-        fig = Figure((3.0, 3.0), dpi=dpi)
+        fig = Figure((3.0, 3.0), dpi=100)
         canvas = FigureCanvas(fig)
-        canvas.setParent(mainGraph)
-        axes = fig.add_subplot(111)
 
-        nRow, nCol = self.dockedOpt.fileInfo()
+        gTitle = 'Raw Data in Bins'
+        xLabel = 'Bins'
+        yLabel = 'Intensity'
+        statTip = 'Raw Data in Bins'
+        tabName = 'Raw Data Bins'
 
-        xx = range(nRow)
-
-        for j in range(nCol):
-            yy = self.dockedOpt.TT[:, j]
-            axes.plot(xx, yy)
-
-        axes.set_title('Raw Data in Bins')
-        axes.set_xlabel('Bins')
-        axes.set_ylabel('Intensity')
-        canvas.draw()
-
-        tab = QtGui.QWidget()
-        tab.setStatusTip("Raw Data in Bins")
-        vbox = QtGui.QVBoxLayout()
-        graphNavigationBar = NavigationToolbar(canvas, self)
-        vbox.addWidget(graphNavigationBar)
-        vbox.addWidget(canvas)
-        tab.setLayout(vbox)
-        name = 'Raw Data Bins'
-
-        self.savingCanvasTabs(tab, name, canvas, fig)
+        self.GraphUtilRawDataLineGraphs(canvas, fig, gTitle, xLabel, yLabel, statTip, tabName, 'B')
 
 def main():
     """Main method"""

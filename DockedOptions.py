@@ -26,15 +26,110 @@ class DockedOption(QtGui.QDockWidget):
         self.fileName = None
         self.myMainWindow = parent
         self.gausFit = GaussianFitting(self)
+
         self.gausFitStat = False
         self.LFitStat = False
-        self.dockGaussianFitOptions
+
+        self.onePeakGausFitStat = False
+        self.onePeakLFit = False
+        self.twoPeakGausFitStat = False
+        self.twoPeaklFitStat = False
+
 
         self.TT = [0][0] # 2D array where raw data is stored
 
     # -----------------------------------------------------------------------------#
-    def dockGaussianFitOptions(self):
-        """Function that creates the dockWidget, Graph Options for fitting one
+    def dockOnePeakGaussianFitOptions(self):  # Beginning of one peak gaussian fit
+        """Function that creates the dockWidget, Graph Options for Gaussian fit with one Peak
+        """
+        self.dockOnePeakFits = QtGui.QDockWidget("Fit", self)
+        self.dockOnePeakFits.setFloating(False)
+        self.dockOnePeakFits.setMaximumWidth(320)
+        self.dockOnePeakFits.setMinimumWidth(320)
+        self.dockOnePeakFits.setAllowedAreas(QtCore.Qt.RightDockWidgetArea | QtCore.Qt.LeftDockWidgetArea)
+
+        layout = QtGui.QFormLayout()
+        FileHLayout = QtGui.QHBoxLayout()
+        BtnLayout = QtGui.QHBoxLayout()
+        dataDocked = QtGui.QWidget()
+
+        self.FileNameRdOnlyBox()
+        self.GraphOnePeakGaussianFitCheckBoxes()
+        self.GraphOnePeakFitsButton()
+
+        FileHLayout.addWidget(self.fileNameLabel)
+        FileHLayout.addWidget(self.rdOnlyFileNameG)
+        FileHLayout.addStretch(1)
+
+        BtnLayout.addStretch(1)
+        BtnLayout.addWidget(self.GraphOnePeakFitsBtn)
+
+        layout.addRow(FileHLayout)
+        layout.addRow(self.graphPeakOneGausFitCheckBx)
+
+        if self.onePeakLFit == True:
+            layout.addRow(self.graphLCheckBx)
+
+        layout.addRow(BtnLayout)
+        dataDocked.setLayout(layout)
+        self.dockOnePeakFits.setWidget(dataDocked)
+
+        # Adding the docked widget to the main window
+        self.myMainWindow.addDockWidget(QtCore.Qt.RightDockWidgetArea, self.dockOnePeakFits)
+        self.myMainWindow.tabifyDockWidget(self.dockRawData, self.dockOnePeakFits)
+
+    def GraphOnePeakGaussianFitCheckBoxes(self):
+        """This function contains a group box with check boxes for Gaussian fit with one peak"""
+        self.graphPeakOneGausFitCheckBx = QtGui.QGroupBox("Gaussian")
+
+        self.checkBxOnePeakAmplitude = QtGui.QCheckBox("Amplitude")
+        self.checkBxOnePeakPosition = QtGui.QCheckBox("Position")
+        self.checkBxOnePeakWidth = QtGui.QCheckBox("Width")
+        self.checkBxOnePeakAmplitudeXWidth = QtGui.QCheckBox("Amplitude x Width")
+
+        vbox = QtGui.QVBoxLayout()
+        vbox.addWidget(self.checkBxOnePeakAmplitude)
+        vbox.addWidget(self.checkBxOnePeakPosition)
+        vbox.addWidget(self.checkBxOnePeakWidth)
+        vbox.addWidget(self.checkBxOnePeakAmplitudeXWidth)
+        self.graphPeakOneGausFitCheckBx.setLayout(vbox)
+
+        if self.onePeakLFit == True:
+            self.graphLCheckBx = QtGui.QGroupBox("L")
+            self.checkBxOnePeakLPosGraph = QtGui.QCheckBox("Position")
+            vboxL = QtGui.QVBoxLayout()
+            vboxL.addWidget(self.checkBxOnePeakLPosGraph)
+            self.graphLCheckBx.setLayout(vboxL)
+
+
+    def GraphOnePeakFits(self):
+        """This function checks which checkboxes are checked and then calls on the appropriate
+        function to graph the desired fitted data. (One Peak Gaussian Fit)
+        """
+        if self.checkBxOnePeakAmplitude.isChecked():
+            self.gausFit.graphOnePeakAmplitude()
+            self.checkBxOnePeakAmplitude.setCheckState(QtCore.Qt.Unchecked)
+
+        if self.checkBxOnePeakPosition.isChecked():
+            self.checkBxOnePeakPosition.setCheckState(QtCore.Qt.Unchecked)
+            self.gausFit.graphOnePeakPosition()
+
+        if self.checkBxOnePeakWidth.isChecked():
+            self.checkBxOnePeakWidth.setCheckState(QtCore.Qt.Unchecked)
+            self.gausFit.graphOnePeakWidth()
+
+        if self.checkBxOnePeakAmplitudeXWidth.isChecked():
+            self.gausFit.graphOnePeakAmplitudeXWidth()
+            self.checkBxOnePeakAmplitudeXWidth.setCheckState(QtCore.Qt.Unchecked)
+
+        if self.onePeakLFit == True:
+            if self.checkBxOnePeakLPosGraph.isChecked():
+                self.gausFit.graphOnePeakLFitPos()
+                self.checkBxOnePeakLPosGraph.setCheckState(QtCore.Qt.Unchecked)
+
+    # -----------------------------------------------------------------------------#
+    def dockTwoPeakGaussianFitOptions(self):
+        """Function that creates the dockWidget Gaussian fit options for two peaks.
         """
         self.dockDataGausFit = QtGui.QDockWidget("Gaussian Fit", self)
         self.dockDataGausFit.setFloating(False)
@@ -102,15 +197,6 @@ class DockedOption(QtGui.QDockWidget):
         self.graphCheckBx1.setLayout(vbox)
         self.graphCheckBx2.setLayout(vbox2)
 
-    # ----------------------------------------------------------------------------------------------------------#
-    def restoreDockGaussianFitOptions(self):
-        """This funtion restores the Graphing Options Dock Widget for Fitting One, if it's close"""
-        if (self.dockDataGausFit.isVisible() == False):
-            self.dockGaussianFitOptions()
-            if self.fileName is not "" and self.fileName is not None:
-                self.rdOnlyFileNameG.setText(self.fileName)
-                self.rdOnlyFileNameG.setStatusTip(self.fileName)
-
     # -----------------------------------------------------------------------------------------#
     def GraphDataGausFit(self):
         """Function that graphs the information from the file and calls on the different methods to graph
@@ -159,6 +245,21 @@ class DockedOption(QtGui.QDockWidget):
         self.checkBxAmplitudeXWidth2.setCheckState(QtCore.Qt.Unchecked)
         self.checkBxPeakPosition2.setCheckState(QtCore.Qt.Unchecked)
         self.checkBxPeakWidth2.setCheckState(QtCore.Qt.Unchecked)
+
+    # ----------------------------------------------------------------------------------------------------------#
+    def restoreDockGaussianFitOptions(self):
+        """This funtion restores the Graphing Options Dock Widget for the Gaussian fit. It checks which Peak to
+        restore, either one peak or two. It only restores them if they are not visible."""
+        if self.onePeakGausFitStat == True:
+            if (self.dockOnePeakFits.isVisible() == False):
+                self.dockOnePeakGaussianFitOptions()
+        elif self.twoPeakGausFitStat == True:
+            if (self.dockDataGausFit.isVisible() == False):
+                self.dockTwoPeakGaussianFitOptions()
+
+        if self.fileName is not "" and self.fileName is not None:
+            self.rdOnlyFileNameG.setText(self.fileName)
+            self.rdOnlyFileNameG.setStatusTip(self.fileName)
 
     # ------------------------------------------------------------------------------------#
     def FileNameRdOnlyBox(self):
@@ -216,6 +317,7 @@ class DockedOption(QtGui.QDockWidget):
         self.rdOnlyFileName.setStatusTip(self.fileName)
         self.gausFitStat = False
         self.LFitStat = False
+        self.onePeakGausFitStat = False
         self.gausFit.continueGraphingEachFit = True
         if (self.rdOnlyFileName.text() != ""):
             self.gausFit.LInputDialog()
@@ -247,9 +349,14 @@ class DockedOption(QtGui.QDockWidget):
     def GraphFittingOneButton(self):
         """Funtion that creates a graph button, connects to the GraphDataFittingOne() method"""
         self.GraphFittingOneBtn = QtGui.QPushButton('Graph', self)
-        self.GraphFittingOneBtn.setStatusTip("Graphs the check graphs")
+        self.GraphFittingOneBtn.setStatusTip("Graphs the checked graphs")
         self.GraphFittingOneBtn.clicked.connect(self.GraphDataGausFit)
 
+    def GraphOnePeakFitsButton(self):
+        """Funtion that creates a graph button, connects to the GraphDataFittingOne() method"""
+        self.GraphOnePeakFitsBtn = QtGui.QPushButton('Graph', self)
+        self.GraphOnePeakFitsBtn.setStatusTip("Graphs the checked graphs")
+        self.GraphOnePeakFitsBtn.clicked.connect(self.GraphOnePeakFits)
 
     def BrowseButton(self):
         """Function that creates a browse method, connects to the openFile() method"""
@@ -312,16 +419,17 @@ class DockedOption(QtGui.QDockWidget):
 
         # Adding the docked widget to the main window
         self.myMainWindow.addDockWidget(QtCore.Qt.RightDockWidgetArea, self.dockRawData)
+
         # Checks to see if the Raw data is being restored when the fitted options have been displayed
-        if (self.gausFitStat == True):
-            if(self.LFitStat == True):
-                if (self.dockLFit.isVisible() == True):
+        if (self.twoPeakGausFitStat == True):
+            if(self.twoPeaklFitStat == True):
+                if (self.twoPeakDockLFit.isVisible() == True):
                     self.myMainWindow.tabifyDockWidget(self.dockRawData, self.dockDataGausFit)
-                    self.myMainWindow.tabifyDockWidget(self.dockDataGausFit, self.dockLFit)
+                    self.myMainWindow.tabifyDockWidget(self.dockDataGausFit, self.twoPeakDockLFit)
                 elif (self.dockDataGausFit.isVisible() == True):
                     self.myMainWindow.tabifyDockWidget(self.dockRawData, self.dockDataGausFit)
             elif (self.dockDataGausFit.isVisible() == True):
-                self.myMainWindow.tabifyDockWidget(self.dockRawData, self.dockDataGausFit)
+                self.myMainWindow.tabifyDockWidget(self.dockRawData, self.restoreDockGaussianFitOptions)
 
     def GraphRawDataCheckBox(self):
         """This function contains a group box with check boxes for fitting one"""
@@ -377,11 +485,11 @@ class DockedOption(QtGui.QDockWidget):
     def DockLFitOptions(self):
         """Function that creates the dockWidget, Graph Options for fitting one
         """
-        self.dockLFit = QtGui.QDockWidget("L Fit", self)
-        self.dockLFit.setFloating(False)
-        self.dockLFit.setMaximumWidth(320)
-        self.dockLFit.setMinimumWidth(320)
-        self.dockLFit.setAllowedAreas(QtCore.Qt.RightDockWidgetArea | QtCore.Qt.LeftDockWidgetArea)
+        self.twoPeakDockLFit = QtGui.QDockWidget("L Fit", self)
+        self.twoPeakDockLFit.setFloating(False)
+        self.twoPeakDockLFit.setMaximumWidth(320)
+        self.twoPeakDockLFit.setMinimumWidth(320)
+        self.twoPeakDockLFit.setAllowedAreas(QtCore.Qt.RightDockWidgetArea | QtCore.Qt.LeftDockWidgetArea)
 
         layout = QtGui.QFormLayout()
         FileHLayout = QtGui.QHBoxLayout()
@@ -403,15 +511,15 @@ class DockedOption(QtGui.QDockWidget):
         layout.addRow(self.graphLCheckBx)
         layout.addRow(BtnLayout)
         self.dataDockedWidget.setLayout(layout)
-        self.dockLFit.setWidget(self.dataDockedWidget)
+        self.twoPeakDockLFit.setWidget(self.dataDockedWidget)
 
         # Adding the docked widget to the main window
-        self.myMainWindow.addDockWidget(QtCore.Qt.RightDockWidgetArea, self.dockLFit)
+        self.myMainWindow.addDockWidget(QtCore.Qt.RightDockWidgetArea, self.twoPeakDockLFit)
 
         if (self.dockDataGausFit.isVisible() == True):
-            self.myMainWindow.tabifyDockWidget(self.dockDataGausFit, self.dockLFit)
+            self.myMainWindow.tabifyDockWidget(self.dockDataGausFit, self.twoPeakDockLFit)
         elif (self.dockRawData.isVisible() == True):
-            self.myMainWindow.tabifyDockWidget(self.dockRawData, self.dockLFit)
+            self.myMainWindow.tabifyDockWidget(self.dockRawData, self.twoPeakDockLFit)
 
     def GraphLFitCheckBox(self):
         """This function contains a group box with check boxes for fitting one"""

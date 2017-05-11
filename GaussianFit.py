@@ -147,7 +147,6 @@ class GaussianFitting:
             fit_error = param[1]
             self.OnePkFitData[j, :] = (fit_result[0], fit_error[0], fit_result[1], fit_error[1], fit_result[2],
                                     fit_error[2])
-        print(self.OnePkFitData)
 
 
     def OnePkFitting(self, xx, yy):
@@ -167,283 +166,229 @@ class GaussianFitting:
         return a * exp(-(x - x0) ** 2 / (2 * sigma ** 2)) + b
 
     # -----------------------------------------------------------------------------------------------------------#
-    def graphAmplitude1(self):
-        """This method graphs the Amplitude for peak one"""
-
+    def GraphUtilGaussianFitGraphs(self, canvas, fig, name, x, y, error, xLabel, yLabel, whichGraph):
         mainGraph = QtGui.QWidget()
 
-        dpi = 100
-        fig = Figure((5.0, 4.0), dpi=dpi)
-        canvas = FigureCanvas(fig)
         canvas.setParent(mainGraph)
-
         axes = fig.add_subplot(111)
 
-        yy0 = self.PkFitData[:, 0]
-        yy_err0 = self.PkFitData[:, 1]
-        xx = self.getXAxis()
+        axes.plot(x, y)
 
-        axes.plot(xx, yy0)
-        axes.set_ylabel('Intensity')
-        axes.set_xlabel('Voltage')
-        axes.errorbar(xx, yy0, yerr=yy_err0, fmt='o')
-        axes.set_title('Peak #1 Amplitude')
+        if whichGraph == 'G':
+            axes.errorbar(x, y, yerr=error, fmt='o')
+        elif whichGraph == 'L':
+            axes.plot(x, y, 'go')
+            axes.yaxis.set_major_formatter(FormatStrFormatter('%.4f'))
+
+        axes.set_title(name)
+        axes.set_xlabel(xLabel)
+        axes.set_ylabel(yLabel)
         canvas.draw()
 
         tab = QtGui.QWidget()
-        tab.setStatusTip("Peak #1 Amplitude")
+        tab.setStatusTip(name)
         vbox = QtGui.QVBoxLayout()
         graphNavigationBar = NavigationToolbar(canvas, mainGraph)
         vbox.addWidget(graphNavigationBar)
         vbox.addWidget(canvas)
         tab.setLayout(vbox)
-        name = 'Peak #1 Amplitude'
-
-        self.myMainWindow.savingCanvasTabs(tab, name, canvas, fig)
-
-    # -----------------------------------------------------------------------------------------#
-    def graphPeakPosition1(self):
-        """This method graphs the peak position for peak one"""
-
-        mainGraph = QtGui.QWidget()
-
-        dpi = 100
-        fig = Figure((5.0, 4.0), dpi=dpi)
-        canvas = FigureCanvas(fig)
-        canvas.setParent(mainGraph)
-
-        axes = fig.add_subplot(111)
-
-        xx = self.getXAxis()
-        yy1 = self.PkFitData[:, 4]
-        yy_err1 = self.PkFitData[:, 5]
-        axes.plot(xx, yy1)
-        axes.set_ylabel('Position')
-        axes.set_xlabel('Voltage')
-        axes.errorbar(xx, yy1, yerr=yy_err1, fmt='o')
-        axes.set_title('Peak #1 Position')
-        canvas.draw()
-
-        tab = QtGui.QWidget()
-        tab.setStatusTip("Peak #1 Position")
-
-        vbox = QtGui.QVBoxLayout()
-        graphNavigationBar = NavigationToolbar(canvas, mainGraph)
-        vbox.addWidget(graphNavigationBar)
-        vbox.addWidget(canvas)
-        tab.setLayout(vbox)
-        name = 'Peak #1 Position'
-
-        self.myMainWindow.savingCanvasTabs(tab, name, canvas, fig)
-
-    # ----------------------------------------------------------------------------------------------------#
-    def graphPeakWidth1(self):
-        """This method graphs the Peak width for peak one"""
-
-        mainGraph = QtGui.QWidget()
-
-        dpi = 100
-        fig = Figure((5.0, 4.0), dpi=dpi)
-        canvas = FigureCanvas(fig)
-        canvas.setParent(mainGraph)
-
-        axes = fig.add_subplot(111)
-
-        xx = self.getXAxis()
-        yy2 = self.PkFitData[:, 8]
-        yy_err2 = self.PkFitData[:, 9]
-        axes.plot(xx, yy2)
-        axes.set_ylabel('Width')
-        axes.set_xlabel('Voltage')
-        axes.errorbar(xx, yy2, yerr=yy_err2, fmt='o')
-        axes.set_title('Peak #1 Width')
-        canvas.draw()
-
-        tab = QtGui.QWidget()
-        tab.setStatusTip("Peak #1 Width")
-        vbox = QtGui.QVBoxLayout()
-        graphNavigationBar = NavigationToolbar(canvas, mainGraph)
-        vbox.addWidget(graphNavigationBar)
-        vbox.addWidget(canvas)
-        tab.setLayout(vbox)
-        name = 'Peak #1 Width'
-
-        self.myMainWindow.savingCanvasTabs(tab, name, canvas, fig)
-
-    # ----------------------------------------------------------------------------------------------------#
-    def graphAmplitudeXWidth1(self):
-        """This method graphs the amplitude x width for the first peak"""
-
-        mainGraph = QtGui.QWidget()
-
-        dpi = 100
-        fig = Figure((5.0, 4.0), dpi=dpi)
-        canvas = FigureCanvas(fig)
-        canvas.setParent(mainGraph)
-        axes = fig.add_subplot(111)
-
-        xx = self.getXAxis()
-        yy2 = self.PkFitData[:, 8]
-        yy0 = self.PkFitData[:, 0]
-        yy3 = yy0 * yy2
-        axes.plot(xx, yy3)
-        axes.set_ylabel('A x W')
-        axes.set_xlabel('Voltage')
-        a_err0 = self.PkFitData[:, 1]
-        w_err2 = self.PkFitData[:, 9]
-        yy_err0 = ((yy3 * a_err0) + (yy3 * w_err2))/yy3
-        axes.errorbar(xx, yy0, yerr=yy_err0, fmt='o')
-        axes.set_title('Peak #1 Amplitude X Width')
-        canvas.draw()
-
-        tab = QtGui.QWidget()
-        tab.setStatusTip("Peak #1 Amplitude X Width")
-        vbox = QtGui.QVBoxLayout()
-        graphNavigationBar = NavigationToolbar(canvas, mainGraph)
-        vbox.addWidget(graphNavigationBar)
-        vbox.addWidget(canvas)
-        tab.setLayout(vbox)
-        name = 'Peak #1 Amplitude X Width'
 
         self.myMainWindow.savingCanvasTabs(tab, name, canvas, fig)
 
     # -----------------------------------------------------------------------------------------------------------#
-    def graphAmplitude2(self):
+    def graphOnePeakAmplitude(self):
         """This method graphs the Amplitude for peak one"""
-
-        mainGraph = QtGui.QWidget()
-
-        dpi = 100
-        fig = Figure((5.0, 4.0), dpi=dpi)
+        fig = Figure((5.0, 4.0), dpi=100)
         canvas = FigureCanvas(fig)
-        canvas.setParent(mainGraph)
 
-        axes = fig.add_subplot(111)
+        x = self.getXAxis()
+        y = self.OnePkFitData[:, 0]
+        error = self.OnePkFitData[:, 1]
+        xLabel = 'Voltage'
+        yLabel = 'Intensity'
+        name = 'Amplitude'
 
-        yy0 = self.PkFitData[:, 2]
-        yy_err0 = self.PkFitData[:, 3]
-        xx = self.getXAxis()
+        self.GraphUtilGaussianFitGraphs(canvas, fig, name, x, y, error, xLabel, yLabel, 'G')
 
-        axes.plot(xx, yy0)
-        axes.set_xlabel('Voltage')
-        axes.set_ylabel('Intensity')
-        axes.errorbar(xx, yy0, yerr=yy_err0, fmt='o')
-        axes.set_title('Peak #2 Amplitude')
-        canvas.draw()
+    # -----------------------------------------------------------------------------------------#
+    def graphOnePeakPosition(self):
+        """This method graphs the peak position for peak one"""
+        fig = Figure((5.0, 4.0), dpi=100)
+        canvas = FigureCanvas(fig)
 
-        tab = QtGui.QWidget()
-        tab.setStatusTip("Peak #2 Amplitude")
-        vbox = QtGui.QVBoxLayout()
-        graphNavigationBar = NavigationToolbar(canvas, mainGraph)
-        vbox.addWidget(graphNavigationBar)
-        vbox.addWidget(canvas)
-        tab.setLayout(vbox)
+        x = self.getXAxis()
+        y = self.OnePkFitData[:, 2]
+        error = self.OnePkFitData[:, 3]
+        xLabel = 'Voltage'
+        yLabel = 'Position'
+        name = 'Position'
+
+        self.GraphUtilGaussianFitGraphs(canvas, fig, name, x, y, error, xLabel, yLabel, 'G')
+
+    # ----------------------------------------------------------------------------------------------------#
+    def graphOnePeakWidth(self):
+        """This method graphs the Peak width for peak one"""
+        fig = Figure((5.0, 4.0), dpi=100)
+        canvas = FigureCanvas(fig)
+
+        x = self.getXAxis()
+        y = self.OnePkFitData[:, 4]
+        error = self.OnePkFitData[:, 5]
+        xLabel = 'Voltage'
+        yLabel = 'Width'
+        name = 'Width'
+
+        self.GraphUtilGaussianFitGraphs(canvas, fig, name, x, y, error, xLabel, yLabel, 'G')
+
+    # ----------------------------------------------------------------------------------------------------#
+    def graphOnePeakAmplitudeXWidth(self):
+        """This method graphs the amplitude x width for the first peak"""
+        fig = Figure((5.0, 4.0), dpi=100)
+        canvas = FigureCanvas(fig)
+
+        x = self.getXAxis()
+        yA = self.OnePkFitData[:, 0]
+        yW = self.OnePkFitData[:, 4]
+        a_err = self.OnePkFitData[:, 1]
+        w_err = self.OnePkFitData[:, 5]
+        y = yA * yW
+        error = ((y * a_err) + (y * w_err)) / y
+
+        xLabel = 'Voltage'
+        yLabel = 'A x W'
+        name = 'Amplitude X Width'
+
+        self.GraphUtilGaussianFitGraphs(canvas, fig, name, x, y, error, xLabel, yLabel, 'G')
+
+    # -----------------------------------------------------------------------------------------------------------#
+    def graphAmplitude1(self):
+        """This method graphs the Amplitude for peak one"""
+        fig = Figure((5.0, 4.0), dpi=100)
+        canvas = FigureCanvas(fig)
+
+        x = self.getXAxis()
+        y = self.PkFitData[:, 0]
+        error = self.PkFitData[:, 1]
+        xLabel = 'Voltage'
+        yLabel = 'Intensity'
+        name = 'Peak #1 Amplitude'
+
+        self.GraphUtilGaussianFitGraphs(canvas, fig, name, x, y, error, xLabel, yLabel, 'G')
+
+    # -----------------------------------------------------------------------------------------#
+    def graphPeakPosition1(self):
+        """This method graphs the peak position for peak one"""
+        fig = Figure((5.0, 4.0), dpi=100)
+        canvas = FigureCanvas(fig)
+
+        x = self.getXAxis()
+        y = self.PkFitData[:, 4]
+        error = self.PkFitData[:, 5]
+        xLabel = 'Voltage'
+        yLabel = 'Position'
+        name = 'Peak #1 Position'
+
+        self.GraphUtilGaussianFitGraphs(canvas, fig, name, x, y, error, xLabel, yLabel, 'G')
+
+    # ----------------------------------------------------------------------------------------------------#
+    def graphPeakWidth1(self):
+        """This method graphs the Peak width for peak one"""
+        fig = Figure((5.0, 4.0), dpi=100)
+        canvas = FigureCanvas(fig)
+
+        x = self.getXAxis()
+        y = self.PkFitData[:, 8]
+        error = self.PkFitData[:, 9]
+        xLabel = 'Voltage'
+        yLabel = 'Width'
+        name = 'Peak #1 Width'
+
+        self.GraphUtilGaussianFitGraphs(canvas, fig, name, x, y, error, xLabel, yLabel, 'G')
+
+    # ----------------------------------------------------------------------------------------------------#
+    def graphAmplitudeXWidth1(self):
+        """This method graphs the amplitude x width for the first peak"""
+        fig = Figure((5.0, 4.0), dpi=100)
+        canvas = FigureCanvas(fig)
+
+        x = self.getXAxis()
+        yA = self.PkFitData[:, 0]
+        yW = self.PkFitData[:, 8]
+        a_err = self.PkFitData[:, 1]
+        w_err = self.PkFitData[:, 9]
+        y = yA * yW
+        error = ((y * a_err) + (y * w_err))/y
+
+        xLabel = 'Voltage'
+        yLabel = 'A x W'
+        name = 'Peak #1 Amplitude X Width'
+
+        self.GraphUtilGaussianFitGraphs(canvas, fig, name, x, y, error, xLabel, yLabel, 'G')
+
+    # -----------------------------------------------------------------------------------------------------------#
+    def graphAmplitude2(self):
+        """This method graphs the Amplitude for peak two"""
+        fig = Figure((5.0, 4.0), dpi=100)
+        canvas = FigureCanvas(fig)
+
+        x = self.getXAxis()
+        y = self.PkFitData[:, 2]
+        error = self.PkFitData[:, 3]
+        xLabel = 'Voltage'
+        yLabel = 'Intensity'
         name = 'Peak #2 Amplitude'
 
-        self.myMainWindow.savingCanvasTabs(tab, name, canvas, fig)
+        self.GraphUtilGaussianFitGraphs(canvas, fig, name, x, y, error, xLabel, yLabel, 'G')
 
     # -----------------------------------------------------------------------------------------#
     def graphPeakPosition2(self):
-        """This method graphs the peak position for peak one"""
-
-        mainGraph = QtGui.QWidget()
-
-        dpi = 100
-        fig = Figure((5.0, 4.0), dpi=dpi)
+        """This method graphs the peak position for peak two"""
+        fig = Figure((5.0, 4.0), dpi=100)
         canvas = FigureCanvas(fig)
-        canvas.setParent(mainGraph)
 
-        axes = fig.add_subplot(111)
-
-        xx = self.getXAxis()
-        yy1 = self.PkFitData[:, 6]
-        yy_err1 = self.PkFitData[:, 7]
-        axes.plot(xx, yy1)
-        axes.set_xlabel('Voltage')
-        axes.set_ylabel('Position')
-        axes.errorbar(xx, yy1, yerr=yy_err1, fmt='o')
-        axes.set_title('Peak #1 Position')
-        canvas.draw()
-
-        tab = QtGui.QWidget()
-        tab.setStatusTip("Peak #1 Position")
-
-        vbox = QtGui.QVBoxLayout()
-        graphNavigationBar = NavigationToolbar(canvas, mainGraph)
-        vbox.addWidget(graphNavigationBar)
-        vbox.addWidget(canvas)
-        tab.setLayout(vbox)
+        x = self.getXAxis()
+        y = self.PkFitData[:, 6]
+        error = self.PkFitData[:, 7]
+        xLabel = 'Voltage'
+        yLabel = 'Position'
         name = 'Peak #2 Position'
 
-        self.myMainWindow.savingCanvasTabs(tab, name, canvas, fig)
+        self.GraphUtilGaussianFitGraphs(canvas, fig, name, x, y, error, xLabel, yLabel, 'G')
 
     # ----------------------------------------------------------------------------------------------------#
     def graphPeakWidth2(self):
-        """This method graphs the Peak width for peak one"""
-
-        mainGraph = QtGui.QWidget()
-
-        dpi = 100
-        fig = Figure((5.0, 4.0), dpi=dpi)
+        """This method graphs the Peak width for peak two"""
+        fig = Figure((5.0, 4.0), dpi=100)
         canvas = FigureCanvas(fig)
-        canvas.setParent(mainGraph)
 
-        axes = fig.add_subplot(111)
-
-        xx = self.getXAxis()
-        yy2 = self.PkFitData[:, 10]
-        yy_err2 = self.PkFitData[:, 11]
-        axes.plot(xx, yy2)
-        axes.set_xlabel('Voltage')
-        axes.set_ylabel('Width')
-        axes.errorbar(xx, yy2, yerr=yy_err2, fmt='o')
-        axes.set_title('Peak #2 Width')
-        canvas.draw()
-
-        tab = QtGui.QWidget()
-        tab.setStatusTip("Peak #2 Width")
-        vbox = QtGui.QVBoxLayout()
-        graphNavigationBar = NavigationToolbar(canvas, mainGraph)
-        vbox.addWidget(graphNavigationBar)
-        vbox.addWidget(canvas)
-        tab.setLayout(vbox)
+        x = self.getXAxis()
+        y = self.PkFitData[:, 10]
+        error = self.PkFitData[:, 11]
+        xLabel = 'Voltage'
+        yLabel = 'Width'
         name = 'Peak #2 Width'
 
-        self.myMainWindow.savingCanvasTabs(tab, name, canvas, fig)
+        self.GraphUtilGaussianFitGraphs(canvas, fig, name, x, y, error, xLabel, yLabel, 'G')
 
     # ----------------------------------------------------------------------------------------------------#
     def graphAmplitudeXWidth2(self):
-        """This method graphs the amplitude x width for the first peak"""
-
-        mainGraph = QtGui.QWidget()
-
-        dpi = 100
-        fig = Figure((5.0, 4.0), dpi=dpi)
+        """This method graphs the amplitude x width for the second peak"""
+        fig = Figure((5.0, 4.0), dpi=100)
         canvas = FigureCanvas(fig)
-        canvas.setParent(mainGraph)
-        axes = fig.add_subplot(111)
 
-        xx = self.getXAxis()
-        yy2 = self.PkFitData[:, 10]
-        yy0 = self.PkFitData[:, 2]
-        yy3 = yy0 * yy2
-        axes.plot(xx, yy3)
-        axes.set_xlabel('Voltage')
-        axes.set_ylabel('A x W')
-        axes.plot(xx, yy3, 'go')
-        axes.set_title('Peak #2 Amplitude X Width')
-        canvas.draw()
+        x = self.getXAxis()
+        yA = self.PkFitData[:, 2]
+        yW = self.PkFitData[:, 10]
+        a_err = self.PkFitData[:, 3]
+        w_err = self.PkFitData[:, 11]
+        y = yA * yW
+        error = ((y * a_err) + (y * w_err)) / y
 
-        tab = QtGui.QWidget()
-        tab.setStatusTip("Peak #2 Amplitude X Width")
-        vbox = QtGui.QVBoxLayout()
-        graphNavigationBar = NavigationToolbar(canvas, mainGraph)
-        vbox.addWidget(graphNavigationBar)
-        vbox.addWidget(canvas)
-        tab.setLayout(vbox)
+        xLabel = 'Voltage'
+        yLabel = 'A x W'
         name = 'Peak #2 Amplitude X Width'
 
-        self.myMainWindow.savingCanvasTabs(tab, name, canvas, fig)
+        self.GraphUtilGaussianFitGraphs(canvas, fig, name, x, y, error, xLabel, yLabel, 'G')
 
     # ------------------------------------------------------------------------------------------------------------#
     def getXAxis(self):
@@ -555,7 +500,7 @@ class GaussianFitting:
 
         self.dialogGausFit.close()
         self.TwoPeakFitting()
-        self.dockedOpt.dockGaussianFitOptions()
+        self.dockedOpt.dockTwoPeakGaussianFitOptions()
         self.dockedOpt.rdOnlyFileNameG.setText(self.dockedOpt.fileName)
         self.dockedOpt.rdOnlyFileNameG.setStatusTip(self.dockedOpt.fileName)
         self.myMainWindow.LFit.setEnabled(True)
@@ -607,13 +552,14 @@ class GaussianFitting:
 
         self.dialogOnePeakGausFit.close()
         self.OnePeakFitting()
-        # self.dockedOpt.dockGaussianFitOptions()
-        # self.dockedOpt.rdOnlyFileNameG.setText(self.dockedOpt.fileName)
-        # self.dockedOpt.rdOnlyFileNameG.setStatusTip(self.dockedOpt.fileName)
-        # self.myMainWindow.LFit.setEnabled(True)
+        self.dockedOpt.dockOnePeakGaussianFitOptions()
+        self.dockedOpt.rdOnlyFileNameG.setText(self.dockedOpt.fileName)
+        self.dockedOpt.rdOnlyFileNameG.setStatusTip(self.dockedOpt.fileName)
+        self.myMainWindow.LFit.setEnabled(True)
 
         # Marks the data has been fitted
-        # self.dockedOpt.gausFitStat = True
+        self.dockedOpt.gausFitStat = True
+        self.dockedOpt.onePeakGausFitStat = True
     # -------------------------------------------------------------------------------------------------------------#
     def LInputDialog(self):
         """Dialog where the user import """
@@ -676,19 +622,31 @@ class GaussianFitting:
 
     # -------------------------------------------------------------------------------------------------------------#
     def doLFit(self):
-        self.LPos1Data = []
-        self.LPos2Data = []
-
+        """This function
+        """
         nRow, nCol = self.dockedOpt.fileInfo()
-        # Position 1
-        for i in range(nRow-1):
-          self.LPos1Data.append(self.PositionLFit(self.PkFitData[i, 4], nRow))
 
-        # Position 2
-        for i in range(nRow - 1):
-          self.LPos2Data.append(self.PositionLFit(self.PkFitData[i, 6], nRow))
+        if  self.dockedOpt.onePeakGausFitStat == True :
+            self.LPosData = []
+            for i in range(nRow - 1):
+                self.LPosData.append(self.PositionLFit(self.OnePkFitData[i, 2], nRow))
 
-        self.dockedOpt.DockLFitOptions()
+            self.dockedOpt.onePeakLFit = True
+            self.dockedOpt.dockOnePeakFits.close()
+            self.dockedOpt.dockOnePeakGaussianFitOptions()
+
+        elif self.dockedOpt.onePeakGausFitStat == False:
+            self.LPos1Data = []
+            self.LPos2Data = []
+            # Position 1
+            for i in range(nRow-1):
+              self.LPos1Data.append(self.PositionLFit(self.PkFitData[i, 4], nRow))
+            # Position 2
+            for i in range(nRow - 1):
+              self.LPos2Data.append(self.PositionLFit(self.PkFitData[i, 6], nRow))
+
+            self.dockedOpt.DockLFitOptions()
+
         self.dockedOpt.rdOnlyFileNameG.setText(self.dockedOpt.fileName)
         self.dockedOpt.rdOnlyFileNameG.setStatusTip(self.dockedOpt.fileName)
 
@@ -696,74 +654,46 @@ class GaussianFitting:
         self.dockedOpt.LFitStat = True
 
     # ----------------------------------------------------------------------------------------------------#
+    def graphOnePeakLFitPos(self):
+        """This method graphs the L fit position for one peak"""
+        fig = Figure((5.0, 4.0), dpi=100)
+        canvas = FigureCanvas(fig)
+
+        x = self.getXAxis()
+        y = self.LPosData
+        xLabel = 'Voltage'
+        yLabel = 'RLU'
+        name = 'L Fit - Position'
+
+        self.GraphUtilGaussianFitGraphs(canvas, fig, name, x, y, None, xLabel, yLabel, 'L')
+
+    # ----------------------------------------------------------------------------------------------------#
     def graphLFitPos1(self):
         """This method graphs the amplitude x width for the first peak"""
-
-        mainGraph = QtGui.QWidget()
-
-        dpi = 100
-        fig = Figure((5.0, 4.0), dpi=dpi)
+        fig = Figure((5.0, 4.0), dpi=100)
         canvas = FigureCanvas(fig)
-        canvas.setParent(mainGraph)
-        axes = fig.add_subplot(111)
 
-        xx = self.getXAxis()
-        yy = self.LPos1Data
-        axes.plot(xx, yy)
-        axes.plot(xx, yy, 'go')
-        axes.set_title('L Fit - Position #1')
-        axes.set_xlabel('Voltage')
-        axes.set_ylabel('RLU')
-        axes.yaxis.set_major_formatter(FormatStrFormatter('%.4f'))
-        canvas.draw()
+        x = self.getXAxis()
+        y = self.LPos1Data
+        xLabel = 'Voltage'
+        yLabel = 'RLU'
+        name = 'L Fit - Position #1'
 
-        tab = QtGui.QWidget()
-        tab.setStatusTip("L Fit - Position #1")
-        vbox = QtGui.QVBoxLayout()
-        graphNavigationBar = NavigationToolbar(canvas, mainGraph)
-        vbox.addWidget(graphNavigationBar)
-        vbox.addWidget(canvas)
-        tab.setLayout(vbox)
-        self.dockedOpt.myMainWindow.tabWidget.addTab(tab, "L Fit - Position #1")
-        self.dockedOpt.myMainWindow.tabWidget.setCurrentWidget(tab)
-
-        self.dockedOpt.myMainWindow.canvasArray.append(canvas)
-        self.dockedOpt.myMainWindow.figArray.append(fig)
+        self.GraphUtilGaussianFitGraphs(canvas, fig, name, x, y, None, xLabel, yLabel, 'L')
 
     # ----------------------------------------------------------------------------------------------------#
     def graphLFitPos2(self):
         """This method graphs the amplitude x width for the first peak"""
-
-        mainGraph = QtGui.QWidget()
-
-        dpi = 100
-        fig = Figure((5.0, 4.0), dpi=dpi)
+        fig = Figure((5.0, 4.0), dpi=100)
         canvas = FigureCanvas(fig)
-        canvas.setParent(mainGraph)
-        axes = fig.add_subplot(111)
 
-        xx = self.getXAxis()
-        yy = self.LPos2Data
-        axes.plot(xx, yy)
-        axes.plot(xx, yy, 'go')
-        axes.set_xlabel('Voltage')
-        axes.set_ylabel('RLU')
-        axes.set_title('L Fit - Position #2')
-        axes.yaxis.set_major_formatter(FormatStrFormatter('%.4f'))
-        canvas.draw()
+        x = self.getXAxis()
+        y = self.LPos2Data
+        xLabel = 'Voltage'
+        yLabel = 'RLU'
+        name = 'L Fit - Position #2'
 
-        tab = QtGui.QWidget()
-        tab.setStatusTip("L Fit - Position #2")
-        vbox = QtGui.QVBoxLayout()
-        graphNavigationBar = NavigationToolbar(canvas, mainGraph)
-        vbox.addWidget(graphNavigationBar)
-        vbox.addWidget(canvas)
-        tab.setLayout(vbox)
-        self.dockedOpt.myMainWindow.tabWidget.addTab(tab, "L Fit - Position #2")
-        self.dockedOpt.myMainWindow.tabWidget.setCurrentWidget(tab)
-
-        self.dockedOpt.myMainWindow.canvasArray.append(canvas)
-        self.dockedOpt.myMainWindow.figArray.append(fig)
+        self.GraphUtilGaussianFitGraphs(canvas, fig, name, x, y, None, xLabel, yLabel, 'L')
 
 
 
