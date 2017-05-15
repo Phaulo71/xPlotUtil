@@ -91,6 +91,7 @@ class MainWindow (QtGui.QMainWindow):
         self.graphMenu.addAction(self.graphRawData)
         self.graphMenu.addAction(self.GaussianFit)
         self.graphMenu.addAction(self.LFit)
+        self.graphMenu.addAction(self.LPercentageChangeTry)
         self.LFit.setEnabled(False)
         self.helpMenu.addSeparator()  
         self.helpMenu.addAction(self.aboutAction)
@@ -114,6 +115,9 @@ class MainWindow (QtGui.QMainWindow):
         self.LFit = QtGui.QAction('L Fit',
                                           self, statusTip="Fits the data to the L fit",
                                           triggered= self.dockedOpt.LFittingData)
+        self.LPercentageChangeTry = QtGui.QAction('RLU %-Change',
+                                  self, statusTip="Fits the data to the L fit",
+                                  triggered=self.gausFit.percentageChangeLConstantOnePeak)
         self.aboutAction = QtGui.QAction(QtGui.QIcon('about.png'), 'A&bout',
                                          self, shortcut="Ctrl+B", statusTip="Displays info about the graph program",
                                          triggered=self.aboutHelp)
@@ -251,11 +255,11 @@ class MainWindow (QtGui.QMainWindow):
         fig = Figure((3.0, 3.0), dpi=100)
         canvas = FigureCanvas(fig)
 
-        gTitle = 'Raw Data in RLU'
-        xLabel = 'RLU (Reciprocal Lattice Unit)'
+        gTitle = 'Raw Data in L Constant'
+        xLabel = 'L Constant'
         yLabel = 'Intensity'
-        statTip = 'Raw Data in RLU'
-        tabName = 'Raw Data RLU'
+        statTip = 'Raw Data in L Constant'
+        tabName = 'Raw Data L Constant'
 
         self.GraphUtilRawDataLineGraphs(canvas, fig, gTitle, xLabel, yLabel, statTip, tabName, 'L')
 

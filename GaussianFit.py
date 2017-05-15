@@ -179,6 +179,7 @@ class GaussianFitting:
         elif whichGraph == 'L':
             axes.plot(x, y, 'go')
             axes.yaxis.set_major_formatter(FormatStrFormatter('%.4f'))
+            axes.xaxis.set_major_formatter(FormatStrFormatter('%.4f'))
 
         axes.set_title(name)
         axes.set_xlabel(xLabel)
@@ -620,6 +621,8 @@ class GaussianFitting:
             L += increment
             self.LData.append(float(format(L, '.4f')))
 
+        print(len(self.LData))
+
     # -------------------------------------------------------------------------------------------------------------#
     def doLFit(self):
         """This function
@@ -694,6 +697,32 @@ class GaussianFitting:
         name = 'L Fit - Position #2'
 
         self.GraphUtilGaussianFitGraphs(canvas, fig, name, x, y, None, xLabel, yLabel, 'L')
+
+    # -----------------------------------------------------------------------------------------------#
+    def percentageChangeLConstantOnePeak(self):
+        """This method get the percentage change of the L Constant and graphs it (Try out)"""
+        self.LDataPercentChange = []
+
+        for i in range(0, len(self.LPosData)):
+            pctChangeData = ((self.LPosData[i] - self.LPosData[0])/self.LPosData[0]) * 100
+            self.LDataPercentChange.append(pctChangeData)
+
+        print(self.LDataPercentChange)
+        print(self.LPosData)
+
+        """Try out for the percentage change of one peak"""
+        fig = Figure((5.0, 4.0), dpi=100)
+        canvas = FigureCanvas(fig)
+
+        x = self.LPosData
+        y = self.LDataPercentChange
+        xLabel = 'RLU'
+        yLabel = '%-Change'
+        name = 'RLU %-Change'
+
+        self.GraphUtilGaussianFitGraphs(canvas, fig, name, x, y, None, xLabel, yLabel, 'L')
+
+
 
 
 

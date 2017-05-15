@@ -33,7 +33,7 @@ class DockedOption(QtGui.QDockWidget):
         self.onePeakGausFitStat = False
         self.onePeakLFit = False
         self.twoPeakGausFitStat = False
-        self.twoPeaklFitStat = False
+        self.twoPeakLFitStat = False
 
 
         self.TT = [0][0] # 2D array where raw data is stored
@@ -419,17 +419,20 @@ class DockedOption(QtGui.QDockWidget):
 
         # Adding the docked widget to the main window
         self.myMainWindow.addDockWidget(QtCore.Qt.RightDockWidgetArea, self.dockRawData)
-
         # Checks to see if the Raw data is being restored when the fitted options have been displayed
-        if (self.twoPeakGausFitStat == True):
-            if(self.twoPeaklFitStat == True):
-                if (self.twoPeakDockLFit.isVisible() == True):
+        if (self.onePeakGausFitStat == True):
+                if self.dockOnePeakFits.isVisible():
+                        self.myMainWindow.tabifyDockWidget(self.dockRawData, self.dockOnePeakFits)
+        elif self.twoPeakGausFitStat == True:
+            if self.twoPeakLFitStat == True:
+                if self.twoPeakDockLFit.isVisible() == True:
                     self.myMainWindow.tabifyDockWidget(self.dockRawData, self.dockDataGausFit)
                     self.myMainWindow.tabifyDockWidget(self.dockDataGausFit, self.twoPeakDockLFit)
-                elif (self.dockDataGausFit.isVisible() == True):
-                    self.myMainWindow.tabifyDockWidget(self.dockRawData, self.dockDataGausFit)
-            elif (self.dockDataGausFit.isVisible() == True):
-                self.myMainWindow.tabifyDockWidget(self.dockRawData, self.restoreDockGaussianFitOptions)
+                else:
+                    self.myMainWindow.tabifyDockWidget(self.dockRawData, self.dockOnePeakGaussianFitOptions)
+            else:
+                self.myMainWindow.tabifyDockWidget(self.dockRawData, self.dockOnePeakGaussianFitOptions)
+
 
     def GraphRawDataCheckBox(self):
         """This function contains a group box with check boxes for fitting one"""
@@ -537,11 +540,25 @@ class DockedOption(QtGui.QDockWidget):
     # ----------------------------------------------------------------------------------------------------------#
     def restoreLFitOptions(self):
         """This funtion restores the Graphing Options Dock Widget for Fitting One, if it's closed """
-        if self.dockLFit.isVisible() == False:
+        if  self.onePeakLFit == True:
+            self.restoreOnePeakLFit()
+        elif self.dockLFit.isVisible() == False:
+            self.restoreTwoPeakLFit()
+
+        # Sets the title of the rdOnlyFileNameG
+        if self.fileName is not "" and self.fileName is not None:
+            self.rdOnlyFileNameG.setText(self.fileName)
+            self.rdOnlyFileNameG.setStatusTip(self.fileName)
+
+    # ------------------------------------------------------------------------------------#
+    def restoreOnePeakLFit(self):
+        if self.dockOnePeakFits.isVisible() == False:
+            self.dockOnePeakGaussianFitOptions()
+
+    # ------------------------------------------------------------------------------------#
+    def restoreTwoPeakLFit(self):
+        if self.twoPeakDockLFit .isVisible() == False:
             self.DockLFitOptions()
-            if self.fileName is not "" and self.fileName is not None:
-                self.rdOnlyFileNameG.setText(self.fileName)
-                self.rdOnlyFileNameG.setStatusTip(self.fileName)
 
     # ----------------------------------------------------------------------------------------------------------#
     def GraphLFit(self):
