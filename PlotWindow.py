@@ -40,12 +40,14 @@ class MainWindow (QtGui.QMainWindow):
         self.setWindowIcon(QtGui.QIcon('Icons/Graph.png'))
         self.dockedOpt = DockedOption(parent = self)
         self.gausFit = self.dockedOpt.gausFit
+        self.readSpec = self.dockedOpt.readSpec
         self.canvasArray = []
         self.figArray = []
 
         self.SetupComponents()
         self.windowTabs()
-        self.dockedOpt.DockRawDataOptions()
+        # self.dockedOpt.DockRawDataOptions() #Starts with the raw data options
+        self.dockedOpt.DockMainOptions()
         self.setCentralWidget(self.tabWidget)
         self.setTabPosition(QtCore.Qt.RightDockWidgetArea | QtCore.Qt.LeftDockWidgetArea, QtGui.QTabWidget.North)
 
@@ -88,36 +90,31 @@ class MainWindow (QtGui.QMainWindow):
         self.fileMenu.addAction(self.openAction)
         self.fileMenu.addSeparator()
         self.fileMenu.addAction(self.exitAction)
-        self.graphMenu.addAction(self.graphRawData)
+        self.graphMenu.addAction(self.mainOptions)
         self.graphMenu.addAction(self.GaussianFit)
         self.graphMenu.addAction(self.LFit)
-        self.graphMenu.addAction(self.LPercentageChangeTry)
-        self.LFit.setEnabled(False)
         self.helpMenu.addSeparator()  
         self.helpMenu.addAction(self.aboutAction)
+
+        # Setting L Fit to not enabled until the Gaussian Fit is complete
+        self.LFit.setEnabled(False)
 
     def CreateActions(self):
         """Function that creates the actions used in the menu bar"""
         self.openAction = QtGui.QAction(QtGui.QIcon('openFolder.png'), '&Open',
                                         self, shortcut=QtGui.QKeySequence.Open,
                                         statusTip="Open an existing file",
-                                        triggered=self.dockedOpt.openFile)
+                                        triggered=self.readSpec.openSpecFile)
         self.exitAction = QtGui.QAction(QtGui.QIcon('exit.png'), 'E&xit',
                                         self, shortcut="Ctrl+Q",
                                         statusTip="Exit the Application",
                                         triggered=self.exitFile)
-        self.GaussianFit= QtGui.QAction('Gaussian Fit',
-                                                   self, statusTip="Dock the graphing options",
-                                                   triggered= self.dockedOpt.GaussianFittingData)
-        self.graphRawData= QtGui.QAction('Raw Data',
-                                            self, statusTip="Plots different graphs for the raw data",
-                                             triggered= self.dockedOpt.restoreRawDataOptions)
-        self.LFit = QtGui.QAction('L Fit',
-                                          self, statusTip="Fits the data to the L fit",
-                                          triggered= self.dockedOpt.LFittingData)
-        self.LPercentageChangeTry = QtGui.QAction('RLU %-Change',
-                                  self, statusTip="Fits the data to the L fit",
-                                  triggered=self.gausFit.percentageChangeLConstantOnePeak)
+        self.mainOptions = QtGui.QAction('Main Options', self, statusTip="Main options for xPlot Util",
+                                             triggered=self.dockedOpt.restoreMainOptions)
+        self.GaussianFit= QtGui.QAction('Gaussian Fit',self, statusTip="Dock the graphing options" ,
+                                        triggered=self.dockedOpt.WhichPeakGaussianFit)
+        self.LFit = QtGui.QAction('L Fit', self, statusTip="Fits the data to the L fit",
+                                  triggered =self.dockedOpt.GraphingLOptionsTree)
         self.aboutAction = QtGui.QAction(QtGui.QIcon('about.png'), 'A&bout',
                                          self, shortcut="Ctrl+B", statusTip="Displays info about the graph program",
                                          triggered=self.aboutHelp)
@@ -131,26 +128,19 @@ class MainWindow (QtGui.QMainWindow):
 
     # ---------------------------------------------------------------------------------------------#
     def exitFile(self):
-        response = self.msgApp("Exiting Form", "Would you like to exit the form")
+        response = self.dockedOpt.msgApp("Exiting Form", "Would you like to exit the form")
 
         if response == "Y":
             self.close()
         else:
             pass
 
-    def msgApp(self, title, msg):
-        userInfo = QtGui.QMessageBox.question(self, title, msg, QtGui.QMessageBox.Yes | QtGui.QMessageBox.No)
-
-        if userInfo == QtGui.QMessageBox.Yes:
-            return "Y"
-        if userInfo == QtGui.QMessageBox.No:
-            return "N"
-
     def aboutHelp(self):
         QtGui.QMessageBox.about(self, "About xPlot Util",
-                          "Open a file and graph the raw data or click on the xPlot tab\n "
-                          "to fit the data. Also under xPlot you can restore the Graphing options "
-                          "if you close them.")
+                          "Click on the browse button to select and open a spec file.\n"
+                          "Choose a PVValue and under xPlot in the menu bar you can click\n on the fits. "
+                          "Once you've clicked on the fit, checkboxes will apear that\n will enable you "
+                          "to graph")
 
     # ---------------------------------------------------------------------------------------------------#
     def savingCanvasTabs(self,tab, name, canvas, fig):
@@ -181,13 +171,11 @@ class MainWindow (QtGui.QMainWindow):
             if line.startswith('#'):
                 header = line
         inF.close()
-        data = np.loadtxt(open(self.dockedOpt.fileName))
         words = header.split()
         ampl = ''
         if len(words) > 6:
             ampl = words[6]
         line1 = '[-' + str(ampl) + '] --> [0] --> [+' + str(ampl) + '] --> [0] --> [-' + str(ampl) + '] '
-        title0 = title0 + '\n' + header
 
         nRow, nCol = self.dockedOpt.fileInfo()
 
@@ -195,13 +183,12 @@ class MainWindow (QtGui.QMainWindow):
         tMin = np.min(self.dockedOpt.TT)
         z = np.linspace(tMin, tMax, endpoint=True)
         YY = range(nCol)
-        XX = self.gausFit.LData
-
+        XX = self.readSpec.L
         axes.contourf(YY, XX, self.dockedOpt.TT, z)
         fig.colorbar(axes.contourf(YY, XX, self.dockedOpt.TT, z))
         axes.set_title(title0)
         axes.set_xlabel('array_index (voltage:' + line1 + ')')
-        axes.set_ylabel('RLU (Reciprocal Lattice Unit)')
+        axes.set_ylabel('L Constant')
         canvas.draw()
 
         tab = QtGui.QWidget()
@@ -227,7 +214,7 @@ class MainWindow (QtGui.QMainWindow):
         if whichGraph == 'B':
             xx = range(nRow)
         elif whichGraph == 'L':
-            xx = self.gausFit.LData
+            xx = self.readSpec.L
 
         for j in range(nCol):
             yy = self.dockedOpt.TT[:, j]
@@ -248,14 +235,13 @@ class MainWindow (QtGui.QMainWindow):
 
         self.savingCanvasTabs(tab, tabName, canvas, fig)
 
-
     # ----------------------------------------------------------------------------------------------#
     def PlotLineGraphRawDataRLU(self):
         """This method graphs the raw data into a line graph wiith RLU as x-axis"""
         fig = Figure((3.0, 3.0), dpi=100)
         canvas = FigureCanvas(fig)
 
-        gTitle = 'Raw Data in L Constant'
+        gTitle = 'Raw Data in L Constant (Scan#: ' + str(self.dockedOpt.specDataList.currentRow() + 1) + ')'
         xLabel = 'L Constant'
         yLabel = 'Intensity'
         statTip = 'Raw Data in L Constant'
@@ -269,7 +255,7 @@ class MainWindow (QtGui.QMainWindow):
         fig = Figure((3.0, 3.0), dpi=100)
         canvas = FigureCanvas(fig)
 
-        gTitle = 'Raw Data in Bins'
+        gTitle = 'Raw Data in Bins (Scan#: ' + str(self.dockedOpt.specDataList.currentRow() + 1) + ')'
         xLabel = 'Bins'
         yLabel = 'Intensity'
         statTip = 'Raw Data in Bins'

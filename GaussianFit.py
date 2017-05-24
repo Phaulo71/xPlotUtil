@@ -27,8 +27,9 @@ from matplotlib.ticker import FormatStrFormatter
 class GaussianFitting:
 
     def __init__ (self, parent=None):
-        self.TwoPkFitData = [0][0]
-        self.dockedOpt = parent
+        self.TwoPkGausFitData = []
+        self.readSpec = parent
+        self.dockedOpt = self.readSpec.dockedOpt
         self.myMainWindow = self.dockedOpt.myMainWindow
         self.continueGraphingEachFit = True #Boolean to stop on Each fit graphing
 
@@ -38,17 +39,19 @@ class GaussianFitting:
 
         nRow, nCol = self.dockedOpt.fileInfo()
 
-        self.PkFitData = zeros((nCol, 12))  # Creats the empty 2D List
-
+        self.TwoPkGausFitData = zeros((nCol, 12))  # Creats the empty 2D List
+        print nCol
         for j in range(nCol):
             col_data = self.dockedOpt.TT[:, j]
             xx = arange(0, len(col_data))
             param = self.twoPkFitting(xx, col_data)
             fit_result = param[0]
             fit_error = param[1]
-            self.PkFitData[j, :] = (fit_result[0], fit_error[0], fit_result[1], fit_error[1], fit_result[2],
+            self.TwoPkGausFitData[j, :] = (fit_result[0], fit_error[0], fit_result[1], fit_error[1], fit_result[2],
                                     fit_error[2], fit_result[3], fit_error[3], fit_result[4], fit_error[4],
                                     fit_result[5], fit_error[5])
+
+            print self.TwoPkGausFitData
 
     def twoPkFitting(self, xx, yy):
         try:
@@ -179,7 +182,6 @@ class GaussianFitting:
         elif whichGraph == 'L':
             axes.plot(x, y, 'go')
             axes.yaxis.set_major_formatter(FormatStrFormatter('%.4f'))
-            axes.xaxis.set_major_formatter(FormatStrFormatter('%.4f'))
 
         axes.set_title(name)
         axes.set_xlabel(xLabel)
@@ -202,12 +204,12 @@ class GaussianFitting:
         fig = Figure((5.0, 4.0), dpi=100)
         canvas = FigureCanvas(fig)
 
-        x = self.getXAxis()
+        x = self.getVoltage()
         y = self.OnePkFitData[:, 0]
         error = self.OnePkFitData[:, 1]
         xLabel = 'Voltage'
         yLabel = 'Intensity'
-        name = 'Amplitude'
+        name = 'Amplitude (Scan#: ' + str(self.dockedOpt.specDataList.currentRow() + 1) + ')'
 
         self.GraphUtilGaussianFitGraphs(canvas, fig, name, x, y, error, xLabel, yLabel, 'G')
 
@@ -217,12 +219,12 @@ class GaussianFitting:
         fig = Figure((5.0, 4.0), dpi=100)
         canvas = FigureCanvas(fig)
 
-        x = self.getXAxis()
+        x = self.getVoltage()
         y = self.OnePkFitData[:, 2]
         error = self.OnePkFitData[:, 3]
         xLabel = 'Voltage'
         yLabel = 'Position'
-        name = 'Position'
+        name = 'Position (Scan#: ' + str(self.dockedOpt.specDataList.currentRow() + 1) + ')'
 
         self.GraphUtilGaussianFitGraphs(canvas, fig, name, x, y, error, xLabel, yLabel, 'G')
 
@@ -232,12 +234,12 @@ class GaussianFitting:
         fig = Figure((5.0, 4.0), dpi=100)
         canvas = FigureCanvas(fig)
 
-        x = self.getXAxis()
+        x = self.getVoltage()
         y = self.OnePkFitData[:, 4]
         error = self.OnePkFitData[:, 5]
         xLabel = 'Voltage'
         yLabel = 'Width'
-        name = 'Width'
+        name = 'Width (Scan#: ' + str(self.dockedOpt.specDataList.currentRow() + 1) + ')'
 
         self.GraphUtilGaussianFitGraphs(canvas, fig, name, x, y, error, xLabel, yLabel, 'G')
 
@@ -247,7 +249,7 @@ class GaussianFitting:
         fig = Figure((5.0, 4.0), dpi=100)
         canvas = FigureCanvas(fig)
 
-        x = self.getXAxis()
+        x = self.getVoltage()
         yA = self.OnePkFitData[:, 0]
         yW = self.OnePkFitData[:, 4]
         a_err = self.OnePkFitData[:, 1]
@@ -257,142 +259,142 @@ class GaussianFitting:
 
         xLabel = 'Voltage'
         yLabel = 'A x W'
-        name = 'Amplitude X Width'
+        name = 'Amplitude X Width (Scan#: ' + str(self.dockedOpt.specDataList.currentRow() + 1) + ')'
 
         self.GraphUtilGaussianFitGraphs(canvas, fig, name, x, y, error, xLabel, yLabel, 'G')
 
     # -----------------------------------------------------------------------------------------------------------#
-    def graphAmplitude1(self):
+    def graphTwoPeakAmplitude1(self):
         """This method graphs the Amplitude for peak one"""
         fig = Figure((5.0, 4.0), dpi=100)
         canvas = FigureCanvas(fig)
 
-        x = self.getXAxis()
-        y = self.PkFitData[:, 0]
-        error = self.PkFitData[:, 1]
+        x = self.getVoltage()
+        y = self.TwoPkGausFitData[:, 0]
+        error = self.TwoPkGausFitData[:, 1]
         xLabel = 'Voltage'
         yLabel = 'Intensity'
-        name = 'Peak #1 Amplitude'
+        name = 'Peak #1 Amplitude (Scan#: ' + str(self.dockedOpt.specDataList.currentRow() + 1) + ')'
 
         self.GraphUtilGaussianFitGraphs(canvas, fig, name, x, y, error, xLabel, yLabel, 'G')
 
     # -----------------------------------------------------------------------------------------#
-    def graphPeakPosition1(self):
+    def graphTwoPeakPosition1(self):
         """This method graphs the peak position for peak one"""
         fig = Figure((5.0, 4.0), dpi=100)
         canvas = FigureCanvas(fig)
 
-        x = self.getXAxis()
-        y = self.PkFitData[:, 4]
-        error = self.PkFitData[:, 5]
+        x = self.getVoltage()
+        y = self.TwoPkGausFitData[:, 4]
+        error = self.TwoPkGausFitData[:, 5]
         xLabel = 'Voltage'
         yLabel = 'Position'
-        name = 'Peak #1 Position'
+        name = 'Peak #1 Position (Scan#: ' + str(self.dockedOpt.specDataList.currentRow() + 1) + ')'
 
         self.GraphUtilGaussianFitGraphs(canvas, fig, name, x, y, error, xLabel, yLabel, 'G')
 
     # ----------------------------------------------------------------------------------------------------#
-    def graphPeakWidth1(self):
+    def graphTwoPeakWidth1(self):
         """This method graphs the Peak width for peak one"""
         fig = Figure((5.0, 4.0), dpi=100)
         canvas = FigureCanvas(fig)
 
-        x = self.getXAxis()
-        y = self.PkFitData[:, 8]
-        error = self.PkFitData[:, 9]
+        x = self.getVoltage()
+        y = self.TwoPkGausFitData[:, 8]
+        error = self.TwoPkGausFitData[:, 9]
         xLabel = 'Voltage'
         yLabel = 'Width'
-        name = 'Peak #1 Width'
+        name = 'Peak #1 Width (Scan#: ' + str(self.dockedOpt.specDataList.currentRow() + 1) + ')'
 
         self.GraphUtilGaussianFitGraphs(canvas, fig, name, x, y, error, xLabel, yLabel, 'G')
 
     # ----------------------------------------------------------------------------------------------------#
-    def graphAmplitudeXWidth1(self):
+    def graphTwoPeakAmplitudeXWidth1(self):
         """This method graphs the amplitude x width for the first peak"""
         fig = Figure((5.0, 4.0), dpi=100)
         canvas = FigureCanvas(fig)
 
-        x = self.getXAxis()
-        yA = self.PkFitData[:, 0]
-        yW = self.PkFitData[:, 8]
-        a_err = self.PkFitData[:, 1]
-        w_err = self.PkFitData[:, 9]
+        x = self.getVoltage()
+        yA = self.TwoPkGausFitData[:, 0]
+        yW = self.TwoPkGausFitData[:, 8]
+        a_err = self.TwoPkGausFitData[:, 1]
+        w_err = self.TwoPkGausFitData[:, 9]
         y = yA * yW
         error = ((y * a_err) + (y * w_err))/y
 
         xLabel = 'Voltage'
         yLabel = 'A x W'
-        name = 'Peak #1 Amplitude X Width'
+        name = 'Peak #1 Amplitude X Width (Scan#: ' + str(self.dockedOpt.specDataList.currentRow() + 1) + ')'
 
         self.GraphUtilGaussianFitGraphs(canvas, fig, name, x, y, error, xLabel, yLabel, 'G')
 
     # -----------------------------------------------------------------------------------------------------------#
-    def graphAmplitude2(self):
+    def graphTwoPeakAmplitude2(self):
         """This method graphs the Amplitude for peak two"""
         fig = Figure((5.0, 4.0), dpi=100)
         canvas = FigureCanvas(fig)
 
-        x = self.getXAxis()
-        y = self.PkFitData[:, 2]
-        error = self.PkFitData[:, 3]
+        x = self.getVoltage()
+        y = self.TwoPkGausFitData[:, 2]
+        error = self.TwoPkGausFitData[:, 3]
         xLabel = 'Voltage'
         yLabel = 'Intensity'
-        name = 'Peak #2 Amplitude'
+        name = 'Peak #2 Amplitude (Scan#: ' + str(self.dockedOpt.specDataList.currentRow() + 1) + ')'
 
         self.GraphUtilGaussianFitGraphs(canvas, fig, name, x, y, error, xLabel, yLabel, 'G')
 
     # -----------------------------------------------------------------------------------------#
-    def graphPeakPosition2(self):
+    def graphTwoPeakPosition2(self):
         """This method graphs the peak position for peak two"""
         fig = Figure((5.0, 4.0), dpi=100)
         canvas = FigureCanvas(fig)
 
-        x = self.getXAxis()
-        y = self.PkFitData[:, 6]
-        error = self.PkFitData[:, 7]
+        x = self.getVoltage()
+        y = self.TwoPkGausFitData[:, 6]
+        error = self.TwoPkGausFitData[:, 7]
         xLabel = 'Voltage'
         yLabel = 'Position'
-        name = 'Peak #2 Position'
+        name = 'Peak #2 Position (Scan#: ' + str(self.dockedOpt.specDataList.currentRow() + 1) + ')'
 
         self.GraphUtilGaussianFitGraphs(canvas, fig, name, x, y, error, xLabel, yLabel, 'G')
 
     # ----------------------------------------------------------------------------------------------------#
-    def graphPeakWidth2(self):
+    def graphTwoPeakWidth2(self):
         """This method graphs the Peak width for peak two"""
         fig = Figure((5.0, 4.0), dpi=100)
         canvas = FigureCanvas(fig)
 
-        x = self.getXAxis()
-        y = self.PkFitData[:, 10]
-        error = self.PkFitData[:, 11]
+        x = self.getVoltage()
+        y = self.TwoPkGausFitData[:, 10]
+        error = self.TwoPkGausFitData[:, 11]
         xLabel = 'Voltage'
         yLabel = 'Width'
-        name = 'Peak #2 Width'
+        name = 'Peak #2 Width (Scan#: ' + str(self.dockedOpt.specDataList.currentRow() + 1) + ')'
 
         self.GraphUtilGaussianFitGraphs(canvas, fig, name, x, y, error, xLabel, yLabel, 'G')
 
     # ----------------------------------------------------------------------------------------------------#
-    def graphAmplitudeXWidth2(self):
+    def graphTwoPeakAmplitudeXWidth2(self):
         """This method graphs the amplitude x width for the second peak"""
         fig = Figure((5.0, 4.0), dpi=100)
         canvas = FigureCanvas(fig)
 
-        x = self.getXAxis()
-        yA = self.PkFitData[:, 2]
-        yW = self.PkFitData[:, 10]
-        a_err = self.PkFitData[:, 3]
-        w_err = self.PkFitData[:, 11]
+        x = self.getVoltage()
+        yA = self.TwoPkGausFitData[:, 2]
+        yW = self.TwoPkGausFitData[:, 10]
+        a_err = self.TwoPkGausFitData[:, 3]
+        w_err = self.TwoPkGausFitData[:, 11]
         y = yA * yW
         error = ((y * a_err) + (y * w_err)) / y
 
         xLabel = 'Voltage'
         yLabel = 'A x W'
-        name = 'Peak #2 Amplitude X Width'
+        name = 'Peak #2 Amplitude X Width (Scan#: ' + str(self.dockedOpt.specDataList.currentRow() + 1) + ')'
 
         self.GraphUtilGaussianFitGraphs(canvas, fig, name, x, y, error, xLabel, yLabel, 'G')
 
     # ------------------------------------------------------------------------------------------------------------#
-    def getXAxis(self):
+    def getVoltage(self):
         """This method gets the voltage of the bins
         :return: returns the x axis in array x
         """
@@ -431,19 +433,6 @@ class GaussianFitting:
             x.append(startX)
         return x
 
-    # -------------------------------------------------------------------------------------------------------------#
-    def graphAll(self):
-        """Fuction graphs all the graphs. Makes sure the fileName is not empty
-            and that the path leads to a file
-        """
-        self.graphAmplitude1()
-        self.graphPeakPosition1()
-        self.graphPeakWidth1()
-        self.graphAmplitudeXWidth1()
-        self.graphAmplitude2()
-        self.graphPeakPosition2()
-        self.graphPeakWidth2()
-        self.graphAmplitudeXWidth2()
 
     # -------------------------------------------------------------------------------------------------------------#
     def gausTwoPeakInputDialog(self):
@@ -501,13 +490,12 @@ class GaussianFitting:
 
         self.dialogGausFit.close()
         self.TwoPeakFitting()
-        self.dockedOpt.dockTwoPeakGaussianFitOptions()
-        self.dockedOpt.rdOnlyFileNameG.setText(self.dockedOpt.fileName)
-        self.dockedOpt.rdOnlyFileNameG.setStatusTip(self.dockedOpt.fileName)
         self.myMainWindow.LFit.setEnabled(True)
 
-        # Marks the data has been fitted
+        # Marks that the data has been fitted for one peak
+        self.dockedOpt.twoPeakStat = True
         self.dockedOpt.gausFitStat = True
+        self.dockedOpt.GraphingGaussianOptionsTree()
 
     # -------------------------------------------------------------------------------------------------------------#
     def gausOnePeakInputDialog(self):
@@ -544,84 +532,25 @@ class GaussianFitting:
         self.dialogOnePeakGausFit.resize(250, 200)
         self.dialogOnePeakGausFit.show()
 
+    # -------------------------------------------------------------------------------------------------------------#
     def returnOnePeakGausUserInput(self):
-        """Sets the values of the variables in the method twoPkFitting, that are used as parameters.
-        It also sets the Gaussian fit options available"""
         self.onePeakAmp = float(self.onePeakAmpSpin.value())
         self.onePeakPos = float(self.onePeakPosSpin.value())
         self.onePeakWid = float(self.onePeakWidthSpin.value())
 
-        self.dialogOnePeakGausFit.close()
         self.OnePeakFitting()
-        self.dockedOpt.dockOnePeakGaussianFitOptions()
-        self.dockedOpt.rdOnlyFileNameG.setText(self.dockedOpt.fileName)
-        self.dockedOpt.rdOnlyFileNameG.setStatusTip(self.dockedOpt.fileName)
         self.myMainWindow.LFit.setEnabled(True)
 
-        # Marks the data has been fitted
+        self.dialogOnePeakGausFit.close()
+
+        # Marks that the data has been fitted for one peak
+        self.dockedOpt.onePeakStat = True
         self.dockedOpt.gausFitStat = True
-        self.dockedOpt.onePeakGausFitStat = True
+        self.dockedOpt.GraphingGaussianOptionsTree()
     # -------------------------------------------------------------------------------------------------------------#
-    def LInputDialog(self):
-        """Dialog where the user import """
-        self.dialogLFit = QtGui.QDialog(self.myMainWindow)
-        inputForm = QtGui.QFormLayout()
-        buttonLayout = QtGui.QHBoxLayout()
-        spaceLayout = QtGui.QVBoxLayout()
-
-        spaceLayout.addStretch(1)
-
-        self.maxLSpin = QtGui.QDoubleSpinBox()
-        self.maxLSpin.setDecimals(4)
-        self.maxLSpin.setMaximum(100000)
-        self.minLSpin = QtGui.QDoubleSpinBox()
-        self.lElementSpin = QtGui.QDoubleSpinBox()
-        self.lElementSpin.setDecimals(4)
-
-        ok = QtGui.QPushButton("Ok")
-        cancel = QtGui.QPushButton("Cancel")
-
-        cancel.clicked.connect(self.dialogLFit.close)
-        ok.clicked.connect(self.LInput)
-        buttonLayout.addWidget(cancel)
-        buttonLayout.addStretch(1)
-        buttonLayout.addWidget(ok)
-
-        inputForm.addRow("Max L: ", self.maxLSpin)
-        inputForm.addRow("Min L: ", self.minLSpin)
-        inputForm.addRow("L Element: ", self.lElementSpin)
-        inputForm.addRow(spaceLayout)
-        inputForm.addRow(buttonLayout)
-
-        self.dialogLFit.setWindowTitle("Input Data for L Fit")
-        self.dialogLFit.setLayout(inputForm)
-        self.dialogLFit.resize(200, 150)
-        self.dialogLFit.exec_()
-
-    # -------------------------------------------------------------------------------------------------------------#
-    """This is where the methods used for the L Fit begin"""
     def PositionLFit(self, pos, rows):
-        l = (1/(((pos/rows)*(self.maxL-self.minL)+self.minL)/2))*self.elementL
+        l = (1/(((pos/rows)*(self.readSpec.lMax-self.readSpec.lMin)+self.readSpec.lMin)/2))*self.readSpec.lElement
         return l
-
-    # -------------------------------------------------------------------------------------------------------------#
-    def LInput(self):
-        self.dialogLFit.close()
-        self.maxL = float(self.maxLSpin.value())
-        self.minL = float(self.minLSpin.value())
-        self.elementL = float(self.lElementSpin.value())
-
-        self.LData = []
-
-        nRow, nCol = self.dockedOpt.fileInfo()
-        increment = (self.maxL - self.minL)/nRow
-        L = self.minL
-        self.LData.append(L)
-        for i in range(nRow - 1):
-            L += increment
-            self.LData.append(float(format(L, '.4f')))
-
-        print(len(self.LData))
 
     # -------------------------------------------------------------------------------------------------------------#
     def doLFit(self):
@@ -629,32 +558,20 @@ class GaussianFitting:
         """
         nRow, nCol = self.dockedOpt.fileInfo()
 
-        if  self.dockedOpt.onePeakGausFitStat == True :
+        if  self.dockedOpt.onePeakStat == True :
             self.LPosData = []
-            for i in range(nRow - 1):
+            for i in range(nCol):
                 self.LPosData.append(self.PositionLFit(self.OnePkFitData[i, 2], nRow))
 
-            self.dockedOpt.onePeakLFit = True
-            self.dockedOpt.dockOnePeakFits.close()
-            self.dockedOpt.dockOnePeakGaussianFitOptions()
-
-        elif self.dockedOpt.onePeakGausFitStat == False:
+        elif self.dockedOpt.twoPeakStat == True:
             self.LPos1Data = []
             self.LPos2Data = []
             # Position 1
-            for i in range(nRow-1):
-              self.LPos1Data.append(self.PositionLFit(self.PkFitData[i, 4], nRow))
+            for i in range(nCol):
+              self.LPos1Data.append(self.PositionLFit(self.TwoPkGausFitData[i, 4], nCol))
             # Position 2
-            for i in range(nRow - 1):
-              self.LPos2Data.append(self.PositionLFit(self.PkFitData[i, 6], nRow))
-
-            self.dockedOpt.DockLFitOptions()
-
-        self.dockedOpt.rdOnlyFileNameG.setText(self.dockedOpt.fileName)
-        self.dockedOpt.rdOnlyFileNameG.setStatusTip(self.dockedOpt.fileName)
-
-        # Marks that the data has been fitted
-        self.dockedOpt.LFitStat = True
+            for i in range(nCol):
+              self.LPos2Data.append(self.PositionLFit(self.TwoPkGausFitData[i, 6], nCol))
 
     # ----------------------------------------------------------------------------------------------------#
     def graphOnePeakLFitPos(self):
@@ -662,66 +579,103 @@ class GaussianFitting:
         fig = Figure((5.0, 4.0), dpi=100)
         canvas = FigureCanvas(fig)
 
-        x = self.getXAxis()
+        x = self.getVoltage()
         y = self.LPosData
         xLabel = 'Voltage'
         yLabel = 'RLU'
-        name = 'L Fit - Position'
+        name = 'L Fit - Position (Scan#: ' + str(self.dockedOpt.specDataList.currentRow() + 1) + ')'
 
         self.GraphUtilGaussianFitGraphs(canvas, fig, name, x, y, None, xLabel, yLabel, 'L')
 
     # ----------------------------------------------------------------------------------------------------#
-    def graphLFitPos1(self):
+    def graphTwoPeakLFitPos1(self):
         """This method graphs the amplitude x width for the first peak"""
         fig = Figure((5.0, 4.0), dpi=100)
         canvas = FigureCanvas(fig)
-
-        x = self.getXAxis()
+        x = self.getVoltage()
         y = self.LPos1Data
+        print x
+        print y
         xLabel = 'Voltage'
         yLabel = 'RLU'
-        name = 'L Fit - Position #1'
+        name = 'L Fit - Position #1 (Scan#: ' + str(self.dockedOpt.specDataList.currentRow() + 1) + ')'
 
         self.GraphUtilGaussianFitGraphs(canvas, fig, name, x, y, None, xLabel, yLabel, 'L')
 
     # ----------------------------------------------------------------------------------------------------#
-    def graphLFitPos2(self):
+    def graphTwoPeakLFitPos2(self):
         """This method graphs the amplitude x width for the first peak"""
         fig = Figure((5.0, 4.0), dpi=100)
         canvas = FigureCanvas(fig)
 
-        x = self.getXAxis()
+        x = self.getVoltage()
         y = self.LPos2Data
         xLabel = 'Voltage'
         yLabel = 'RLU'
-        name = 'L Fit - Position #2'
+        name = 'L Fit - Position #2 (Scan#: ' + str(self.dockedOpt.specDataList.currentRow() + 1) + ')'
 
         self.GraphUtilGaussianFitGraphs(canvas, fig, name, x, y, None, xLabel, yLabel, 'L')
 
     # -----------------------------------------------------------------------------------------------#
     def percentageChangeLConstantOnePeak(self):
         """This method get the percentage change of the L Constant and graphs it (Try out)"""
-        self.LDataPercentChange = []
+        LDataPercentChange = []
 
         for i in range(0, len(self.LPosData)):
             pctChangeData = ((self.LPosData[i] - self.LPosData[0])/self.LPosData[0]) * 100
-            self.LDataPercentChange.append(pctChangeData)
+            LDataPercentChange.append(pctChangeData)
 
-        print(self.LDataPercentChange)
-        print(self.LPosData)
-
-        """Try out for the percentage change of one peak"""
         fig = Figure((5.0, 4.0), dpi=100)
         canvas = FigureCanvas(fig)
 
-        x = self.LPosData
-        y = self.LDataPercentChange
-        xLabel = 'RLU'
+        x = self.getVoltage()
+        y = LDataPercentChange
+        xLabel = 'Voltage'
         yLabel = '%-Change'
         name = 'RLU %-Change'
 
         self.GraphUtilGaussianFitGraphs(canvas, fig, name, x, y, None, xLabel, yLabel, 'L')
 
+    # -----------------------------------------------------------------------------------------------#
+    def percentageChangeLConstantPeakOne(self):
+        """This method get the percentage change of the L Constant and graphs it (Try out)"""
+        LDataPercentChange = []
+
+        for i in range(0, len(self.LPos1Data)):
+            pctChangeData = ((self.LPos1Data[i] - self.LPos1Data[0]) / self.LPos1Data[0]) * 100
+            LDataPercentChange.append(pctChangeData)
+
+        fig = Figure((5.0, 4.0), dpi=100)
+        canvas = FigureCanvas(fig)
+
+        x = self.getVoltage()
+        y = LDataPercentChange
+        xLabel = 'Voltage'
+        yLabel = '%-Change'
+        name = 'RLU %-Change'
+
+        self.GraphUtilGaussianFitGraphs(canvas, fig, name, x, y, None, xLabel, yLabel, 'L')
+
+    # -----------------------------------------------------------------------------------------------#
+    def percentageChangeLConstantPeakTwo(self):
+        """This method get the percentage change of the L Constant and graphs it (Try out)"""
+        LDataPercentChange = []
+
+        for i in range(0, len(self.LPos2Data)):
+            pctChangeData = ((self.LPos2Data[i] - self.LPos2Data[0]) / self.LPos2Data[0]) * 100
+            LDataPercentChange.append(pctChangeData)
+
+        """Try out for the percentage change of one peak"""
+        fig = Figure((5.0, 4.0), dpi=100)
+        canvas = FigureCanvas(fig)
+
+        x = self.getVoltage()
+        y = LDataPercentChange
+        xLabel = 'Voltage'
+        yLabel = '%-Change'
+        name = 'RLU %-Change'
+
+        self.GraphUtilGaussianFitGraphs(canvas, fig, name, x, y, None, xLabel, yLabel, 'L')
 
 
 
