@@ -12,12 +12,17 @@ from pylab import *
 from matplotlib.backends import qt_compat
 from GaussianFit import GaussianFitting
 import os
+from pathlib2 import Path
 from GaussianFit import GaussianFitting
 use_pyside = qt_compat.QT_API == qt_compat.QT_API_PYSIDE
 if use_pyside:
-    from PySide import QtGui, QtCore
+    from PySide.QtGui import *
+    from PySide.QtCore import *
 else:
-    from PyQt4 import QtGui, QtCore
+    from PyQt5.QtGui import *
+    from PyQt5.QtCore import *
+    from PyQt5.QtWidgets import *
+
 from spec2nexus.spec import SpecDataFile
 # --------------------------------------------------------------------------------------#
 
@@ -47,19 +52,21 @@ class ReadSpec:
 
     def currentScan(self):
         scan = str(self.dockedOpt.specDataList.currentRow() + 1)
+        self.currentRow = self.dockedOpt.specDataList.currentRow()
         self.dockedOpt.openFile()
 
         # Making sure the file of the PVvalue has been opened
         try:
-            if os.path.isfile(self.dockedOpt.fileName) == True:
+            if os.path.isfile(self.dockedOpt.fileName):
                 # Getting the L information for the particular PVValue
-                self.L = self.scans[scan].data["L"]
-                self.lMin = self.L[0]
-                self.lMax = self.L[-1]
+                L = self.scans[scan].data["L"]
+                self.lMin = L[0]
+                self.lMax = L[-1]
                 k = self.scans[scan].G["G1"].split(" ")
                 self.lElement = float(k[2])
-        except TypeError and RuntimeError and KeyError:
-            print("Please make sure the PVValue file has the information on the file.")
+                self.getRLU()
+        except TypeError or RuntimeError or KeyError:
+            print("Please make sure the PVValue file has L the information on the file.")
 
     # ------------------------------------------------------------------------------------#
     def openSpecFile(self):
@@ -72,20 +79,41 @@ class ReadSpec:
 
     def openSpecDialog(self):
         """This method allows the user to open the spec file """
-        filters = "Spec files (*.spec);;Python files (*.py)"
-        selectedFilter = "Spec files (*.spec);;Python files (*.py)"
-        self.specFileName = QtGui.QFileDialog.getOpenFileName(self.myMainWindow, "Open Spec File", filters, selectedFilter)
-
-        # Makes sure a file has been opened
-        if os.path.isfile(self.specFileName) == True:
+        try:
+            filters = "Spec files (*.spec);;Python files (*.py)"
+            selectedFilter = "Spec files (*.spec);;Python files (*.py)"
+            self.specFileName, self.specFileFilter = QFileDialog.getOpenFileName(self.myMainWindow, "Open Spec File", filters, selectedFilter)
             self.dockedOpt.mainOptions.close()
-            self.gausFitStat = False
-            self.LFitStat = False
             self.dockedOpt.DockMainOptions()
-            self.dockedOpt.rdOnlyFileName.setText(self.specFileName)
-            self.dockedOpt.rdOnlyFileName.setStatusTip(self.specFileName)
-            self.specFile = SpecDataFile(self.specFileName)
-            self.dockedOpt.specDataList.clear()
-            self.loadScans(self.specFile.scans)
-            self.specFileOpened = True
-            self.dockedOpt.fileOpened = False
+            self.myMainWindow.LFit.setEnabled(False)
+
+            # Makes sure a file has been opened
+            if os.path.isfile(self.specFileName):
+                self.gausFitStat = False
+                self.LFitStat = False
+                self.dockedOpt.rdOnlyFileName.setText(self.specFileName)
+                self.dockedOpt.rdOnlyFileName.setStatusTip(self.specFileName)
+                self.specFile = SpecDataFile(self.specFileName)
+                self.loadScans(self.specFile.scans)
+                self.specFileOpened = True
+                self.dockedOpt.fileOpened = False
+                self.continueGraphingEachFit = True
+        except:
+            print("Please make sure the PVValue file has L the information on the file.")
+
+
+    def getRLU(self):
+        nRow, nCol = self.dockedOpt.fileInfo()  # nRows = points || nCol = bins
+        if nRow != 0:
+            adjustment = (self.lMax - self.lMin)/nRow
+            self.L = []
+            self.L.append(self.lMin)
+            RLU = self.lMin
+            count = 1
+            while count < nRow:
+                RLU += adjustment
+                self.L.append(round(RLU, 3))
+                count += 1
+
+
+

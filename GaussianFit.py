@@ -13,21 +13,27 @@ import os
 from pylab import *
 from matplotlib.backends import qt_compat
 use_pyside = qt_compat.QT_API == qt_compat.QT_API_PYSIDE
+
 if use_pyside:
-    from PySide import QtGui, QtCore
+    from PySide.QtGui import *
+    from PySide.QtCore import *
 else:
-    from PyQt4 import QtGui, QtCore
+    from PyQt5.QtGui import *
+    from PyQt5.QtCore import *
+    from PyQt5.QtWidgets import *
+
 from scipy.optimize import curve_fit
 from scipy import exp
 from matplotlib.figure import Figure
-from matplotlib.backends.backend_qt4agg import FigureCanvasQTAgg as FigureCanvas
-from matplotlib.backends.backend_qt4 import NavigationToolbar2QT as NavigationToolbar
+from matplotlib.backends.backend_qt5agg import FigureCanvasQTAgg as FigureCanvas
+from matplotlib.backends.backend_qt5 import NavigationToolbar2QT as NavigationToolbar
 from matplotlib.ticker import FormatStrFormatter
 
 class GaussianFitting:
 
     def __init__ (self, parent=None):
         self.TwoPkGausFitData = []
+        self.OnePkFitData = []
         self.readSpec = parent
         self.dockedOpt = self.readSpec.dockedOpt
         self.myMainWindow = self.dockedOpt.myMainWindow
@@ -36,35 +42,36 @@ class GaussianFitting:
     # --------------------------------------------------------------------------------------#
     def TwoPeakFitting(self):
         """Gaussian Fitting for Two Peaks [Updated April 4, 2017]"""
-
+        #try:
         nRow, nCol = self.dockedOpt.fileInfo()
 
         self.TwoPkGausFitData = zeros((nCol, 12))  # Creats the empty 2D List
-        print nCol
         for j in range(nCol):
             col_data = self.dockedOpt.TT[:, j]
             xx = arange(0, len(col_data))
             param = self.twoPkFitting(xx, col_data)
-            fit_result = param[0]
-            fit_error = param[1]
+            fit_result = ["%f" % member for member in param[0]]
+            fit_error = ["%f" % member for member in param[1]]
             self.TwoPkGausFitData[j, :] = (fit_result[0], fit_error[0], fit_result[1], fit_error[1], fit_result[2],
-                                    fit_error[2], fit_result[3], fit_error[3], fit_result[4], fit_error[4],
-                                    fit_result[5], fit_error[5])
-
-            print self.TwoPkGausFitData
+                                           fit_error[2], fit_result[3], fit_error[3], fit_result[4], fit_error[4],
+                                           fit_result[5], fit_error[5])
+        #except:
+           # QMessageBox.warning(self.myMainWindow, "Warning", "Please make sure to input realistic guesses.\n"
+            #                                                        "Reset or reopen the PVvaulue file.")
 
     def twoPkFitting(self, xx, yy):
-        try:
-            mean = sum(xx * yy) / sum(yy)
-            sigma = np.sqrt(sum(yy * (xx - mean) ** 2)) / sqrt(sum(yy))
-            bg0 = min(yy)  # min value of yy
-            popt, pcov = curve_fit(self.gaus2, xx, yy, p0=[self.twoPeak1Amp, self.twoPeak2Amp, self.twoPeak1Pos, self.twoPeak2Pos,
-                                                           self.twoPeak1Wid, self.twoPeak2Wid, bg0])
-            perr = np.sqrt(np.diag(pcov))
-            self.graphEachFitRawData(xx, yy, popt, 2)
-            return popt, perr
-        except TypeError and RuntimeError:
-            print("Please make sure the fitted data is correct")
+        #try:
+        mean = sum(xx * yy) / sum(yy)
+        sig = np.sqrt(sum(yy * (xx - mean) ** 2)) / sqrt(sum(yy))
+        bg0 = (yy[max(xx)] + yy[0]) / 2
+        popt, pcov = curve_fit(self.gaus2, xx, yy, p0=[self.twoPeak1Amp, self.twoPeak2Amp, self.twoPeak1Pos, self.twoPeak2Pos,
+                                                       self.twoPeak1Wid, self.twoPeak2Wid, bg0])
+        perr = np.sqrt(np.diag(pcov))
+        self.graphEachFitRawData(xx, yy, popt, 2)
+        return popt, perr
+       # except TypeError and RuntimeError:
+          #   QMessageBox.warning(self.myMainWindow, "Warning", "Please make sure to input realistic guesses.\n"
+                                                                    # "Reset or reopen the PVvaulue file.")
 
     def gaus2(self, x, a1, a2, x01, x02, sigma1, sigma2, background):
         return a1 * exp(-(x - x01) ** 2 / (2 * sigma1 ** 2))\
@@ -78,7 +85,7 @@ class GaussianFitting:
         :param popt: from the gaussian fit
         """
         if (self.continueGraphingEachFit == True):
-            self.mainGraph = QtGui.QDialog(self.myMainWindow)
+            self.mainGraph = QDialog(self.myMainWindow)
             self.mainGraph.resize(600, 600)
             dpi = 100
             fig = Figure((3.0, 3.0), dpi=dpi)
@@ -97,8 +104,8 @@ class GaussianFitting:
             axes.set_ylabel('Intensity')
             canvas.draw()
 
-            vbox = QtGui.QVBoxLayout()
-            hbox = QtGui.QHBoxLayout()
+            vbox = QVBoxLayout()
+            hbox = QHBoxLayout()
             self.skipEachFitGraphButton()
             self.nextFitGraphButton()
             hbox.addWidget(self.skipEachFitGraphBtn)
@@ -114,14 +121,14 @@ class GaussianFitting:
     # ------------------------------------------------------------------------------------#
     def skipEachFitGraphButton(self):
         """Button that allows the user to skip each fit graph, calls on the skipEachFit() method"""
-        self.skipEachFitGraphBtn = QtGui.QPushButton('Skip')
+        self.skipEachFitGraphBtn = QPushButton('Skip')
         self.skipEachFitGraphBtn.setStatusTip("Skip the graphing of each fit")
         self.skipEachFitGraphBtn.clicked.connect(self.skipEachFit)
 
     def nextFitGraphButton(self):
         """Button that shows the next fit graph, calls on nextFitGraph() method"""
         # Button next to the FileNameRdOnly label and LineEdit
-        self.nextFitGraphBtn = QtGui.QPushButton('Next')
+        self.nextFitGraphBtn = QPushButton('Next')
         self.nextFitGraphBtn.clicked.connect(self.nextFitGraph)
         self.nextFitGraphBtn.setStatusTip("Graphs the next fit and the original data")
 
@@ -155,8 +162,8 @@ class GaussianFitting:
     def OnePkFitting(self, xx, yy):
         try:
             mean = sum(xx * yy) / sum(yy)  # note this correction
-            sigma = np.sqrt(sum(yy * (xx - mean) ** 2)) / sqrt(sum(yy))
-            bg0 = min(yy)  # min value of yy
+            sig = np.sqrt(sum(yy * (xx - mean) ** 2)) / sqrt(sum(yy))
+            bg0 = (yy[max(xx)] + yy[0]) / 2  # min value of yy
             popt, pcov = curve_fit(self.gaus1, xx, yy, p0=[self.onePeakAmp, self.onePeakPos, self.onePeakWid, bg0])
             perr = np.sqrt(np.diag(pcov))
             self.graphEachFitRawData(xx, yy, popt, 1)
@@ -170,7 +177,7 @@ class GaussianFitting:
 
     # -----------------------------------------------------------------------------------------------------------#
     def GraphUtilGaussianFitGraphs(self, canvas, fig, name, x, y, error, xLabel, yLabel, whichGraph):
-        mainGraph = QtGui.QWidget()
+        mainGraph = QWidget()
 
         canvas.setParent(mainGraph)
         axes = fig.add_subplot(111)
@@ -188,9 +195,9 @@ class GaussianFitting:
         axes.set_ylabel(yLabel)
         canvas.draw()
 
-        tab = QtGui.QWidget()
+        tab = QWidget()
         tab.setStatusTip(name)
-        vbox = QtGui.QVBoxLayout()
+        vbox = QVBoxLayout()
         graphNavigationBar = NavigationToolbar(canvas, mainGraph)
         vbox.addWidget(graphNavigationBar)
         vbox.addWidget(canvas)
@@ -437,25 +444,25 @@ class GaussianFitting:
     # -------------------------------------------------------------------------------------------------------------#
     def gausTwoPeakInputDialog(self):
         """Dialog where the user import """
-        self.dialogGausFit = QtGui.QDialog()
-        inputForm = QtGui.QFormLayout()
-        buttonLayout = QtGui.QHBoxLayout()
-        spaceLayout = QtGui.QVBoxLayout()
+        self.dialogGausFit = QDialog()
+        inputForm = QFormLayout()
+        buttonLayout = QHBoxLayout()
+        spaceLayout = QVBoxLayout()
 
         spaceLayout.addStretch(1)
 
-        self.twoPeak1AmpSpin = QtGui.QDoubleSpinBox()
+        self.twoPeak1AmpSpin = QDoubleSpinBox()
         self.twoPeak1AmpSpin.setMaximum(100000)
-        self.twoPeak1PosSpin = QtGui.QDoubleSpinBox()
-        self.twoPeak1WidthSpin = QtGui.QDoubleSpinBox()
+        self.twoPeak1PosSpin = QDoubleSpinBox()
+        self.twoPeak1WidthSpin = QDoubleSpinBox()
 
-        self.twoPeak2AmpSpin = QtGui.QDoubleSpinBox()
+        self.twoPeak2AmpSpin = QDoubleSpinBox()
         self.twoPeak2AmpSpin.setMaximum(100000)
-        self.twoPeak2PosSpin = QtGui.QDoubleSpinBox()
-        self.twoPeak2WidthSpin = QtGui.QDoubleSpinBox()
+        self.twoPeak2PosSpin = QDoubleSpinBox()
+        self.twoPeak2WidthSpin = QDoubleSpinBox()
 
-        ok = QtGui.QPushButton("Ok")
-        cancel = QtGui.QPushButton("Cancel")
+        ok = QPushButton("Ok")
+        cancel = QPushButton("Cancel")
 
         cancel.clicked.connect(self.dialogGausFit.close)
         ok.clicked.connect(self.returnTwoPeakGausUserInput)
@@ -492,7 +499,7 @@ class GaussianFitting:
         self.TwoPeakFitting()
         self.myMainWindow.LFit.setEnabled(True)
 
-        # Marks that the data has been fitted for one peak
+        # Marks that the data has been fitted for one peakm
         self.dockedOpt.twoPeakStat = True
         self.dockedOpt.gausFitStat = True
         self.dockedOpt.GraphingGaussianOptionsTree()
@@ -500,20 +507,20 @@ class GaussianFitting:
     # -------------------------------------------------------------------------------------------------------------#
     def gausOnePeakInputDialog(self):
         """Dialog where the user inputs guesses about the peak"""
-        self.dialogOnePeakGausFit = QtGui.QDialog()
-        inputForm = QtGui.QFormLayout()
-        buttonLayout = QtGui.QHBoxLayout()
-        spaceLayout = QtGui.QVBoxLayout()
+        self.dialogOnePeakGausFit = QDialog()
+        inputForm = QFormLayout()
+        buttonLayout = QHBoxLayout()
+        spaceLayout = QVBoxLayout()
 
         spaceLayout.addStretch(1)
 
-        self.onePeakAmpSpin = QtGui.QDoubleSpinBox()
+        self.onePeakAmpSpin = QDoubleSpinBox()
         self.onePeakAmpSpin.setMaximum(100000)
-        self.onePeakPosSpin = QtGui.QDoubleSpinBox()
-        self.onePeakWidthSpin = QtGui.QDoubleSpinBox()
+        self.onePeakPosSpin = QDoubleSpinBox()
+        self.onePeakWidthSpin = QDoubleSpinBox()
 
-        ok = QtGui.QPushButton("Ok")
-        cancel = QtGui.QPushButton("Cancel")
+        ok = QPushButton("Ok")
+        cancel = QPushButton("Cancel")
 
         cancel.clicked.connect(self.dialogOnePeakGausFit.close)
         ok.clicked.connect(self.returnOnePeakGausUserInput)
@@ -529,7 +536,7 @@ class GaussianFitting:
 
         self.dialogOnePeakGausFit.setWindowTitle("Input Guesses")
         self.dialogOnePeakGausFit.setLayout(inputForm)
-        self.dialogOnePeakGausFit.resize(250, 200)
+        self.dialogOnePeakGausFit.resize(200, 110)
         self.dialogOnePeakGausFit.show()
 
     # -------------------------------------------------------------------------------------------------------------#
@@ -538,10 +545,9 @@ class GaussianFitting:
         self.onePeakPos = float(self.onePeakPosSpin.value())
         self.onePeakWid = float(self.onePeakWidthSpin.value())
 
+        self.dialogOnePeakGausFit.close()
         self.OnePeakFitting()
         self.myMainWindow.LFit.setEnabled(True)
-
-        self.dialogOnePeakGausFit.close()
 
         # Marks that the data has been fitted for one peak
         self.dockedOpt.onePeakStat = True
@@ -582,7 +588,7 @@ class GaussianFitting:
         x = self.getVoltage()
         y = self.LPosData
         xLabel = 'Voltage'
-        yLabel = 'RLU'
+        yLabel = 'L Constant'
         name = 'L Fit - Position (Scan#: ' + str(self.dockedOpt.specDataList.currentRow() + 1) + ')'
 
         self.GraphUtilGaussianFitGraphs(canvas, fig, name, x, y, None, xLabel, yLabel, 'L')
@@ -597,7 +603,7 @@ class GaussianFitting:
         print x
         print y
         xLabel = 'Voltage'
-        yLabel = 'RLU'
+        yLabel = 'L Constant'
         name = 'L Fit - Position #1 (Scan#: ' + str(self.dockedOpt.specDataList.currentRow() + 1) + ')'
 
         self.GraphUtilGaussianFitGraphs(canvas, fig, name, x, y, None, xLabel, yLabel, 'L')
@@ -611,7 +617,7 @@ class GaussianFitting:
         x = self.getVoltage()
         y = self.LPos2Data
         xLabel = 'Voltage'
-        yLabel = 'RLU'
+        yLabel = 'L Constant'
         name = 'L Fit - Position #2 (Scan#: ' + str(self.dockedOpt.specDataList.currentRow() + 1) + ')'
 
         self.GraphUtilGaussianFitGraphs(canvas, fig, name, x, y, None, xLabel, yLabel, 'L')
@@ -632,7 +638,7 @@ class GaussianFitting:
         y = LDataPercentChange
         xLabel = 'Voltage'
         yLabel = '%-Change'
-        name = 'RLU %-Change'
+        name = 'L Constant %-Change'
 
         self.GraphUtilGaussianFitGraphs(canvas, fig, name, x, y, None, xLabel, yLabel, 'L')
 
@@ -652,7 +658,7 @@ class GaussianFitting:
         y = LDataPercentChange
         xLabel = 'Voltage'
         yLabel = '%-Change'
-        name = 'RLU %-Change'
+        name = 'L Constant %-Change'
 
         self.GraphUtilGaussianFitGraphs(canvas, fig, name, x, y, None, xLabel, yLabel, 'L')
 
@@ -673,7 +679,7 @@ class GaussianFitting:
         y = LDataPercentChange
         xLabel = 'Voltage'
         yLabel = '%-Change'
-        name = 'RLU %-Change'
+        name = 'L Constant %-Change'
 
         self.GraphUtilGaussianFitGraphs(canvas, fig, name, x, y, None, xLabel, yLabel, 'L')
 

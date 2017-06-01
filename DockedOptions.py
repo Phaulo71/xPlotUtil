@@ -11,16 +11,22 @@ from __future__ import unicode_literals
 from pylab import *
 from matplotlib.backends import qt_compat
 import os
+import gc
+
 use_pyside = qt_compat.QT_API == qt_compat.QT_API_PYSIDE
 if use_pyside:
-    from PySide import QtGui, QtCore
+    from PySide.QtGui import *
+    from PySide.QtCore import *
 else:
-    from PyQt4 import QtGui, QtCore
+    from PyQt5.QtGui import *
+    from PyQt5.QtCore import *
+    from PyQt5.QtWidgets import *
+
 from spec2nexus.spec import SpecDataFile
 from ReadSpecFile import ReadSpec
 
 
-class DockedOption(QtGui.QDockWidget):
+class DockedOption(QDockWidget):
 
     def __init__ (self, parent=None):
         super(DockedOption, self).__init__(parent)
@@ -44,17 +50,17 @@ class DockedOption(QtGui.QDockWidget):
     def DockMainOptions(self):
         """Function that creates the dockWidget, Graph Options for fitting one
         """
-        self.mainOptions = QtGui.QDockWidget("Main Options", self)
+        self.mainOptions = QDockWidget("Main Options", self)
         self.mainOptions.setFloating(False)
         self.mainOptions.setMaximumWidth(320)
         self.mainOptions.setMinimumWidth(320)
-        self.mainOptions.setAllowedAreas(QtCore.Qt.RightDockWidgetArea | QtCore.Qt.LeftDockWidgetArea)
+        self.mainOptions.setAllowedAreas(Qt.RightDockWidgetArea | Qt.LeftDockWidgetArea)
 
-        layout = QtGui.QFormLayout()
-        FileHLayout = QtGui.QHBoxLayout()
-        PVLayout = QtGui.QHBoxLayout()
-        BtnLayout = QtGui.QHBoxLayout()
-        self.dataDockedWidget = QtGui.QWidget()
+        layout = QFormLayout()
+        FileHLayout = QHBoxLayout()
+        PVLayout = QHBoxLayout()
+        BtnLayout = QHBoxLayout()
+        self.dataDockedWidget = QWidget()
 
         self.FileNameRdOnlyBox()
         self.BrowseButton()
@@ -84,7 +90,7 @@ class DockedOption(QtGui.QDockWidget):
         self.mainOptions.setWidget(self.dataDockedWidget)
 
         # Adding the docked widget to the main window
-        self.myMainWindow.addDockWidget(QtCore.Qt.RightDockWidgetArea, self.mainOptions)
+        self.myMainWindow.addDockWidget(Qt.RightDockWidgetArea, self.mainOptions)
 
     # -----------------------------------------------------------------------------------#
     def restoreMainOptions(self):
@@ -94,23 +100,23 @@ class DockedOption(QtGui.QDockWidget):
     def FileNameRdOnlyBox(self):
         """This method contains a QLineEdit and label that display the selected file
             next to the browse button"""
-        self.rdOnlyFileName = QtGui.QLineEdit()
+        self.rdOnlyFileName = QLineEdit()
         self.rdOnlyFileName.setReadOnly(True)
         self.rdOnlyFileName.setTextMargins(0, 0, 10, 0)
         self.rdOnlyFileName.setFixedWidth(125)
 
         #For the Gaussioan Fit
-        self.rdOnlyScanSelected = QtGui.QLineEdit()
+        self.rdOnlyScanSelected = QLineEdit()
         self.rdOnlyScanSelected.setReadOnly(True)
         self.rdOnlyScanSelected.setTextMargins(0, 0, 10, 0)
         self.rdOnlyScanSelected.setFixedWidth(250)
 
         # Label
-        self.fileNameLabel = QtGui.QLabel()
+        self.fileNameLabel = QLabel()
         self.fileNameLabel.setText("File Name: ")
 
         # PvValue label
-        self.pvLabel = QtGui.QLabel()
+        self.pvLabel = QLabel()
         self.pvLabel.setText("Scan: ")
 
     # ------------------------------------------------------------------------------------#
@@ -131,79 +137,129 @@ class DockedOption(QtGui.QDockWidget):
             response = self.msgApp("Open New Spec File", "Would you like to open a new spec file?")
             if response == "Y":
                 self.openDialog()
-                self.gausFitStat = False
-                self.LFitStat = False
 
     def openDialog(self):
         """This method allows the user to open the spec file """
         self.rdOnlyScanSelected.setText("")
         filters = "All files (*.*);;Python files (*.py)"
         selectedFilter = "All files (*.*);;Python files (*.py)"
-        self.fileName = QtGui.QFileDialog.getOpenFileName(self, "Open file for PVvalue #"
+        self.fileName, self.fileFilter = QFileDialog.getOpenFileName(self, "Open file for PVvalue #"
                                                           + str(self.specDataList.currentRow() + 1)
                                                           , filters, selectedFilter)
 
-        # Makes sure a file has been opened
+        if self.fileOpened == True:
+            self.mainOptions.close()
+            self.DockMainOptions()
+            self.rdOnlyFileName.setText(self.readSpec.specFileName)
+            self.rdOnlyFileName.setStatusTip(self.readSpec.specFileName)
+            specFile = SpecDataFile(self.readSpec.specFileName)
+            self.readSpec.loadScans(specFile.scans)
+            self.myMainWindow.LFit.setEnabled(False)
+
+        # Makes sure a file has been opened before changing attributes
         if os.path.isfile(self.fileName) == True:
+            if self.fileOpened == True:
+                self.specDataList.setCurrentRow(self.readSpec.currentRow)
+                self.onePeakStat = False
+                self.twoPeakStat = False
             self.gausFitStat = False
             self.LFitStat = False
             self.rdOnlyScanSelected.setStatusTip(self.fileName)
             self.rdOnlyScanSelected.setText(self.fileName)
             self.fileOpened = True
+            self.gausFit.continueGraphingEachFit = True
+
 
     # -----------------------------------------------------------------------------------#
     def PeakDialog(self):
         """Method that allows the user to choose which peak they are fitting"""
         peakList = ['One', 'Two']
-        text, ok = QtGui.QInputDialog.getItem(self, 'Peak Fit', 'Choose Peak: ', peakList)
+        text, ok = QInputDialog.getItem(self, 'Peak Fit', 'Choose Peak: ', peakList)
 
         if ok:
             return text
 
     # ------------------------------------------------------------------------------------#
     def msgApp(self, title, msg):
-        userInfo = QtGui.QMessageBox.question(self, title, msg, QtGui.QMessageBox.Yes | QtGui.QMessageBox.No)
+        userInfo = QMessageBox.question(self, title, msg, QMessageBox.Yes | QMessageBox.No)
 
-        if userInfo == QtGui.QMessageBox.Yes:
+        if userInfo == QMessageBox.Yes:
             return "Y"
-        if userInfo == QtGui.QMessageBox.No:
+        if userInfo == QMessageBox.No:
             return "N"
         self.close()
 
+    # -----------------------------------------------------------------------------------#
+    def resetxPlot(self):
+        self.mainOptions.close()
+        self.DockMainOptions()
+        self.gausFit.continueGraphingEachFit = True
+
+        self.readSpec.specFileOpened = False
+        self.readSpec.specFileName = None
+
+        self.fileName = None
+        self.onePeakStat = False
+        self.twoPeakStat = False
+        self.fileOpened = False
+        self.gausFitStat = False
+        self.LFitStat = False
+        self.myMainWindow.LFit.setEnabled(False)
+        index = len(self.myMainWindow.canvasArray)
+        i = 0
+        j = 0
+        while i < index:
+            self.myMainWindow.canvasArray.pop(j)
+            self.myMainWindow.figArray.pop(j)
+            gc.collect()
+            self.myMainWindow.tabWidget.removeTab(j)
+            i += 1
     # ------------------------------------------------------------------------------------#
     def fileInfo(self):
         """This method is used to get the rows and columns of the data. It also sets the
         array with the raw data, which is the TT"""
-        data = np.loadtxt(open(self.fileName))
+        try:
+            data = np.loadtxt(open(self.fileName))
 
-        nRow = data.shape[0]  # Gets the number of rows
-        nCol = data.shape[1]  # Gets the number of columns
-        x = 0
-        for f in range(nCol):
-            if (np.mean(data[:, f]) == 0):
-                break
-            else:
-                x += 1
-        nCol = x
+            nRow = data.shape[0]  # Gets the number of rows
+            nCol = data.shape[1]  # Gets the number of columns
+            x = 0
+            for f in range(nCol):
+                if (np.mean(data[:, f]) == 0):
+                    break
+                else:
+                    x += 1
+            nCol = x
 
-        self.TT = np.zeros((nRow, nCol))
+            self.TT = np.zeros((nRow, nCol))
 
-        for i in range(nCol):
-            self.TT[:, i] = data[:, i]
+            for i in range(nCol):
+                self.TT[:, i] = data[:, i]
 
-        return nRow, nCol
-
+            return nRow, nCol
+        except ValueError or TypeError:
+            QMessageBox.warning(self.myMainWindow,"Warning", "Please make sure you're opening the correct"
+                                                                   " file and it follows the appropriate format.")
+            self.mainOptions.close()
+            self.DockMainOptions()
+            self.rdOnlyFileName.setText(self.readSpec.specFileName)
+            self.rdOnlyFileName.setStatusTip(self.readSpec.specFileName)
+            specFile = SpecDataFile(self.readSpec.specFileName)
+            self.readSpec.loadScans(specFile.scans)
+            self.myMainWindow.LFit.setEnabled(False)
+            self.fileOpened = False
+            return 0, 0
     # ------------------------------------------------------------------------------------#
     def BrowseButton(self):
         """Function that creates a browse method, connects to the openFile() method"""
         # Button next to the FileNameRdOnly label and LineEdit
-        self.BrowseBtn = QtGui.QPushButton('Browse', self)
+        self.BrowseBtn = QPushButton('Browse', self)
         self.BrowseBtn.clicked.connect(self.readSpec.openSpecFile)
         self.BrowseBtn.setStatusTip("Browse and open an existing file")
 
     def GraphDataButton(self):
         """Function that creates a graph button, connects to the GraphData() method"""
-        self.GraphDataBtn = QtGui.QPushButton('Graph', self)
+        self.GraphDataBtn = QPushButton('Graph', self)
         self.GraphDataBtn.setStatusTip("Graphs the checked boxes")
         self.GraphDataBtn.clicked.connect(self.plottingFits)
 
@@ -211,23 +267,23 @@ class DockedOption(QtGui.QDockWidget):
     def SpecDataValueList(self):
         """This list displays the values/scans of the spec file
         """
-        self.specDataList = QtGui.QListWidget()
+        self.specDataList = QListWidget()
         self.specDataList.itemDoubleClicked.connect(self.readSpec.currentScan)
 
     # --------------------------------------------------------------------------------------------#
     def FileError(self):
         if self.fileName is "" or self.fileName is None:
-            QtGui.QMessageBox.warning(self, "Error - No File", "There is no data to graph."
+            QMessageBox.warning(self, "Error - No File", "There is no data to graph."
                                                                " Make sure a file has been open.")
             return True
         else:
             if os.path.isfile(self.fileName) == False:
-                QtGui.QMessageBox.warning(self, "Error - No File", "There is no data to graph."
+                QMessageBox.warning(self, "Error - No File", "There is no data to graph."
                                                                    " Make sure a file has been open.")
                 return True
             else:
                 if self.rdOnlyScanSelected.text() == "":
-                    QtGui.QMessageBox.warning(self, "Error", "Please select a PVvalue.")
+                    QMessageBox.warning(self, "Error", "Please select a PVvalue.")
                 else:
                     return False
 
@@ -236,128 +292,129 @@ class DockedOption(QtGui.QDockWidget):
         """This method initializes the tree withthe raw data
         """
         # Initialization of the main tree
-        self.graphingOptionsTree = QtGui.QTreeWidget()
-        self.graphingOptionsTree.setHeaderLabel(QtCore.QString("Graphing Options"))
+        self.graphingOptionsTree =QTreeWidget()
+        self.graphingOptionsTree.setHeaderLabel("Graphing Options")
 
         """Initialization of the top level Fits"""
         # Raw Data Top Branch
-        self.rawDataTopBranch = QtGui.QTreeWidgetItem(self.graphingOptionsTree)
+        self.rawDataTopBranch = QTreeWidgetItem()
         self.rawDataTopBranch.setText(0, "Raw Data")
-        self.rawDataTopBranch.setFlags(self.rawDataTopBranch.flags() | QtCore.Qt.ItemIsTristate | QtCore.Qt.ItemIsUserCheckable)
+        self.rawDataTopBranch.setFlags(self.rawDataTopBranch.flags() | Qt.ItemIsTristate | Qt.ItemIsUserCheckable)
 
         """Raw Data Children"""
         # Color Graph
-        self.colorGraphBranch = QtGui.QTreeWidgetItem(self.rawDataTopBranch)
+        self.colorGraphBranch = QTreeWidgetItem(self.rawDataTopBranch)
         self.colorGraphBranch.setText(0, "Color Graph")
-        self.colorGraphBranch.setFlags(self.colorGraphBranch.flags() | QtCore.Qt.ItemIsTristate | QtCore.Qt.ItemIsUserCheckable)
-        self.colorGraphBranch.setCheckState(0, QtCore.Qt.Unchecked)
+        self.colorGraphBranch.setFlags(self.colorGraphBranch.flags() | Qt.ItemIsTristate | Qt.ItemIsUserCheckable)
+        self.colorGraphBranch.setCheckState(0, Qt.Unchecked)
 
         # Line Graph in L-Constant
-        self.lineGraphLBranch = QtGui.QTreeWidgetItem(self.rawDataTopBranch)
+        self.lineGraphLBranch = QTreeWidgetItem(self.rawDataTopBranch)
         self.lineGraphLBranch.setText(0, "Line Graph (L-Constant)")
-        self.lineGraphLBranch.setFlags(self.lineGraphLBranch.flags() | QtCore.Qt.ItemIsTristate | QtCore.Qt.ItemIsUserCheckable)
-        self.lineGraphLBranch.setCheckState(0, QtCore.Qt.Unchecked)
+        self.lineGraphLBranch.setFlags(self.lineGraphLBranch.flags() | Qt.ItemIsTristate | Qt.ItemIsUserCheckable)
+        self.lineGraphLBranch.setCheckState(0, Qt.Unchecked)
 
         # Line Graph in L-Constant
-        self.lineGraphBinsBranch = QtGui.QTreeWidgetItem(self.rawDataTopBranch)
+        self.lineGraphBinsBranch =QTreeWidgetItem(self.rawDataTopBranch)
         self.lineGraphBinsBranch.setText(0, "Line Graph (Bins)")
-        self.lineGraphBinsBranch.setFlags(self.lineGraphBinsBranch.flags() | QtCore.Qt.ItemIsTristate | QtCore.Qt.ItemIsUserCheckable)
-        self.lineGraphBinsBranch.setCheckState(0, QtCore.Qt.Unchecked)
+        self.lineGraphBinsBranch.setFlags(self.lineGraphBinsBranch.flags() | Qt.ItemIsTristate | Qt.ItemIsUserCheckable)
+        self.lineGraphBinsBranch.setCheckState(0, Qt.Unchecked)
 
+        self.graphingOptionsTree.addTopLevelItem(self.rawDataTopBranch)
     # ---------------------------------------------------------------------------------------------------------------#
     def GraphingGaussianOptionsTree(self):
         # Gaussian Fit Top Branch
-        self.gaussianFitTopBranch = QtGui.QTreeWidgetItem()
+        self.gaussianFitTopBranch = QTreeWidgetItem()
         self.gaussianFitTopBranch.setText(0, "Gaussian Fit")
-        self.gaussianFitTopBranch.setFlags(self.gaussianFitTopBranch.flags() | QtCore.Qt.ItemIsTristate | QtCore.Qt.ItemIsUserCheckable)
+        self.gaussianFitTopBranch.setFlags(self.gaussianFitTopBranch.flags() | Qt.ItemIsTristate | Qt.ItemIsUserCheckable)
 
         if self.twoPeakStat == True:
             """Gaussian Fit Children"""
             # Peak One
-            self.peakOneBranch = QtGui.QTreeWidgetItem(self.gaussianFitTopBranch)
+            self.peakOneBranch = QTreeWidgetItem(self.gaussianFitTopBranch)
             self.peakOneBranch.setText(0, "Peak #1")
-            self.peakOneBranch.setFlags(self.peakOneBranch.flags() | QtCore.Qt.ItemIsTristate | QtCore.Qt.ItemIsUserCheckable)
+            self.peakOneBranch.setFlags(self.peakOneBranch.flags() | Qt.ItemIsTristate | Qt.ItemIsUserCheckable)
 
             # Peak Two
-            self.peakTwoBranch = QtGui.QTreeWidgetItem(self.gaussianFitTopBranch)
+            self.peakTwoBranch = QTreeWidgetItem(self.gaussianFitTopBranch)
             self.peakTwoBranch.setText(0, "Peak #2")
-            self.peakTwoBranch.setFlags(self.peakTwoBranch.flags() | QtCore.Qt.ItemIsTristate | QtCore.Qt.ItemIsUserCheckable)
+            self.peakTwoBranch.setFlags(self.peakTwoBranch.flags() | Qt.ItemIsTristate | Qt.ItemIsUserCheckable)
 
             """Peak One Tree Branch Children"""
             # Amplitude Peak One
-            self.amplitudePeakOne = QtGui.QTreeWidgetItem(self.peakOneBranch)
-            self.amplitudePeakOne.setFlags(self.amplitudePeakOne.flags() | QtCore.Qt.ItemIsUserCheckable | QtCore.Qt.ItemIsTristate)
+            self.amplitudePeakOne = QTreeWidgetItem(self.peakOneBranch)
+            self.amplitudePeakOne.setFlags(self.amplitudePeakOne.flags() | Qt.ItemIsUserCheckable | Qt.ItemIsTristate)
             self.amplitudePeakOne.setText(0, "Amplitude")
-            self.amplitudePeakOne.setCheckState(0, QtCore.Qt.Unchecked)
+            self.amplitudePeakOne.setCheckState(0, Qt.Unchecked)
 
             # Position Peak One
-            self.positionPeakOne = QtGui.QTreeWidgetItem(self.peakOneBranch)
-            self.positionPeakOne.setFlags(self.positionPeakOne.flags() | QtCore.Qt.ItemIsUserCheckable | QtCore.Qt.ItemIsTristate)
+            self.positionPeakOne = QTreeWidgetItem(self.peakOneBranch)
+            self.positionPeakOne.setFlags(self.positionPeakOne.flags() | Qt.ItemIsUserCheckable | Qt.ItemIsTristate)
             self.positionPeakOne.setText(0, "Position")
-            self.positionPeakOne.setCheckState(0, QtCore.Qt.Unchecked)
+            self.positionPeakOne.setCheckState(0, Qt.Unchecked)
 
             # Width Peak One
-            self.widthPeakOne = QtGui.QTreeWidgetItem(self.peakOneBranch)
-            self.widthPeakOne.setFlags(self.widthPeakOne.flags() | QtCore.Qt.ItemIsUserCheckable | QtCore.Qt.ItemIsTristate)
+            self.widthPeakOne = QTreeWidgetItem(self.peakOneBranch)
+            self.widthPeakOne.setFlags(self.widthPeakOne.flags() | Qt.ItemIsUserCheckable | Qt.ItemIsTristate)
             self.widthPeakOne.setText(0, "Width")
-            self.widthPeakOne.setCheckState(0, QtCore.Qt.Unchecked)
+            self.widthPeakOne.setCheckState(0, Qt.Unchecked)
 
             # Amplitude x Width Peak One
-            self.ampXWidPeakOne = QtGui.QTreeWidgetItem(self.peakOneBranch)
-            self.ampXWidPeakOne.setFlags(self.positionPeakOne.flags() | QtCore.Qt.ItemIsUserCheckable | QtCore.Qt.ItemIsTristate)
+            self.ampXWidPeakOne = QTreeWidgetItem(self.peakOneBranch)
+            self.ampXWidPeakOne.setFlags(self.positionPeakOne.flags() | Qt.ItemIsUserCheckable | Qt.ItemIsTristate)
             self.ampXWidPeakOne.setText(0, "Amplitude x Width")
-            self.ampXWidPeakOne.setCheckState(0, QtCore.Qt.Unchecked)
+            self.ampXWidPeakOne.setCheckState(0, Qt.Unchecked)
 
             """Peak Two Tree Branch Children"""
             # Amplitude Peak Two
-            self.amplitudePeakTwo = QtGui.QTreeWidgetItem(self.peakTwoBranch)
-            self.amplitudePeakTwo.setFlags(self.amplitudePeakTwo.flags() | QtCore.Qt.ItemIsUserCheckable | QtCore.Qt.ItemIsTristate)
+            self.amplitudePeakTwo = QTreeWidgetItem(self.peakTwoBranch)
+            self.amplitudePeakTwo.setFlags(self.amplitudePeakTwo.flags() | Qt.ItemIsUserCheckable | Qt.ItemIsTristate)
             self.amplitudePeakTwo.setText(0, "Amplitude")
-            self.amplitudePeakTwo.setCheckState(0, QtCore.Qt.Unchecked)
+            self.amplitudePeakTwo.setCheckState(0, Qt.Unchecked)
 
             # Position Peak Two
-            self.positionPeakTwo = QtGui.QTreeWidgetItem(self.peakTwoBranch)
-            self.positionPeakTwo.setFlags(self.positionPeakTwo.flags() | QtCore.Qt.ItemIsUserCheckable | QtCore.Qt.ItemIsTristate)
+            self.positionPeakTwo = QTreeWidgetItem(self.peakTwoBranch)
+            self.positionPeakTwo.setFlags(self.positionPeakTwo.flags() | Qt.ItemIsUserCheckable | Qt.ItemIsTristate)
             self.positionPeakTwo.setText(0, "Position")
-            self.positionPeakTwo.setCheckState(0, QtCore.Qt.Unchecked)
+            self.positionPeakTwo.setCheckState(0, Qt.Unchecked)
 
             # Width Peak Two
-            self.widthPeakTwo = QtGui.QTreeWidgetItem(self.peakTwoBranch)
-            self.widthPeakTwo.setFlags(self.widthPeakTwo.flags() | QtCore.Qt.ItemIsUserCheckable | QtCore.Qt.ItemIsTristate)
+            self.widthPeakTwo = QTreeWidgetItem(self.peakTwoBranch)
+            self.widthPeakTwo.setFlags(self.widthPeakTwo.flags() | Qt.ItemIsUserCheckable | Qt.ItemIsTristate)
             self.widthPeakTwo.setText(0, "Width")
-            self.widthPeakTwo.setCheckState(0, QtCore.Qt.Unchecked)
+            self.widthPeakTwo.setCheckState(0, Qt.Unchecked)
 
             # Amplitude x Width Peak Two
-            self.ampXWidPeakTwo = QtGui.QTreeWidgetItem(self.peakTwoBranch)
-            self.ampXWidPeakTwo.setFlags(self.ampXWidPeakTwo.flags() | QtCore.Qt.ItemIsUserCheckable | QtCore.Qt.ItemIsTristate)
+            self.ampXWidPeakTwo = QTreeWidgetItem(self.peakTwoBranch)
+            self.ampXWidPeakTwo.setFlags(self.ampXWidPeakTwo.flags() | Qt.ItemIsUserCheckable | Qt.ItemIsTristate)
             self.ampXWidPeakTwo.setText(0, "Amplitude x Width")
-            self.ampXWidPeakTwo.setCheckState(0, QtCore.Qt.Unchecked)
+            self.ampXWidPeakTwo.setCheckState(0, Qt.Unchecked)
 
         elif self.onePeakStat == True:
             """Children of Gaussian Branch"""
             # Amplitude
-            self.onePeakAmplitude = QtGui.QTreeWidgetItem(self.gaussianFitTopBranch)
-            self.onePeakAmplitude.setFlags(self.onePeakAmplitude.flags() | QtCore.Qt.ItemIsUserCheckable | QtCore.Qt.ItemIsTristate)
+            self.onePeakAmplitude = QTreeWidgetItem(self.gaussianFitTopBranch)
+            self.onePeakAmplitude.setFlags(self.onePeakAmplitude.flags() | Qt.ItemIsUserCheckable | Qt.ItemIsTristate)
             self.onePeakAmplitude.setText(0, "Amplitude")
-            self.onePeakAmplitude.setCheckState(0, QtCore.Qt.Unchecked)
+            self.onePeakAmplitude.setCheckState(0, Qt.Unchecked)
 
             # Position
-            self.onePeakPosition = QtGui.QTreeWidgetItem(self.gaussianFitTopBranch)
-            self.onePeakPosition.setFlags(self.onePeakPosition.flags() | QtCore.Qt.ItemIsUserCheckable | QtCore.Qt.ItemIsTristate)
+            self.onePeakPosition = QTreeWidgetItem(self.gaussianFitTopBranch)
+            self.onePeakPosition.setFlags(self.onePeakPosition.flags() | Qt.ItemIsUserCheckable | Qt.ItemIsTristate)
             self.onePeakPosition.setText(0, "Position")
-            self.onePeakPosition.setCheckState(0, QtCore.Qt.Unchecked)
+            self.onePeakPosition.setCheckState(0, Qt.Unchecked)
 
             # Width Peak One
-            self.onePeakWidth = QtGui.QTreeWidgetItem(self.gaussianFitTopBranch)
-            self.onePeakWidth.setFlags(self.onePeakWidth.flags() | QtCore.Qt.ItemIsUserCheckable | QtCore.Qt.ItemIsTristate)
+            self.onePeakWidth = QTreeWidgetItem(self.gaussianFitTopBranch)
+            self.onePeakWidth.setFlags(self.onePeakWidth.flags() | Qt.ItemIsUserCheckable | Qt.ItemIsTristate)
             self.onePeakWidth.setText(0, "Width")
-            self.onePeakWidth.setCheckState(0, QtCore.Qt.Unchecked)
+            self.onePeakWidth.setCheckState(0, Qt.Unchecked)
 
             # Amplitude x Width Peak One
-            self.onePeakAmpxWid = QtGui.QTreeWidgetItem(self.gaussianFitTopBranch)
-            self.onePeakAmpxWid.setFlags(self.onePeakAmpxWid.flags() | QtCore.Qt.ItemIsUserCheckable | QtCore.Qt.ItemIsTristate)
+            self.onePeakAmpxWid = QTreeWidgetItem(self.gaussianFitTopBranch)
+            self.onePeakAmpxWid.setFlags(self.onePeakAmpxWid.flags() | Qt.ItemIsUserCheckable | Qt.ItemIsTristate)
             self.onePeakAmpxWid.setText(0, "Amplitude x Width")
-            self.onePeakAmpxWid.setCheckState(0, QtCore.Qt.Unchecked)
+            self.onePeakAmpxWid.setCheckState(0, Qt.Unchecked)
 
         #Adding the top branch to the graphing options tree
         self.graphingOptionsTree.addTopLevelItem(self.gaussianFitTopBranch)
@@ -367,57 +424,57 @@ class DockedOption(QtGui.QDockWidget):
     def GraphingLOptionsTree(self):
         if self.LFitStat == False:
             # L Fit Top Branch
-            self.LFitTopBranch = QtGui.QTreeWidgetItem()
+            self.LFitTopBranch = QTreeWidgetItem()
             self.LFitTopBranch.setText(0, "L Fit")
-            self.LFitTopBranch.setFlags(self.LFitTopBranch.flags() | QtCore.Qt.ItemIsTristate | QtCore.Qt.ItemIsUserCheckable)
+            self.LFitTopBranch.setFlags(self.LFitTopBranch.flags() | Qt.ItemIsTristate | Qt.ItemIsUserCheckable)
             """L FitData Children, depending on the peak"""
             if self.onePeakStat == True:
                 # RLU Graph
-                self.onePeakRLU = QtGui.QTreeWidgetItem(self.LFitTopBranch)
+                self.onePeakRLU = QTreeWidgetItem(self.LFitTopBranch)
                 self.onePeakRLU.setText(0, "RLU")
-                self.onePeakRLU.setFlags(self.onePeakRLU.flags() | QtCore.Qt.ItemIsTristate | QtCore.Qt.ItemIsUserCheckable)
-                self.onePeakRLU.setCheckState(0, QtCore.Qt.Unchecked)
+                self.onePeakRLU.setFlags(self.onePeakRLU.flags() | Qt.ItemIsTristate | Qt.ItemIsUserCheckable)
+                self.onePeakRLU.setCheckState(0, Qt.Unchecked)
 
                 # %Change Graph
-                self.onePeakRLUPrcChange = QtGui.QTreeWidgetItem(self.LFitTopBranch)
+                self.onePeakRLUPrcChange = QTreeWidgetItem(self.LFitTopBranch)
                 self.onePeakRLUPrcChange.setText(0, "RLU %-Change")
-                self.onePeakRLUPrcChange.setFlags(self.onePeakRLUPrcChange.flags() | QtCore.Qt.ItemIsTristate | QtCore.Qt.ItemIsUserCheckable)
-                self.onePeakRLUPrcChange.setCheckState(0, QtCore.Qt.Unchecked)
+                self.onePeakRLUPrcChange.setFlags(self.onePeakRLUPrcChange.flags() | Qt.ItemIsTristate | Qt.ItemIsUserCheckable)
+                self.onePeakRLUPrcChange.setCheckState(0, Qt.Unchecked)
 
             elif self.twoPeakStat == True:
                 # Peak One
-                peakOneBranch = QtGui.QTreeWidgetItem(self.LFitTopBranch)
+                peakOneBranch = QTreeWidgetItem(self.LFitTopBranch)
                 peakOneBranch.setText(0, "Peak #1")
-                peakOneBranch.setFlags(peakOneBranch.flags() | QtCore.Qt.ItemIsTristate | QtCore.Qt.ItemIsUserCheckable)
+                peakOneBranch.setFlags(peakOneBranch.flags() | Qt.ItemIsTristate | Qt.ItemIsUserCheckable)
 
                 # Peak Two
-                peakTwoBranch = QtGui.QTreeWidgetItem(self.LFitTopBranch)
+                peakTwoBranch = QTreeWidgetItem(self.LFitTopBranch)
                 peakTwoBranch.setText(0, "Peak #2")
-                peakTwoBranch.setFlags(peakTwoBranch.flags() | QtCore.Qt.ItemIsTristate | QtCore.Qt.ItemIsUserCheckable)
+                peakTwoBranch.setFlags(peakTwoBranch.flags() | Qt.ItemIsTristate | Qt.ItemIsUserCheckable)
 
                 # RLU Graph Peak one
-                self.RLUPeakOne = QtGui.QTreeWidgetItem(peakOneBranch)
+                self.RLUPeakOne = QTreeWidgetItem(peakOneBranch)
                 self.RLUPeakOne.setText(0, "RLU")
-                self.RLUPeakOne.setFlags(self.RLUPeakOne.flags() | QtCore.Qt.ItemIsTristate | QtCore.Qt.ItemIsUserCheckable)
-                self.RLUPeakOne.setCheckState(0, QtCore.Qt.Unchecked)
+                self.RLUPeakOne.setFlags(self.RLUPeakOne.flags() | Qt.ItemIsTristate | Qt.ItemIsUserCheckable)
+                self.RLUPeakOne.setCheckState(0, Qt.Unchecked)
 
                 # %Change Graph Peak One
-                self.RLUPrcChangePeakOne = QtGui.QTreeWidgetItem(peakOneBranch)
+                self.RLUPrcChangePeakOne = QTreeWidgetItem(peakOneBranch)
                 self.RLUPrcChangePeakOne.setText(0, "RLU %-Change")
-                self.RLUPrcChangePeakOne.setFlags(self.RLUPrcChangePeakOne.flags() | QtCore.Qt.ItemIsTristate | QtCore.Qt.ItemIsUserCheckable)
-                self.RLUPrcChangePeakOne.setCheckState(0, QtCore.Qt.Unchecked)
+                self.RLUPrcChangePeakOne.setFlags(self.RLUPrcChangePeakOne.flags() | Qt.ItemIsTristate | Qt.ItemIsUserCheckable)
+                self.RLUPrcChangePeakOne.setCheckState(0, Qt.Unchecked)
 
                 # RLU Graph Peak two
-                self.RLUPeakTwo = QtGui.QTreeWidgetItem(peakTwoBranch)
+                self.RLUPeakTwo = QTreeWidgetItem(peakTwoBranch)
                 self.RLUPeakTwo.setText(0, "RLU")
-                self.RLUPeakTwo.setFlags(self.RLUPeakTwo.flags() | QtCore.Qt.ItemIsTristate | QtCore.Qt.ItemIsUserCheckable)
-                self.RLUPeakTwo.setCheckState(0, QtCore.Qt.Unchecked)
+                self.RLUPeakTwo.setFlags(self.RLUPeakTwo.flags() | Qt.ItemIsTristate | Qt.ItemIsUserCheckable)
+                self.RLUPeakTwo.setCheckState(0, Qt.Unchecked)
 
                 # %Change Graph Peak two
-                self.RLUPrcChangePeakTwo = QtGui.QTreeWidgetItem(peakTwoBranch)
+                self.RLUPrcChangePeakTwo = QTreeWidgetItem(peakTwoBranch)
                 self.RLUPrcChangePeakTwo.setText(0, "RLU %-Change")
-                self.RLUPrcChangePeakTwo.setFlags(self.RLUPrcChangePeakTwo.flags() | QtCore.Qt.ItemIsTristate | QtCore.Qt.ItemIsUserCheckable)
-                self.RLUPrcChangePeakTwo.setCheckState(0, QtCore.Qt.Unchecked)
+                self.RLUPrcChangePeakTwo.setFlags(self.RLUPrcChangePeakTwo.flags() | Qt.ItemIsTristate | Qt.ItemIsUserCheckable)
+                self.RLUPrcChangePeakTwo.setCheckState(0, Qt.Unchecked)
 
             # Adding the top branch to the graphing options tree
             self.graphingOptionsTree.addTopLevelItem(self.LFitTopBranch)
@@ -447,25 +504,28 @@ class DockedOption(QtGui.QDockWidget):
 
     # -------------------------------------------------------------------------------------------------------#
     def graphingOnePeak(self):
-        if self.onePeakAmplitude.checkState(0) == 2:
-            self.gausFit.graphOnePeakAmplitude()
-            self.onePeakAmplitude.setCheckState(0, 0)
-        if self.onePeakPosition.checkState(0) == 2:
-            self.gausFit.graphOnePeakPosition()
-            self.onePeakPosition.setCheckState(0, 0)
-        if self.onePeakWidth.checkState(0) == 2:
-            self.gausFit.graphOnePeakWidth()
-            self.onePeakWidth.setCheckState(0, 0)
-        if self.onePeakAmpxWid.checkState(0) == 2:
-            self.gausFit.graphOnePeakAmplitudeXWidth()
-            self.onePeakAmpxWid.setCheckState(0, 0)
-        if self.LFitStat == True:
-            if self.onePeakRLU.checkState(0) == 2:
-                self.gausFit.graphOnePeakLFitPos()
-                self.onePeakRLU.setCheckState(0, 0)
-            if self.onePeakRLUPrcChange.checkState(0) == 2:
-                self.gausFit.percentageChangeLConstantOnePeak()
-                self.onePeakRLUPrcChange.setCheckState(0, 0)
+        try:
+            if self.onePeakAmplitude.checkState(0) == 2:
+                self.gausFit.graphOnePeakAmplitude()
+                self.onePeakAmplitude.setCheckState(0, 0)
+            if self.onePeakPosition.checkState(0) == 2:
+                self.gausFit.graphOnePeakPosition()
+                self.onePeakPosition.setCheckState(0, 0)
+            if self.onePeakWidth.checkState(0) == 2:
+                self.gausFit.graphOnePeakWidth()
+                self.onePeakWidth.setCheckState(0, 0)
+            if self.onePeakAmpxWid.checkState(0) == 2:
+                self.gausFit.graphOnePeakAmplitudeXWidth()
+                self.onePeakAmpxWid.setCheckState(0, 0)
+            if self.LFitStat == True:
+                if self.onePeakRLU.checkState(0) == 2:
+                    self.gausFit.graphOnePeakLFitPos()
+                    self.onePeakRLU.setCheckState(0, 0)
+                if self.onePeakRLUPrcChange.checkState(0) == 2:
+                    self.gausFit.percentageChangeLConstantOnePeak()
+                    self.onePeakRLUPrcChange.setCheckState(0, 0)
+        except:
+            pass
 
     # -------------------------------------------------------------------------------------------------------#
     def graphingTwoPeak(self):
@@ -509,6 +569,24 @@ class DockedOption(QtGui.QDockWidget):
             if self.RLUPrcChangePeakTwo.checkState(0) == 2:
                 self.gausFit.percentageChangeLConstantPeakTwo()
                 self.RLUPrcChangePeakTwo.setCheckState(0, 0)
+
+    # ----------------------------------------------------------------------------------------------------------#
+    def resetingComponents(self):
+        """This method will be either erased or change. Here are the variables used in the program that need to be
+        reset.
+        """
+        self.gausFit.continueGraphingEachFit = True
+
+        self.readSpec.specFileOpened = False
+        self.readSpec.specFileName = None
+
+        self.fileName = None
+        self.onePeakStat = False
+        self.twoPeakStat = False
+        self.fileOpened = False
+        self.gausFitStat = False
+        self.LFitStat = False
+
 
 
 
