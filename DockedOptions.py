@@ -479,6 +479,7 @@ class DockedOption(QDockWidget):
             # Adding the top branch to the graphing options tree
             self.graphingOptionsTree.addTopLevelItem(self.LFitTopBranch)
             self.gausFit.doLFit()
+            self.gausFit.doLFitPercentChange()
             self.LFitStat = True
 
     # -------------------------------------------------------------------------------------------------------#

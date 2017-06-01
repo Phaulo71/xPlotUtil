@@ -34,6 +34,9 @@ class GaussianFitting:
     def __init__ (self, parent=None):
         self.TwoPkGausFitData = []
         self.OnePkFitData = []
+        self.LPosPrcChangeData = []
+        self.LPos1PrcChangeData = []
+        self.LPos2PrcChangeData = []
         self.readSpec = parent
         self.dockedOpt = self.readSpec.dockedOpt
         self.myMainWindow = self.dockedOpt.myMainWindow
@@ -160,17 +163,17 @@ class GaussianFitting:
 
 
     def OnePkFitting(self, xx, yy):
-        try:
-            mean = sum(xx * yy) / sum(yy)  # note this correction
-            sig = np.sqrt(sum(yy * (xx - mean) ** 2)) / sqrt(sum(yy))
-            bg0 = (yy[max(xx)] + yy[0]) / 2  # min value of yy
-            popt, pcov = curve_fit(self.gaus1, xx, yy, p0=[self.onePeakAmp, self.onePeakPos, self.onePeakWid, bg0])
-            perr = np.sqrt(np.diag(pcov))
-            self.graphEachFitRawData(xx, yy, popt, 1)
-            return popt, perr
+       # try:
+        mean = sum(xx * yy) / sum(yy)  # note this correction
+        sig = np.sqrt(sum(yy * (xx - mean) ** 2)) / sqrt(sum(yy))
+        bg0 = (yy[max(xx)] + yy[0]) / 2  # min value of yy
+        popt, pcov = curve_fit(self.gaus1, xx, yy, p0=[self.onePeakAmp, self.onePeakPos, self.onePeakWid, bg0])
+        perr = np.sqrt(np.diag(pcov))
+        self.graphEachFitRawData(xx, yy, popt, 1)
+        return popt, perr
 
-        except TypeError and RuntimeError:
-            print("Please make sure the fitted data is correct")
+        # xcept TypeError and RuntimeError:
+         #   print("Please make sure the fitted data is correct")
 
     def gaus1(self, x, a, x0, sigma, b):
         return a * exp(-(x - x0) ** 2 / (2 * sigma ** 2)) + b
@@ -565,13 +568,13 @@ class GaussianFitting:
         nRow, nCol = self.dockedOpt.fileInfo()
 
         if  self.dockedOpt.onePeakStat == True :
-            self.LPosData = []
+            self.LPosData = []  # L Constant for One Peak
             for i in range(nCol):
                 self.LPosData.append(self.PositionLFit(self.OnePkFitData[i, 2], nRow))
 
         elif self.dockedOpt.twoPeakStat == True:
-            self.LPos1Data = []
-            self.LPos2Data = []
+            self.LPos1Data = []  # L Constant for Two Peak [#1]
+            self.LPos2Data = []  # L Constant for Two Peak [#2]
             # Position 1
             for i in range(nCol):
               self.LPos1Data.append(self.PositionLFit(self.TwoPkGausFitData[i, 4], nCol))
@@ -622,20 +625,36 @@ class GaussianFitting:
 
         self.GraphUtilGaussianFitGraphs(canvas, fig, name, x, y, None, xLabel, yLabel, 'L')
 
+    # -------------------------------------------------------------------------------------------------------------#
+    def doLFitPercentChange(self):
+        """This function
+        """
+        self.LPosPrcChangeData = []
+
+        if self.dockedOpt.onePeakStat == True:
+            for i in range(0, len(self.LPosData)):
+                pctChangeData = ((self.LPosData[i] - self.LPosData[0]) / self.LPosData[0]) * 100
+                self.LPosPrcChangeData.append(pctChangeData)
+
+        elif self.dockedOpt.twoPeakStat == True:
+            self.LPos1PrcChangeData = []
+            self.LPos2PrcChangeData = []
+            for i in range(0, len(self.LPos1Data)):
+                pctChangeData = ((self.LPos1Data[i] - self.LPos1Data[0]) / self.LPos1Data[0]) * 100
+                self.LPos1PrcChangeData.append(pctChangeData)
+
+            for i in range(0, len(self.LPos2Data)):
+                pctChangeData = ((self.LPos2Data[i] - self.LPos2Data[0]) / self.LPos2Data[0]) * 100
+                self.LPos2PrcChangeData.append(pctChangeData)
     # -----------------------------------------------------------------------------------------------#
     def percentageChangeLConstantOnePeak(self):
         """This method get the percentage change of the L Constant and graphs it (Try out)"""
-        LDataPercentChange = []
-
-        for i in range(0, len(self.LPosData)):
-            pctChangeData = ((self.LPosData[i] - self.LPosData[0])/self.LPosData[0]) * 100
-            LDataPercentChange.append(pctChangeData)
 
         fig = Figure((5.0, 4.0), dpi=100)
         canvas = FigureCanvas(fig)
 
         x = self.getVoltage()
-        y = LDataPercentChange
+        y = self.LPosPrcChangeData
         xLabel = 'Voltage'
         yLabel = '%-Change'
         name = 'L Constant %-Change'
@@ -645,17 +664,11 @@ class GaussianFitting:
     # -----------------------------------------------------------------------------------------------#
     def percentageChangeLConstantPeakOne(self):
         """This method get the percentage change of the L Constant and graphs it (Try out)"""
-        LDataPercentChange = []
-
-        for i in range(0, len(self.LPos1Data)):
-            pctChangeData = ((self.LPos1Data[i] - self.LPos1Data[0]) / self.LPos1Data[0]) * 100
-            LDataPercentChange.append(pctChangeData)
-
         fig = Figure((5.0, 4.0), dpi=100)
         canvas = FigureCanvas(fig)
 
         x = self.getVoltage()
-        y = LDataPercentChange
+        y = self.LPos1PrcChangeData
         xLabel = 'Voltage'
         yLabel = '%-Change'
         name = 'L Constant %-Change'
@@ -665,18 +678,11 @@ class GaussianFitting:
     # -----------------------------------------------------------------------------------------------#
     def percentageChangeLConstantPeakTwo(self):
         """This method get the percentage change of the L Constant and graphs it (Try out)"""
-        LDataPercentChange = []
-
-        for i in range(0, len(self.LPos2Data)):
-            pctChangeData = ((self.LPos2Data[i] - self.LPos2Data[0]) / self.LPos2Data[0]) * 100
-            LDataPercentChange.append(pctChangeData)
-
-        """Try out for the percentage change of one peak"""
         fig = Figure((5.0, 4.0), dpi=100)
         canvas = FigureCanvas(fig)
 
         x = self.getVoltage()
-        y = LDataPercentChange
+        y = self.LPos2PrcChangeData
         xLabel = 'Voltage'
         yLabel = '%-Change'
         name = 'L Constant %-Change'

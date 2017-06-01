@@ -82,7 +82,8 @@ class ReadSpec:
         try:
             filters = "Spec files (*.spec);;Python files (*.py)"
             selectedFilter = "Spec files (*.spec);;Python files (*.py)"
-            self.specFileName, self.specFileFilter = QFileDialog.getOpenFileName(self.myMainWindow, "Open Spec File", filters, selectedFilter)
+            self.specFileName, self.specFileFilter = QFileDialog.getOpenFileName(self.myMainWindow, "Open Spec File",
+                                                                                 None, selectedFilter)
             self.dockedOpt.mainOptions.close()
             self.dockedOpt.DockMainOptions()
             self.myMainWindow.LFit.setEnabled(False)

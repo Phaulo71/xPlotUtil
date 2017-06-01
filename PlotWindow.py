@@ -283,26 +283,24 @@ class MainWindow (QMainWindow):
         self.reportBtn.setStatusTip("Creates a report of the chosen data.")
         self.reportBtn.clicked.connect(self.CreateReport)
 
-    # -------------------------------------------------------------------------------------------------------#
     def CancelReportButton(self):
         """This button cancels the creation of a report"""
         self.cancelReportBtn = QPushButton('Cancel', self)
         self.cancelReportBtn.setStatusTip("Cancels the creation of the report.")
         self.cancelReportBtn.clicked.connect(self.reportDialog.close)
 
-    # ------------------------------------------------------------------------------------------------------#
     def CreateReport(self):
-        self.reportDialog.close()
-        self.ReportSaveDialog()
-        if self.reportFile != "":
-            self.WrittingReport()
+        if self.reportCbGausFit.isChecked() or self.reportCbLFit.isChecked():
+            self.reportDialog.close()
+            self.ReportSaveDialog()
+            if self.reportFile != "":
+                self.WritingReport()
 
-    # ------------------------------------------------------------------------------------------------------#
     def ReportSaveDialog(self):
         filters = "All files (*.*);;Text files (*txt);;Python files (*.py)"
         selectedFilters = "Text files (*txt);;Python files (*.py)"
         self.reportFile, self.reportFileFilter = QFileDialog.getSaveFileName(self, "Save Report", "", selectedFilters)
-    # ------------------------------------------------------------------------------------------------------#
+
     def ReportDialog(self):
         self.reportDialog = QDialog(self)
         vBox = QVBoxLayout()
@@ -323,7 +321,7 @@ class MainWindow (QMainWindow):
         self.reportDialog.setLayout(vBox)
         self.reportDialog.exec_()
 
-    # -----------------------------------------------------------------------------------------#
+    # -----------------------------------------------------------------------------------------------------------------#
     def ReportCheckBox(self):
         """This function contains a group box with check boxes"""
         self.reportGroupBx = QGroupBox("Select the data")
@@ -344,7 +342,7 @@ class MainWindow (QMainWindow):
 
         self.reportGroupBx.setLayout(vbox)
 
-    def WrittingReport(self):
+    def WritingReport(self):
         """This method writes the data to the report file, calling on the appropriate methods.
         """
         _, nCol = self.dockedOpt.fileInfo()
@@ -363,23 +361,24 @@ class MainWindow (QMainWindow):
 
         if self.reportCbLFit.isChecked():
             if self.dockedOpt.onePeakStat == True:
-                header += "L "
+                header += "L L% "
                 # Reshapes the array so that it can be append
                 L = np.reshape(self.gausFit.LPosData, (len(self.gausFit.LPosData), 1))  # Enables array to be appended
-                reportData = np.concatenate((reportData, L), axis=1)
+                LPrc = np.reshape(self.gausFit.LPosPrcChangeData, (len(self.gausFit.LPosPrcChangeData), 1))
+                reportData = np.concatenate((reportData, L, LPrc), axis=1)
             if self.dockedOpt.twoPeakStat == True:
-                header += "L1 L2 "
+                header += "L1 L2 L1% L2% "
                 L1 = np.reshape(self.gausFit.LPos1Data, (len(self.gausFit.LPos1Data), 1))  # Reshapes to append
                 L2 = np.reshape(self.gausFit.LPos2Data, (len(self.gausFit.LPos2Data), 1))  # Reshapes to append
-                print len(L1)
-                print len(L2)
-                print len(reportData)
+                L1Prc = np.reshape(self.gausFit.LPos1PrcChangeData, (len(self.gausFit.LPos1PrcChangeData), 1))
+                L2Prc = np.reshape(self.gausFit.LPos2PrcChangeData, (len(self.gausFit.LPos2PrcChangeData), 1))
 
-                reportData = np.concatenate((reportData, L1, L2), axis=1)
+                reportData = np.concatenate((reportData, L1, L2, L1Prc, L2Prc), axis=1)
 
         # Writes to sheet
         np.savetxt(self.reportFile, reportData, fmt=str('%f'), header=header, comments=comment)
 
+    # -----------------------------------------------------------------------------------------------------------------#
 
 def main():
     """Main method"""
