@@ -3,6 +3,9 @@
 """
 Copyright (c) UChicago Argonne, LLC. All rights reserved.
 See LICENSE file.
+
+#C In some methods LFit or L refer to the Lattice Constant not RLU
+
 """
 
 # --------------------------------------------------------------------------------------#
@@ -500,9 +503,9 @@ class GaussianFitting:
 
         self.dialogGausFit.close()
         self.TwoPeakFitting()
-        self.myMainWindow.LFit.setEnabled(True)
+        self.myMainWindow.LatticeFitAction.setEnabled(True)
 
-        # Marks that the data has been fitted for one peakm
+        # Marks that the data has been fitted for one peak
         self.dockedOpt.twoPeakStat = True
         self.dockedOpt.gausFitStat = True
         self.dockedOpt.GraphingGaussianOptionsTree()
@@ -550,7 +553,7 @@ class GaussianFitting:
 
         self.dialogOnePeakGausFit.close()
         self.OnePeakFitting()
-        self.myMainWindow.LFit.setEnabled(True)
+        self.myMainWindow.LatticeFitAction.setEnabled(True)
 
         # Marks that the data has been fitted for one peak
         self.dockedOpt.onePeakStat = True

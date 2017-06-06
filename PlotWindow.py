@@ -3,6 +3,8 @@
 """
 Copyright (c) UChicago Argonne, LLC. All rights reserved.
 See LICENSE file.
+
+#C In some methods LFit or L refer to the Lattice Constant not RLU
 """
 # --------------------------------------------------------------------------------------#
 from __future__ import unicode_literals
@@ -95,14 +97,16 @@ class MainWindow (QMainWindow):
         self.fileMenu.addAction(self.exitAction)
         self.graphMenu.addAction(self.mainOptionsAction)
         self.graphMenu.addAction(self.GaussianFitAction)
-        self.graphMenu.addAction(self.LFit)
+        self.graphMenu.addAction(self.LatticeFitAction)
+        self.graphMenu.addAction(self.normalizeAction)
         self.graphMenu.addSeparator()
         self.graphMenu.addAction(self.reportAction)
         self.helpMenu.addSeparator()  
         self.helpMenu.addAction(self.aboutAction)
 
         # Setting L Fit to not enabled until the Gaussian Fit is complete
-        self.LFit.setEnabled(False)
+        self.LatticeFitAction.setEnabled(False)
+        self.normalizeAction.setEnabled(False)
 
     def CreateActions(self):
         """Function that creates the actions used in the menu bar"""
@@ -122,8 +126,10 @@ class MainWindow (QMainWindow):
                                              triggered=self.dockedOpt.restoreMainOptions)
         self.GaussianFitAction= QAction('Gaussian Fit',self, statusTip="Dock the graphing options" ,
                                         triggered=self.dockedOpt.WhichPeakGaussianFit)
-        self.LFit = QAction('L Fit', self, statusTip="Fits the data to the L fit",
+        self.LatticeFitAction = QAction('L Fit', self, statusTip="Fits the data to the L fit",
                                   triggered =self.dockedOpt.GraphingLOptionsTree)
+        self.normalizeAction = QAction('Normalize', self, statusTip ='Normalizes the data',
+                                       triggered=self.readSpec.NormalizerDialog)
         self.aboutAction = QAction(QIcon('about.png'), 'A&bout',
                                          self, shortcut="Ctrl+B", statusTip="Displays info about the graph program",
                                          triggered=self.aboutHelp)
@@ -193,10 +199,10 @@ class MainWindow (QMainWindow):
         z = np.linspace(tMin, tMax, endpoint=True)
         YY = range(nCol)
         if self.readSpec.lMax - self.readSpec.lMin == 0:
-            XX = range(len(self.readSpec.L))
+            XX = range(len(self.readSpec.Lattice))
             axes.set_ylabel('Points in Bins')
         else:
-            XX = self.readSpec.L
+            XX = self.readSpec.Lattice
             axes.set_ylabel('RLU (Reciprocal Lattice Unit)')
         axes.contourf(YY, XX, self.dockedOpt.TT, z)
         fig.colorbar(axes.contourf(YY, XX, self.dockedOpt.TT, z))
@@ -216,21 +222,24 @@ class MainWindow (QMainWindow):
         self.savingCanvasTabs(tab, name, canvas, fig)
 
     # ----------------------------------------------------------------------------------------------#
-    def GraphUtilRawDataLineGraphs(self, canvas, fig, gTitle, xLabel, yLabel, statTip, tabName, whichGraph):
+    def GraphUtilRawDataLineGraphs(self, gTitle, xLabel, yLabel, statTip, tabName, xx, whichG):
         mainGraph = QWidget()
+        fig = Figure((3.0, 3.0), dpi=100)
+        canvas = FigureCanvas(fig)
 
         canvas.setParent(mainGraph)
         axes = fig.add_subplot(111)
 
         nRow, nCol = self.dockedOpt.fileInfo()
 
-        if whichGraph == 'B':
-            xx = range(nRow)
-        elif whichGraph == 'L':
-            xx = self.readSpec.L
-
-        for j in range(nCol):
-            yy = self.dockedOpt.TT[:, j]
+        if whichG == 'M':
+            for j in range(nCol):
+                yy = self.dockedOpt.TT[:, j]
+                axes.plot(xx, yy)
+        elif whichG == 'S':
+            yy = []
+            for j in range(nRow):
+                yy.append(np.mean(self.dockedOpt.TT[j, :]))
             axes.plot(xx, yy)
 
         axes.set_title(gTitle)
@@ -248,35 +257,59 @@ class MainWindow (QMainWindow):
 
         self.savingCanvasTabs(tab, tabName, canvas, fig)
 
-    # ----------------------------------------------------------------------------------------------#
+    # ------------------------ Line Graphs of Raw Data-----------------------------------------------------------------#
     def PlotLineGraphRawDataRLU(self):
         """This method graphs the raw data into a line graph wiith RLU as x-axis"""
-        fig = Figure((3.0, 3.0), dpi=100)
-        canvas = FigureCanvas(fig)
-
-        gTitle = 'Raw Data in L Constant (Scan#: ' + str(self.dockedOpt.specDataList.currentRow() + 1) + ')'
+        gTitle = 'Raw Data in Lattice (Scan#: ' + str(self.dockedOpt.specDataList.currentRow() + 1) + ')'
         xLabel = 'RLU (Reciprocal Lattice Unit)'
+        xx = self.readSpec.Lattice
         yLabel = 'Intensity'
         statTip = 'Raw Data in RLU (Reciprocal Lattice Unit)'
         tabName = 'Raw Data RLU'
+        whichG = 'M'
 
-        self.GraphUtilRawDataLineGraphs(canvas, fig, gTitle, xLabel, yLabel, statTip, tabName, 'L')
+        self.GraphUtilRawDataLineGraphs(gTitle, xLabel, yLabel, statTip, tabName, xx, whichG)
 
-    # ----------------------------------------------------------------------------------------------#
     def PlotLineGraphRawDataBins(self):
         """This method graphs the raw data into a line graph into bins"""
-        fig = Figure((3.0, 3.0), dpi=100)
-        canvas = FigureCanvas(fig)
+        nRow, nCol = self.dockedOpt.fileInfo()
 
         gTitle = 'Raw Data in Bins (Scan#: ' + str(self.dockedOpt.specDataList.currentRow() + 1) + ')'
-        xLabel = 'Bins'
+        xLabel = 'Points'
+        xx = range(nRow)
         yLabel = 'Intensity'
         statTip = 'Raw Data in Bins'
         tabName = 'Raw Data Bins'
+        whichG = 'M'
 
-        self.GraphUtilRawDataLineGraphs(canvas, fig, gTitle, xLabel, yLabel, statTip, tabName, 'B')
+        self.GraphUtilRawDataLineGraphs(gTitle, xLabel, yLabel, statTip, tabName, xx, whichG)
 
-    # -----------------------------Creating Report-----------------------------------------------------------#
+    # -----------------------------------Graphing Normalize Data-------------------------------------------------------#
+    def PlotNormalizeData(self):
+        """This method graphs the raw data normalized"""
+        gTitle = 'Normalized Data (Scan#: ' + str(self.dockedOpt.specDataList.currentRow() + 1) + ')'
+        xLabel = "Normalizer"
+        xx = self.readSpec.normalizer
+        yLabel = 'Intensity'
+        statTip = 'Normalized Data'
+        tabName = 'Normalized Data'
+        whichG = 'M'
+        self.PlotNormalizeDataMean()
+        self.GraphUtilRawDataLineGraphs(gTitle, xLabel, yLabel, statTip, tabName, xx, whichG)
+
+    def PlotNormalizeDataMean(self):
+        """This method graphs the raw data normalized"""
+        gTitle = 'Normalized Data 2 (Scan#: ' + str(self.dockedOpt.specDataList.currentRow() + 1) + ')'
+        xLabel = "Normalizer"
+        xx = self.readSpec.normalizer
+        yLabel = 'Intensity'
+        statTip = 'Normalized Data1'
+        tabName = 'Normalized Data1'
+        whichG = 'S'
+
+        self.GraphUtilRawDataLineGraphs(gTitle, xLabel, yLabel, statTip, tabName, xx, whichG)
+
+    # -----------------------------------Creating Report---------------------------------------------------------------#
     def ReportButton(self):
         """This button creates a report"""
         self.reportBtn = QPushButton('Report', self)
@@ -297,8 +330,7 @@ class MainWindow (QMainWindow):
                 self.WritingReport()
 
     def ReportSaveDialog(self):
-        filters = "All files (*.*);;Text files (*txt);;Python files (*.py)"
-        selectedFilters = "Text files (*txt);;Python files (*.py)"
+        selectedFilters = "Text files (*txt)"
         self.reportFile, self.reportFileFilter = QFileDialog.getSaveFileName(self, "Save Report", "", selectedFilters)
 
     def ReportDialog(self):

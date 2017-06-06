@@ -4,6 +4,7 @@
 Copyright (c) UChicago Argonne, LLC. All rights reserved.
 See LICENSE file.
 
+#C In some methods LFit or L refer to the Lattice Constant not RLU.
 """
 
 # --------------------------------------------------------------------------------------#
@@ -42,6 +43,7 @@ class DockedOption(QDockWidget):
         # keep track of when the fit has been done
         self.gausFitStat = False
         self.LFitStat = False
+        self.normalizingStat = False
 
 
         self.TT = [0][0] # 2D array where raw data is stored
@@ -134,7 +136,7 @@ class DockedOption(QDockWidget):
         if self.fileOpened == False:
             self.openDialog()
         elif self.fileOpened == True:
-            response = self.msgApp("Open New Spec File", "Would you like to open a new spec file?")
+            response = self.msgApp("Open New PVvalue File", "Would you like to open a new PVvalue file?")
             if response == "Y":
                 self.openDialog()
 
@@ -154,7 +156,7 @@ class DockedOption(QDockWidget):
             self.rdOnlyFileName.setStatusTip(self.readSpec.specFileName)
             specFile = SpecDataFile(self.readSpec.specFileName)
             self.readSpec.loadScans(specFile.scans)
-            self.myMainWindow.LFit.setEnabled(False)
+            self.myMainWindow.LatticeFitAction.setEnabled(False)
 
         # Makes sure a file has been opened before changing attributes
         if os.path.isfile(self.fileName) == True:
@@ -162,6 +164,7 @@ class DockedOption(QDockWidget):
                 self.specDataList.setCurrentRow(self.readSpec.currentRow)
                 self.onePeakStat = False
                 self.twoPeakStat = False
+            self.normalizingStat = False
             self.gausFitStat = False
             self.LFitStat = False
             self.rdOnlyScanSelected.setStatusTip(self.fileName)
@@ -204,7 +207,9 @@ class DockedOption(QDockWidget):
         self.fileOpened = False
         self.gausFitStat = False
         self.LFitStat = False
-        self.myMainWindow.LFit.setEnabled(False)
+        self.normalizingStat = False
+        self.myMainWindow.LatticeFitAction.setEnabled(False)
+        self.myMainWindow.normalizeAction.setEnabled(False)
         index = len(self.myMainWindow.canvasArray)
         i = 0
         j = 0
@@ -246,7 +251,7 @@ class DockedOption(QDockWidget):
             self.rdOnlyFileName.setStatusTip(self.readSpec.specFileName)
             specFile = SpecDataFile(self.readSpec.specFileName)
             self.readSpec.loadScans(specFile.scans)
-            self.myMainWindow.LFit.setEnabled(False)
+            self.myMainWindow.LatticeFitAction.setEnabled(False)
             self.fileOpened = False
             return 0, 0
     # ------------------------------------------------------------------------------------#
@@ -418,14 +423,14 @@ class DockedOption(QDockWidget):
 
         #Adding the top branch to the graphing options tree
         self.graphingOptionsTree.addTopLevelItem(self.gaussianFitTopBranch)
-        self.myMainWindow.LFit.setEnabled(True)
+        self.myMainWindow.LatticeFitAction.setEnabled(True)
 
     # ---------------------------------------------------------------------------------------------------------------#
     def GraphingLOptionsTree(self):
         if self.LFitStat == False:
             # L Fit Top Branch
             self.LFitTopBranch = QTreeWidgetItem()
-            self.LFitTopBranch.setText(0, "L Fit")
+            self.LFitTopBranch.setText(0, "Lattice Fit")
             self.LFitTopBranch.setFlags(self.LFitTopBranch.flags() | Qt.ItemIsTristate | Qt.ItemIsUserCheckable)
             """L FitData Children, depending on the peak"""
             if self.onePeakStat == True:
@@ -482,6 +487,17 @@ class DockedOption(QDockWidget):
             self.gausFit.doLFitPercentChange()
             self.LFitStat = True
 
+    # ---------------------------------------------------------------------------------------------------------------#
+    def NormalizerOptionsTree(self):
+        self.NormalizerTopBranch = QTreeWidgetItem()
+        self.NormalizerTopBranch.setText(0, "Normalize")
+        self.NormalizerTopBranch.setFlags(self.NormalizerTopBranch.flags() | Qt.ItemIsUserCheckable)
+        self.NormalizerTopBranch.setCheckState(0, Qt.Unchecked)
+        self.graphingOptionsTree.addTopLevelItem(self.NormalizerTopBranch)
+        self.normalizingStat = True
+
+
+
     # -------------------------------------------------------------------------------------------------------#
     def plottingFits(self):
         """This function calls on the appropriate method to graph for one or two peaks.
@@ -497,6 +513,10 @@ class DockedOption(QDockWidget):
             if self.lineGraphLBranch.checkState(0) == 2:
                 self.myMainWindow.PlotLineGraphRawDataRLU()
                 self.lineGraphLBranch.setCheckState(0, 0)
+            if self.normalizingStat == True:
+                if self.NormalizerTopBranch.checkState(0) == 2:
+                    self.myMainWindow.PlotNormalizeData()
+                    self.NormalizerTopBranch.setCheckState(0, 0)
 
             if self.onePeakStat == True:
                 self.graphingOnePeak()
@@ -571,22 +591,6 @@ class DockedOption(QDockWidget):
                 self.gausFit.percentageChangeLConstantPeakTwo()
                 self.RLUPrcChangePeakTwo.setCheckState(0, 0)
 
-    # ----------------------------------------------------------------------------------------------------------#
-    def resetingComponents(self):
-        """This method will be either erased or change. Here are the variables used in the program that need to be
-        reset.
-        """
-        self.gausFit.continueGraphingEachFit = True
-
-        self.readSpec.specFileOpened = False
-        self.readSpec.specFileName = None
-
-        self.fileName = None
-        self.onePeakStat = False
-        self.twoPeakStat = False
-        self.fileOpened = False
-        self.gausFitStat = False
-        self.LFitStat = False
 
 
 
