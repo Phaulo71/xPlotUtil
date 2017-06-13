@@ -72,6 +72,7 @@ class ReadSpec:
                 self.specFileOpened = True
                 self.dockedOpt.fileOpened = False
                 self.continueGraphingEachFit = True
+                self.myMainWindow.LatticeFitAction.setEnabled(False)
         except:
             print("Please make sure the spec file has the correct format.")
 

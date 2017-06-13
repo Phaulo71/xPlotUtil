@@ -27,6 +27,7 @@ else:
     from PyQt5.QtCore import *
     from PyQt5.QtWidgets import *
 
+from AlgebraicExpressions import AlgebraicExpress
 from DockedOptions import DockedOption
 # ---------------------------------------------------------------------------------------------------------------------#
 
@@ -43,6 +44,7 @@ class MainWindow (QMainWindow):
         self.setWindowTitle("xPlot Util")
         self.setWindowIcon(QIcon('Icons/Graph.png'))
         self.dockedOpt = DockedOption(parent = self)
+        self.algebraExp = AlgebraicExpress(parent = self)
         self.gausFit = self.dockedOpt.gausFit
         self.readSpec = self.dockedOpt.readSpec
         self.canvasArray = []
@@ -116,6 +118,8 @@ class MainWindow (QMainWindow):
         self.graphMenu.addAction(self.reportAction)
         self.helpMenu.addSeparator()  
         self.helpMenu.addAction(self.aboutAction)
+
+        self.LatticeFitAction.setEnabled(False)
 
     def CreateActions(self):
         """Function that creates the actions used in the menu bar

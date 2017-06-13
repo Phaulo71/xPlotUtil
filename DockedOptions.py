@@ -175,6 +175,7 @@ class DockedOption(QDockWidget):
             self.mainOptions.close()
             self.DockMainOptions()
             self.specFileInfo()
+            self.myMainWindow.LatticeFitAction.setEnabled(False)
 
         # Makes sure a file has been opened before changing attributes to orginal value
         if os.path.isfile(self.fileName) == True:
@@ -280,6 +281,8 @@ class DockedOption(QDockWidget):
         self.mainOptions.close()
         self.DockMainOptions()
         self.gausFit.continueGraphingEachFit = True
+
+        self.myMainWindow.LatticeFitAction.setEnabled(False)
 
         self.readSpec.specFileOpened = False
         self.readSpec.specFileName = None
@@ -451,6 +454,8 @@ class DockedOption(QDockWidget):
 
         #Adding the top branch to the graphing options tree
         self.graphingOptionsTree.addTopLevelItem(self.gaussianFitTopBranch)
+
+        self.myMainWindow.LatticeFitAction.setEnabled(True)
 
 
     def GraphingLatticeOptionsTree(self):
