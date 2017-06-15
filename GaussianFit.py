@@ -30,6 +30,7 @@ from matplotlib.figure import Figure
 from matplotlib.backends.backend_qt5agg import FigureCanvasQTAgg as FigureCanvas
 from matplotlib.backends.backend_qt5 import NavigationToolbar2QT as NavigationToolbar
 from matplotlib.ticker import FormatStrFormatter
+from AlgebraicExpressions import AlgebraicExpress
 # ---------------------------------------------------------------------------------------------------------------------#
 
 class GaussianFitting:
@@ -45,6 +46,7 @@ class GaussianFitting:
         self.readSpec = parent
         self.dockedOpt = self.readSpec.dockedOpt
         self.myMainWindow = self.dockedOpt.myMainWindow
+        self.algebraExp = AlgebraicExpress(parent=self)
         self.continueGraphingEachFit = True #Boolean to stop on Each fit graphing
 
     # --------------------------------Gaussian Fit---------------------------------------------------------------------#

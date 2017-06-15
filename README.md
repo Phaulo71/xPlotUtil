@@ -32,8 +32,8 @@ Built With
 Installation
 ------------
 To download xPlot Util use the git clone command by using HTTPS or SSH, which I have provided below:
-    - SSH - git@github.com:Phaulo71/xPlotUtil.git
-    - HTTPS - https://github.com/Phaulo71/xPlotUtil.git
+    - SSH - git@github.com:AdvancedPhotonSource/xPlotUtil.git
+    - HTTPS - https://github.com/AdvancedPhotonSource/xPlotUtil.git
 
 Author(s)
 -------
