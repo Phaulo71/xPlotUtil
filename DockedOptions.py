@@ -49,6 +49,7 @@ class DockedOption(QDockWidget):
         self.gausFitStat = False
         self.LFitStat = False
         self.normalizingStat = False
+        self.algebraicExpStat = False
 
 
         self.TT = [] # 2D array where raw data is stored
@@ -124,7 +125,7 @@ class DockedOption(QDockWidget):
 
         # Spec Label
         self.fileNameLabel = QLabel()
-        self.fileNameLabel.setText("File Name: ")
+        self.fileNameLabel.setText("Spec File: ")
 
         # PvValue label
         self.pvLabel = QLabel()
@@ -177,6 +178,7 @@ class DockedOption(QDockWidget):
             self.DockMainOptions()
             self.specFileInfo()
             self.myMainWindow.LatticeFitAction.setEnabled(False)
+            self.fileOpened = False
 
         # Makes sure a file has been opened before changing attributes to orginal value
         if os.path.isfile(self.fileName) == True:
@@ -186,6 +188,7 @@ class DockedOption(QDockWidget):
             self.normalizingStat = False
             self.gausFitStat = False
             self.LFitStat = False
+            self.algebraicExpStat = False
             self.rdOnlyScanSelected.setStatusTip(self.fileName)
             self.rdOnlyScanSelected.setText(self.fileName)
             self.fileOpened = True
@@ -295,6 +298,7 @@ class DockedOption(QDockWidget):
         self.gausFitStat = False
         self.LFitStat = False
         self.normalizingStat = False
+        self.algebraicExpStat = False
 
         # Closes and removes the graphs created
         index = len(self.myMainWindow.canvasArray)
@@ -327,7 +331,7 @@ class DockedOption(QDockWidget):
         """This method initializes the tree branch for the raw data graphing options.
         """
         # Initialization of the main tree
-        self.graphingOptionsTree =QTreeWidget()
+        self.graphingOptionsTree = QTreeWidget()
         self.graphingOptionsTree.setHeaderLabel("Graphing Options")
 
         """Initialization of the top level Fits"""
@@ -351,13 +355,46 @@ class DockedOption(QDockWidget):
 
         self.graphingOptionsTree.addTopLevelItem(self.rawDataTopBranch)
 
+    def DataGraphingAlgebraicExpOptionsTree(self):
+        """This method initializes the tree branch for the raw data graphing options.
+        """
+        if self.algebraicExpStat == False and self.fileOpened == True:
+            # Algebraic Expressions Top Branch
+            self.algebraicExpTopBranch = QTreeWidgetItem()
+            self.algebraicExpTopBranch.setText(0, "Algebraic Expressions")
+            self.algebraicExpTopBranch.setFlags(self.algebraicExpTopBranch.flags() | Qt.ItemIsTristate |
+                                                Qt.ItemIsUserCheckable)
+
+            # Single Value Index
+            self.singleValueIndexBranch = QTreeWidgetItem(self.algebraicExpTopBranch)
+            self.singleValueIndexBranch.setText(0, "Single Value Index")
+            self.singleValueIndexBranch.setFlags(self.singleValueIndexBranch.flags() | Qt.ItemIsTristate |
+                                                 Qt.ItemIsUserCheckable)
+            self.singleValueIndexBranch.setCheckState(0, Qt.Unchecked)
+
+            # Th2Th Graph
+            self.th2ThBranch = QTreeWidgetItem(self.algebraicExpTopBranch)
+            self.th2ThBranch.setText(0, "\u03B82\u03B8")
+            self.th2ThBranch.setFlags(self.th2ThBranch.flags() | Qt.ItemIsTristate | Qt.ItemIsUserCheckable)
+            self.th2ThBranch.setCheckState(0, Qt.Unchecked)
+
+            # Weighting Graph
+            self.weightingBranch = QTreeWidgetItem(self.algebraicExpTopBranch)
+            self.weightingBranch.setText(0, "Weighting")
+            self.weightingBranch.setFlags(self.weightingBranch.flags() | Qt.ItemIsTristate | Qt.ItemIsUserCheckable)
+            self.weightingBranch.setCheckState(0, Qt.Unchecked)
+
+            self.algebraicExpStat = True
+            self.graphingOptionsTree.addTopLevelItem(self.algebraicExpTopBranch)
+
     def GraphingGaussianOptionsTree(self):
         """This method initializes the tree branch for the gaussian fit graphing options.
         """
         # Gaussian Fit Top Branch
         self.gaussianFitTopBranch = QTreeWidgetItem()
         self.gaussianFitTopBranch.setText(0, "Gaussian Fit")
-        self.gaussianFitTopBranch.setFlags(self.gaussianFitTopBranch.flags() | Qt.ItemIsTristate | Qt.ItemIsUserCheckable)
+        self.gaussianFitTopBranch.setFlags(self.gaussianFitTopBranch.flags() | Qt.ItemIsTristate |
+                                           Qt.ItemIsUserCheckable)
 
         if self.twoPeakStat == True:
             """Gaussian Fit Children"""
@@ -531,6 +568,16 @@ class DockedOption(QDockWidget):
                 self.myMainWindow.PlotLineGraphRawData()
                 self.lineGraphBranch.setCheckState(0, 0)
 
+            if self.algebraicExpStat == True:
+                if self.singleValueIndexBranch.checkState(0) == 2:
+                    self.algebraExp.plotSingleValueIndex()
+                    self.singleValueIndexBranch.setCheckState(0, 0)
+                if self.th2ThBranch.checkState(0) == 2:
+                    self.algebraExp.plotTh2ThExp()
+                    self.th2ThBranch.setCheckState(0, 0)
+                if self.weightingBranch.checkState(0) == 2:
+                    self.algebraExp.plotWeightingExp()
+                    self.weightingBranch.setCheckState(0, 0)
             # Gaussian Fit
             if self.onePeakStat == True:
                 self.graphingOnePeak()

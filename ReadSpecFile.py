@@ -69,6 +69,7 @@ class ReadSpec:
                 self.dockedOpt.gausFitStat = False
                 self.dockedOpt.LFitStat = False
                 self.dockedOpt.normalizingStat = False
+                self.algebraicExpStat = False
                 self.dockedOpt.specFileInfo()
                 self.specFileOpened = True
                 self.dockedOpt.fileOpened = False
@@ -185,7 +186,7 @@ class ReadSpec:
                         self.normalizer = self.scans[self.scan].data[norm]
                         self.normalizer = np.reshape(self.normalizer, (len(self.normalizer), 1))
                         self.dockedOpt.TT = np.divide(self.dockedOpt.TT, self.normalizer)
-                        self.dockedOpt.normalizingStat == True
+                        self.dockedOpt.normalizingStat = True
         except:
             QMessageBox.warning(self.myMainWindow, "Dimension Error", "Please make sure the selected normalizer "
                                                                       "has the same row dimension as the raw data.")

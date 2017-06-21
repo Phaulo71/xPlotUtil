@@ -12,6 +12,7 @@ import sys
 import os
 import numpy as np
 from pylab import *
+
 from matplotlib.backends import qt_compat
 from matplotlib.figure import Figure
 from matplotlib.backends.backend_qt5agg import FigureCanvasQTAgg as FigureCanvas
@@ -111,14 +112,11 @@ class MainWindow (QMainWindow):
         self.fileMenu.addAction(self.exitAction)
         self.graphMenu.addAction(self.mainOptionsAction)
         self.graphMenu.addAction(self.normalizeAction)
-        self.algebreicExpMenu = self.graphMenu.addMenu("Algebraic Expression")
+        self.graphMenu.addAction(self.algebraicExpAction)
         self.graphMenu.addAction(self.GaussianFitAction)
         self.graphMenu.addAction(self.LatticeFitAction)
         self.graphMenu.addSeparator()
         self.graphMenu.addAction(self.reportAction)
-        self.algebreicExpMenu.addAction(self.th2ThAction)
-        self.algebreicExpMenu.addAction(self.weightingExpAction)
-        self.algebreicExpMenu.addAction(self.singleValueIndexAction)
         self.helpMenu.addSeparator()  
         self.helpMenu.addAction(self.aboutAction)
 
@@ -147,12 +145,8 @@ class MainWindow (QMainWindow):
                                   triggered =self.dockedOpt.GraphingLatticeOptionsTree)
         self.normalizeAction = QAction('Normalize', self, statusTip ='Normalizes the data',
                                        triggered=self.readSpec.NormalizerDialog)
-        self.th2ThAction = QAction('\u03B82\u03B8', self, statusTip='Theta to Theta expression.',
-                                       triggered=self.algebraExp.plotTh2ThExp)
-        self.singleValueIndexAction = QAction('Single Value Index', self, statusTip='Single value index expression.',
-                                   triggered=self.algebraExp.plotSingleValueIndex)
-        self.weightingExpAction = QAction('Weighting', self, statusTip='Weighting algebraic expression.',
-                                              triggered=self.algebraExp.weightingExp)
+        self.algebraicExpAction = QAction('Algebraic Expressions', self, statusTip='Algebraic expressions.',
+                                       triggered=self.dockedOpt.DataGraphingAlgebraicExpOptionsTree)
         self.aboutAction = QAction(QIcon('about.png'), 'A&bout',
                                          self, shortcut="Ctrl+B", statusTip="Displays info about the graph program",
                                          triggered=self.aboutHelp)
@@ -269,7 +263,6 @@ class MainWindow (QMainWindow):
         """This method graphs the raw data into a line graph with the x-axis the user picks.
         """
         xx, gTitle, xLabel, statTip, tabName = self.readSpec.getRawDataLinePlotElements()
-
         if gTitle != 0:
              self.GraphUtilRawDataLineGraphs(gTitle, xLabel, 'Intensity', statTip, tabName, xx, 'L')
 
@@ -349,7 +342,8 @@ class MainWindow (QMainWindow):
         self.reportGroupBx.setLayout(vbox)
 
     def WritingReport(self):
-        """This method writes the data to the report file, calling on the appropriate methods.
+        """This method writes the data to the report file, calling on the appropriate methods. It's important to
+        note that the report can only contain data from the gaussian fit and the lattice fit.
         """
         _, nCol = self.dockedOpt.fileInfo()
         reportData = np.zeros((nCol, 0))

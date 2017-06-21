@@ -45,42 +45,6 @@ class AlgebraicExpress:
         self.V = []
 
         self.U, self.S, self.V = svd(self.dockedOpt.TT)
-        print len(self.S)
-
-    def PlotAlgebraicExpGraph(self, name, x, y, xLabel, yLabel):
-        """Generic plotting method that plots depending on which graph the user has selected.
-        :param canvas: canvas for widget
-        :param fig: figure for graph
-        :param name: name of tab
-        :param x: x-values
-        :param y: y-values
-        :param error: error values for gaussian fit graphs
-        :param xLabel: x-axis label
-        :param yLabel: y-axis label
-        """
-        mainGraph = QWidget()
-        fig = Figure((5.0, 4.0), dpi=100)
-        canvas = FigureCanvas(fig)
-
-        canvas.setParent(mainGraph)
-        axes = fig.add_subplot(221)
-
-        axes.plot(x, y)
-
-        axes.set_title(name)
-        axes.set_xlabel(xLabel)
-        axes.set_ylabel(yLabel)
-        canvas.draw()
-
-        tab = QWidget()
-        tab.setStatusTip(name)
-        vbox = QVBoxLayout()
-        graphNavigationBar = NavigationToolbar(canvas, mainGraph)
-        vbox.addWidget(graphNavigationBar)
-        vbox.addWidget(canvas)
-        tab.setLayout(vbox)
-
-        self.myMainWindow.savingCanvasTabs(tab, name, canvas, fig)
 
     def PlotAlgebraicExpGraphs(self, title, name1, x, y1, xLabel, yLabel1, y2, name2, yLabel2, y3, name3, yLabel3):
         mainGraph = QWidget()
@@ -107,7 +71,7 @@ class AlgebraicExpress:
         axe.set_ylabel(yLabel3)
         axe.plot(x, y3)
 
-        fig.tight_layout()
+        fig.tight_layout(pad=.4, w_pad=.5, h_pad=-1.4)
         canvas.draw()
 
         tab = QWidget()
@@ -139,7 +103,7 @@ class AlgebraicExpress:
         yLabel3 = "Counts"
         self.PlotAlgebraicExpGraphs(title, name1, x, y1, xLabel, yLabel1, y2, name2, yLabel2, y3, name3, yLabel3)
 
-    def weightingExp(self):
+    def plotWeightingExp(self):
         self.singularValueDecomposition()
         title = 'Weighting (Scan#: ' + str(self.dockedOpt.specDataList.currentRow() + 1) + ')'
 
@@ -158,14 +122,41 @@ class AlgebraicExpress:
         yLabel3 = "Weighting 3"
         self.PlotAlgebraicExpGraphs(title, name1, x, y1, xLabel, yLabel1, y2, name2, yLabel2, y3, name3, yLabel3)
 
+    def PlotAlgebraicExpGraph(self, title, name, x, y, xLabel, yLabel):
+        mainGraph = QWidget()
+        fig = Figure((5.0, 4.0), dpi=100)
+        canvas = FigureCanvas(fig)
+
+        canvas.setParent(mainGraph)
+        axes = fig.add_subplot(111)
+
+        axes.set_title(name)
+        axes.set_xlabel(xLabel)
+        axes.set_ylabel(yLabel)
+        axes.plot(x, y)
+
+        fig.tight_layout()
+        canvas.draw()
+
+        tab = QWidget()
+        tab.setStatusTip(title)
+        vbox = QVBoxLayout()
+        graphNavigationBar = NavigationToolbar(canvas, mainGraph)
+        vbox.addWidget(graphNavigationBar)
+        vbox.addWidget(canvas)
+        tab.setLayout(vbox)
+
+        self.myMainWindow.savingCanvasTabs(tab, title, canvas, fig)
+
     def plotSingleValueIndex(self):
         """Needs some work. Not working properly yet"""
         self.singularValueDecomposition()
-        name = 'Singular Value Index (Scan#: ' + str(self.dockedOpt.specDataList.currentRow() + 1) + ')'
-        x = self.readSpec.L
+        title = 'Singular Value Index (Scan#: ' + str(self.dockedOpt.specDataList.currentRow() + 1) + ')'
+        name = "Singular Value Index"
+        x = self.gausFit.getVoltage()
         y = log(self.S)
-        xLabel = "RLU"
-        yLabel = "TH2TH"
-        self.PlotAlgebraicExpGraph(name, x, y, xLabel, yLabel)
+        xLabel = "Voltage"
+        yLabel = "Singular Value"
+        self.PlotAlgebraicExpGraph(title, name, x, y, xLabel, yLabel)
 
 
