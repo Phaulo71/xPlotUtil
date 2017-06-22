@@ -14,14 +14,9 @@ from matplotlib.backends import qt_compat
 import os
 import gc
 
-use_pyside = qt_compat.QT_API == qt_compat.QT_API_PYSIDE
-if use_pyside:
-    from PySide.QtGui import *
-    from PySide.QtCore import *
-else:
-    from PyQt5.QtGui import *
-    from PyQt5.QtCore import *
-    from PyQt5.QtWidgets import *
+from PyQt5.QtGui import *
+from PyQt5.QtCore import *
+from PyQt5.QtWidgets import *
 
 from spec2nexus.spec import SpecDataFile
 from ReadSpecFile import ReadSpec
@@ -356,7 +351,7 @@ class DockedOption(QDockWidget):
         self.graphingOptionsTree.addTopLevelItem(self.rawDataTopBranch)
 
     def DataGraphingAlgebraicExpOptionsTree(self):
-        """This method initializes the tree branch for the raw data graphing options.
+        """This method initializes the tree branch for the algebraic expression graphing options.
         """
         if self.algebraicExpStat == False and self.fileOpened == True:
             # Algebraic Expressions Top Branch
@@ -385,6 +380,7 @@ class DockedOption(QDockWidget):
             self.weightingBranch.setCheckState(0, Qt.Unchecked)
 
             self.algebraicExpStat = True
+            self.algebraExp.singularValueDecomposition()
             self.graphingOptionsTree.addTopLevelItem(self.algebraicExpTopBranch)
 
     def GraphingGaussianOptionsTree(self):

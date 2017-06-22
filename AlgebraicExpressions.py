@@ -13,13 +13,9 @@ from pylab import *
 from matplotlib.backends import qt_compat
 use_pyside = qt_compat.QT_API == qt_compat.QT_API_PYSIDE
 
-if use_pyside:
-    from PySide.QtGui import *
-    from PySide.QtCore import *
-else:
-    from PyQt5.QtGui import *
-    from PyQt5.QtCore import *
-    from PyQt5.QtWidgets import *
+from PyQt5.QtGui import *
+from PyQt5.QtCore import *
+from PyQt5.QtWidgets import *
 
 from scipy.optimize import curve_fit
 from scipy import exp
@@ -30,9 +26,10 @@ from matplotlib.ticker import FormatStrFormatter
 # ---------------------------------------------------------------------------------------------------------------------#
 
 class AlgebraicExpress:
+    """This class is where the algebraic expressions are formed to be plotted.
     """
-    """
-    def __init__ (self, parent=None):
+
+    def __init__(self, parent=None):
         self.gausFit = parent
         self.dockedOpt = self.gausFit.dockedOpt
         self.readSpec = self.gausFit.readSpec
@@ -40,6 +37,8 @@ class AlgebraicExpress:
 
 
     def singularValueDecomposition(self):
+        """This method calculates the svd of the raw data.
+        """
         self.U = []
         self.S = []
         self.V = []
@@ -47,6 +46,20 @@ class AlgebraicExpress:
         self.U, self.S, self.V = svd(self.dockedOpt.TT)
 
     def PlotAlgebraicExpGraphs(self, title, name1, x, y1, xLabel, yLabel1, y2, name2, yLabel2, y3, name3, yLabel3):
+        """Generic plotting method that creates a canvas with 3 subplots.
+        :param title: Title of tab
+        :param name1: name of graph one
+        :param x: x-axis of graphs
+        :param y1: y-axis of graph one
+        :param xLabel: x-label for graphs
+        :param yLabel1: y-label for graph two
+        :param y2: y-axis of graph two
+        :param name2: name of graph 2
+        :param yLabel2: y-label for graph two
+        :param y3: y-axis of graph three
+        :param name3: name of graph three
+        :param yLabel3: y-label for graph three
+        """
         mainGraph = QWidget()
         fig = Figure((5.0, 4.0), dpi=100)
         canvas = FigureCanvas(fig)
@@ -85,7 +98,8 @@ class AlgebraicExpress:
         self.myMainWindow.savingCanvasTabs(tab, title, canvas, fig)
 
     def plotTh2ThExp(self):
-        self.singularValueDecomposition()
+        """This method plots the theta2theta graphs.
+        """
         title = '\u03B82\u03B8 (Scan#: ' + str(self.dockedOpt.specDataList.currentRow() + 1) + ')'
 
         name1 = "\u03B82\u03B8"
@@ -104,7 +118,8 @@ class AlgebraicExpress:
         self.PlotAlgebraicExpGraphs(title, name1, x, y1, xLabel, yLabel1, y2, name2, yLabel2, y3, name3, yLabel3)
 
     def plotWeightingExp(self):
-        self.singularValueDecomposition()
+        """This method plots the weighting graphs.
+        """
         title = 'Weighting (Scan#: ' + str(self.dockedOpt.specDataList.currentRow() + 1) + ')'
 
         name1 = "Weighting 1"
@@ -123,6 +138,14 @@ class AlgebraicExpress:
         self.PlotAlgebraicExpGraphs(title, name1, x, y1, xLabel, yLabel1, y2, name2, yLabel2, y3, name3, yLabel3)
 
     def PlotAlgebraicExpGraph(self, title, name, x, y, xLabel, yLabel):
+        """Generic plotting method with one subplot.
+        :param title: Title of tab
+        :param name: name of graph and tool tip
+        :param x: x-axis
+        :param y: y-axis
+        :param xLabel: x label
+        :param yLabel: y label
+        """
         mainGraph = QWidget()
         fig = Figure((5.0, 4.0), dpi=100)
         canvas = FigureCanvas(fig)
@@ -149,8 +172,8 @@ class AlgebraicExpress:
         self.myMainWindow.savingCanvasTabs(tab, title, canvas, fig)
 
     def plotSingleValueIndex(self):
-        """Needs some work. Not working properly yet"""
-        self.singularValueDecomposition()
+        """Plots the single value index graph.
+        """
         title = 'Singular Value Index (Scan#: ' + str(self.dockedOpt.specDataList.currentRow() + 1) + ')'
         name = "Singular Value Index"
         x = self.gausFit.getVoltage()

@@ -19,14 +19,10 @@ from matplotlib.backends.backend_qt5agg import FigureCanvasQTAgg as FigureCanvas
 from matplotlib.backends.backend_qt5 import NavigationToolbar2QT as NavigationToolbar
 import gc
 
-use_pyside = qt_compat.QT_API == qt_compat.QT_API_PYSIDE
-if use_pyside:
-    from PySide.QtGui import *
-    from PySide.QtCore import *
-else:
-    from PyQt5.QtGui import *
-    from PyQt5.QtCore import *
-    from PyQt5.QtWidgets import *
+
+from PyQt5.QtGui import *
+from PyQt5.QtCore import *
+from PyQt5.QtWidgets import *
 
 from DockedOptions import DockedOption
 # ---------------------------------------------------------------------------------------------------------------------#
@@ -107,6 +103,9 @@ class MainWindow (QMainWindow):
         self.CreateActions()
         self.CreateMenus()
         self.fileMenu.addAction(self.openAction)
+        self.exportMenu = self.fileMenu.addMenu("Export")
+        self.exportMenu.addAction(self.reportAction)
+        self.exportMenu.addAction(self.binGausFitReportAction)
         self.fileMenu.addAction(self.resetAction)
         self.fileMenu.addSeparator()
         self.fileMenu.addAction(self.exitAction)
@@ -116,7 +115,6 @@ class MainWindow (QMainWindow):
         self.graphMenu.addAction(self.GaussianFitAction)
         self.graphMenu.addAction(self.LatticeFitAction)
         self.graphMenu.addSeparator()
-        self.graphMenu.addAction(self.reportAction)
         self.helpMenu.addSeparator()  
         self.helpMenu.addAction(self.aboutAction)
 
@@ -137,6 +135,8 @@ class MainWindow (QMainWindow):
                                   triggered=self.dockedOpt.resetxPlot)
         self.reportAction = QAction('Report', self, statusTip="Create a report of the data",
                                          triggered=self.ReportDialog)
+        self.binGausFitReportAction = QAction('Bin Gaussian Fit', self, statusTip="Create a report from bin fitted data",
+                                              triggered=self.gausFit.EachFitDataReport)
         self.mainOptionsAction = QAction('Main Options', self, statusTip="Main options for xPlot Util",
                                              triggered=self.dockedOpt.restoreMainOptions)
         self.GaussianFitAction= QAction('Gaussian Fit',self, statusTip="Dock the graphing options" ,
@@ -287,15 +287,12 @@ class MainWindow (QMainWindow):
         """
         if self.reportCbGausFit.isChecked() or self.reportCbLFit.isChecked():
             self.reportDialog.close()
-            self.ReportSaveDialog()
+            selectedFilters = ".txt"
+            self.reportFile, self.reportFileFilter = QFileDialog.getSaveFileName(self, "Save Report", "",
+                                                                                 selectedFilters)
             if self.reportFile != "":
+                self.reportFile += self.reportFileFilter
                 self.WritingReport()
-
-    def ReportSaveDialog(self):
-        """Save file dialog for the report file.
-        """
-        selectedFilters = "Text files (*txt)"
-        self.reportFile, self.reportFileFilter = QFileDialog.getSaveFileName(self, "Save Report", "", selectedFilters)
 
     def ReportDialog(self):
         """Dialog that allows the user to select the data it wants on the report.
@@ -333,7 +330,6 @@ class MainWindow (QMainWindow):
             self.reportCbGausFit.setEnabled(True)
         if self.dockedOpt.LFitStat == True:
             self.reportCbLFit.setEnabled(True)
-
 
         vbox = QVBoxLayout()
         vbox.addWidget(self.reportCbGausFit)
@@ -377,7 +373,6 @@ class MainWindow (QMainWindow):
 
         # Writes to sheet
         np.savetxt(self.reportFile, reportData, fmt=str('%f'), header=header, comments=comment)
-
 
 def main():
     """Main method.

@@ -13,14 +13,10 @@ from pylab import *
 from matplotlib.backends import qt_compat
 import os
 from GaussianFit import GaussianFitting
-use_pyside = qt_compat.QT_API == qt_compat.QT_API_PYSIDE
-if use_pyside:
-    from PySide.QtGui import *
-    from PySide.QtCore import *
-else:
-    from PyQt5.QtGui import *
-    from PyQt5.QtCore import *
-    from PyQt5.QtWidgets import *
+
+from PyQt5.QtGui import *
+from PyQt5.QtCore import *
+from PyQt5.QtWidgets import *
 
 from spec2nexus.spec import SpecDataFile
 # ---------------------------------------------------------------------------------------------------------------------#
