@@ -144,39 +144,32 @@ class DockedOption(QDockWidget):
         """This list displays the values/scans of the spec file.
         """
         self.specDataList = QListWidget()
-        self.specDataList.itemDoubleClicked.connect(self.readSpec.currentScan)
+        self.specDataList.itemDoubleClicked.connect(self.openPVFile)
 
     # ----------------------------------Opening PVvalue file and such--------------------------------------------------#
-    def openFile(self):
+    def openPVFile(self):
         """This method calls on the openDialog if no file has previously been open or asks
          the user if it wants to open a new file.
          """
         if self.fileOpened == False:
-            self.openDialog()
+            self.readSpec.currentScan()
         elif self.fileOpened == True:
-            response = self.msgApp("Open New PVvalue File", "Would you like to open a new PVvalue file?")
+            response = self.msgApp("New PVvalue File", "Would you like to open the new selected PVvalue file?")
             if response == "Y":
-                self.openDialog()
+                self.readSpec.currentScan()
 
-    def openDialog(self):
+    def openFile(self, fileName):
         """This method allows the user to open a new PVvalue file. It also resets some attributes to
         their original value to enable the fits and other functionality.
         """
-        self.rdOnlyScanSelected.setText("")
-        selectedFilter = "All files (*.*);;Python files (*.py)"
-        self.fileName, self.fileFilter = QFileDialog.getOpenFileName(self, "Open file for PVvalue #"
-                                                          + str(self.specDataList.currentRow() + 1), None,
-                                                          selectedFilter)
+        self.fileName = fileName
 
-        if self.fileOpened == True:
+        # Makes sure a file has been opened before changing attributes to orginal value
+        if os.path.isfile(self.fileName) == True:
             self.mainOptions.close()
             self.DockMainOptions()
             self.specFileInfo()
             self.myMainWindow.LatticeFitAction.setEnabled(False)
-            self.fileOpened = False
-
-        # Makes sure a file has been opened before changing attributes to orginal value
-        if os.path.isfile(self.fileName) == True:
             self.specDataList.setCurrentRow(self.readSpec.currentRow)
             self.onePeakStat = False
             self.twoPeakStat = False
@@ -196,7 +189,6 @@ class DockedOption(QDockWidget):
         """
         try:
             data = np.loadtxt(open(self.fileName))
-
             nRow = data.shape[0]  # Gets the number of rows
             nCol = data.shape[1]  # Gets the number of columns
             x = 0

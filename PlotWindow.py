@@ -98,7 +98,7 @@ class MainWindow (QMainWindow):
         """
         self.myStatusBar = QStatusBar()
         self.setStatusBar(self.myStatusBar)
-        self.myStatusBar.showMessage('Ready', 30000)
+        self.myStatusBar.showMessage('Ready', 3000)
 
         self.CreateActions()
         self.CreateMenus()
@@ -204,13 +204,51 @@ class MainWindow (QMainWindow):
             xx = self.readSpec.L
             yLabel = "RLU (Reciprocal Lattice Unit)"
 
-        gTitle = 'Raw Data Color Graph (Scan#: ' + str(self.dockedOpt.specDataList.currentRow() + 1) + ')'
+        gTitle = 'Raw Data Color Graph (Scan#: ' + self.readSpec.scan + ')'
         statTip = "Raw Data Color Graph"
         xLabel = 'Bins (voltage:' + line1 + ')'
         tabName = 'Raw Data Color Graph'
         whichG = 'C'
 
         self.GraphUtilRawDataLineGraphs(gTitle, xLabel, yLabel, statTip, tabName, xx, whichG)
+
+    def ColorGraphContrastDialog(self):
+        """This method creates a dialog with dynamically created radio buttons from the spec file, which allow the
+        user to pick which chamber was used to normalize.
+        """
+        if self.dockedOpt.normalizingStat == False and self.dockedOpt.FileError() == False :
+            self.normalizeDialog = QDialog(self.myMainWindow)
+            dialogBox = QVBoxLayout()
+            buttonLayout = QHBoxLayout()
+            vBox = QVBoxLayout()
+
+            groupBox = QGroupBox("Select normalizer")
+            self.buttonGroup = QButtonGroup(groupBox)
+
+            for norm in self.normalizers:
+                normalizerRB = QRadioButton(norm)
+                self.buttonGroup.addButton(normalizerRB, int(norm[-1]))
+                vBox.addWidget(normalizerRB)
+
+            groupBox.setLayout(vBox)
+
+            ok = QPushButton("Ok")
+            cancel = QPushButton("Cancel")
+
+            cancel.clicked.connect(self.normalizeDialog.close)
+            ok.clicked.connect(self.getNormalizer)
+
+            buttonLayout.addWidget(cancel)
+            buttonLayout.addStretch(1)
+            buttonLayout.addWidget(ok)
+
+            dialogBox.addWidget(groupBox)
+            dialogBox.addLayout(buttonLayout)
+
+            self.normalizeDialog.setWindowTitle("Normalize raw data")
+            self.normalizeDialog.setLayout(dialogBox)
+            self.normalizeDialog.resize(250, 250)
+            self.normalizeDialog.exec_()
 
     def GraphUtilRawDataLineGraphs(self, gTitle, xLabel, yLabel, statTip, tabName, xx, whichG):
         """Generic graph method that helps graph the raw data.
@@ -239,10 +277,34 @@ class MainWindow (QMainWindow):
         elif whichG == 'C':
             tMax = np.max(self.dockedOpt.TT)
             tMin = np.min(self.dockedOpt.TT)
-            z = np.linspace(tMin, tMax, endpoint=True)
-            YY = range(nCol)
-            axes.contourf(YY, xx, self.dockedOpt.TT, z)
-            fig.colorbar(axes.contourf(YY, xx, self.dockedOpt.TT, z))
+            z = np.linspace(tMin, tMax)
+            yy = range(nCol)
+            """data = np.loadtxt("text")
+            nRow = data.shape[0]  # Gets the number of rows
+            nCol = data.shape[1]  # Gets the number of columns
+            x = 0
+            for f in range(nCol):
+                if (np.mean(data[:, f]) == 0):
+                    break
+                else:
+                    x += 1
+            nCol = x
+            txt = np.zeros((nRow, nCol))
+            for i in range(nCol):
+                txt[:, i] = data[:, i]
+            print len(txt[1, :])
+            xx = 1.982, 1.984, 1.986, 1.988, 1.99, 1.992, 1.994, 1.996, 1.998, 2, 2.002, 2.004,\
+                 2.006, 2.008, 2.01, 2.012, 2.014, 2.016, 2.018, 2.02, 2.022, 2.024, 2.026, 2.028
+            yy = range(20)
+            tMax = np.max(txt)
+            tMin = np.min(txt)
+            z = np.linspace(tMin, tMax)"""
+            axes.contourf(yy, xx, self.dockedOpt.TT, z)
+            fig.colorbar(axes.contourf(yy, xx, self.dockedOpt.TT, z))
+
+            contrastBtn = QPushButton("Contrast")
+            contrastBtn.clicked.connect(self.normalizeDialog.close)
+
 
         axes.set_title(gTitle)
         axes.set_xlabel(xLabel)
@@ -265,7 +327,6 @@ class MainWindow (QMainWindow):
         xx, gTitle, xLabel, statTip, tabName = self.readSpec.getRawDataLinePlotElements()
         if gTitle != 0:
              self.GraphUtilRawDataLineGraphs(gTitle, xLabel, 'Intensity', statTip, tabName, xx, 'L')
-
 
     # -----------------------------------Creating Report---------------------------------------------------------------#
     def ReportButton(self):
@@ -344,7 +405,7 @@ class MainWindow (QMainWindow):
         _, nCol = self.dockedOpt.fileInfo()
         reportData = np.zeros((nCol, 0))
         header = "#H "
-        scanNum = str(self.dockedOpt.specDataList.currentRow() + 1)
+        scanNum = self.readSpec.scan
         comment = "#C PVvalue #" + scanNum + "\n"
 
         if self.reportCbGausFit.isChecked():

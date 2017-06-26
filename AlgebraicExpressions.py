@@ -100,7 +100,7 @@ class AlgebraicExpress:
     def plotTh2ThExp(self):
         """This method plots the theta2theta graphs.
         """
-        title = '\u03B82\u03B8 (Scan#: ' + str(self.dockedOpt.specDataList.currentRow() + 1) + ')'
+        title = '\u03B82\u03B8 (Scan#: ' + self.readSpec.scan + ')'
 
         name1 = "\u03B82\u03B8"
         x = self.readSpec.L
@@ -120,7 +120,7 @@ class AlgebraicExpress:
     def plotWeightingExp(self):
         """This method plots the weighting graphs.
         """
-        title = 'Weighting (Scan#: ' + str(self.dockedOpt.specDataList.currentRow() + 1) + ')'
+        title = 'Weighting (Scan#: ' + self.readSpec.scan + ')'
 
         name1 = "Weighting 1"
         x = self.gausFit.getVoltage()
@@ -174,7 +174,7 @@ class AlgebraicExpress:
     def plotSingleValueIndex(self):
         """Plots the single value index graph.
         """
-        title = 'Singular Value Index (Scan#: ' + str(self.dockedOpt.specDataList.currentRow() + 1) + ')'
+        title = 'Singular Value Index (Scan#: ' + self.readSpec.scan + ')'
         name = "Singular Value Index"
         x = self.gausFit.getVoltage()
         y = log(self.S)

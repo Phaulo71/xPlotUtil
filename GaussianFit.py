@@ -81,7 +81,6 @@ class GaussianFitting:
 
             # Filling array with the Gaussian fit data from each bin
             binFit = np.reshape(self.gaus1(xx, *popt), (len(self.gaus1(xx, *popt)), 1))
-            print binFit[1]
             self.binFitData = np.concatenate((self.binFitData, binFit), axis=1)
 
             if self.continueGraphingEachFit == True:
@@ -420,7 +419,7 @@ class GaussianFitting:
         error = self.OnePkFitData[:, 1]
         xLabel = 'Voltage'
         yLabel = 'Intensity'
-        name = 'Amplitude (Scan#: ' + str(self.dockedOpt.specDataList.currentRow() + 1) + ')'
+        name = 'Amplitude (Scan#: ' + self.readSpec.scan + ')'
 
         self.GraphUtilGaussianFitGraphs(name, x, y, error, xLabel, yLabel, 'G')
 
@@ -432,7 +431,7 @@ class GaussianFitting:
         error = self.OnePkFitData[:, 3]
         xLabel = 'Voltage'
         yLabel = 'Position'
-        name = 'Position (Scan#: ' + str(self.dockedOpt.specDataList.currentRow() + 1) + ')'
+        name = 'Position (Scan#: ' + self.readSpec.scan + ')'
 
         self.GraphUtilGaussianFitGraphs(name, x, y, error, xLabel, yLabel, 'G')
 
@@ -444,7 +443,7 @@ class GaussianFitting:
         error = self.OnePkFitData[:, 5]
         xLabel = 'Voltage'
         yLabel = 'Width'
-        name = 'Width (Scan#: ' + str(self.dockedOpt.specDataList.currentRow() + 1) + ')'
+        name = 'Width (Scan#: ' + self.readSpec.scan + ')'
 
         self.GraphUtilGaussianFitGraphs(name, x, y, error, xLabel, yLabel, 'G')
 
@@ -461,7 +460,7 @@ class GaussianFitting:
 
         xLabel = 'Voltage'
         yLabel = 'A x W'
-        name = 'Amplitude X Width (Scan#: ' + str(self.dockedOpt.specDataList.currentRow() + 1) + ')'
+        name = 'Amplitude X Width (Scan#: ' + self.readSpec.scan + ')'
 
         self.GraphUtilGaussianFitGraphs(name, x, y, error, xLabel, yLabel, 'G')
 
@@ -473,7 +472,7 @@ class GaussianFitting:
         error = self.TwoPkGausFitData[:, 1]
         xLabel = 'Voltage'
         yLabel = 'Intensity'
-        name = 'Peak #1 Amplitude (Scan#: ' + str(self.dockedOpt.specDataList.currentRow() + 1) + ')'
+        name = 'Peak #1 Amplitude (Scan#: ' + self.readSpec.scan + ')'
 
         self.GraphUtilGaussianFitGraphs(name, x, y, error, xLabel, yLabel, 'G')
 
@@ -485,7 +484,7 @@ class GaussianFitting:
         error = self.TwoPkGausFitData[:, 5]
         xLabel = 'Voltage'
         yLabel = 'Position'
-        name = 'Peak #1 Position (Scan#: ' + str(self.dockedOpt.specDataList.currentRow() + 1) + ')'
+        name = 'Peak #1 Position (Scan#: ' + self.readSpec.scan + ')'
 
         self.GraphUtilGaussianFitGraphs(name, x, y, error, xLabel, yLabel, 'G')
 
@@ -497,7 +496,7 @@ class GaussianFitting:
         error = self.TwoPkGausFitData[:, 9]
         xLabel = 'Voltage'
         yLabel = 'Width'
-        name = 'Peak #1 Width (Scan#: ' + str(self.dockedOpt.specDataList.currentRow() + 1) + ')'
+        name = 'Peak #1 Width (Scan#: ' + self.readSpec.scan + ')'
 
         self.GraphUtilGaussianFitGraphs(name, x, y, error, xLabel, yLabel, 'G')
 
@@ -514,7 +513,7 @@ class GaussianFitting:
 
         xLabel = 'Voltage'
         yLabel = 'A x W'
-        name = 'Peak #1 Amplitude X Width (Scan#: ' + str(self.dockedOpt.specDataList.currentRow() + 1) + ')'
+        name = 'Peak #1 Amplitude X Width (Scan#: ' + self.readSpec.scan + ')'
 
         self.GraphUtilGaussianFitGraphs(name, x, y, error, xLabel, yLabel, 'G')
 
@@ -526,7 +525,7 @@ class GaussianFitting:
         error = self.TwoPkGausFitData[:, 3]
         xLabel = 'Voltage'
         yLabel = 'Intensity'
-        name = 'Peak #2 Amplitude (Scan#: ' + str(self.dockedOpt.specDataList.currentRow() + 1) + ')'
+        name = 'Peak #2 Amplitude (Scan#: ' + self.readSpec.scan + ')'
 
         self.GraphUtilGaussianFitGraphs(
             name, x, y, error, xLabel, yLabel, 'G')
@@ -539,7 +538,7 @@ class GaussianFitting:
         error = self.TwoPkGausFitData[:, 7]
         xLabel = 'Voltage'
         yLabel = 'Position'
-        name = 'Peak #2 Position (Scan#: ' + str(self.dockedOpt.specDataList.currentRow() + 1) + ')'
+        name = 'Peak #2 Position (Scan#: ' + self.readSpec.scan + ')'
 
         self.GraphUtilGaussianFitGraphs(name, x, y, error, xLabel, yLabel, 'G')
 
@@ -551,7 +550,7 @@ class GaussianFitting:
         error = self.TwoPkGausFitData[:, 11]
         xLabel = 'Voltage'
         yLabel = 'Width'
-        name = 'Peak #2 Width (Scan#: ' + str(self.dockedOpt.specDataList.currentRow() + 1) + ')'
+        name = 'Peak #2 Width (Scan#: ' + self.readSpec.scan + ')'
 
         self.GraphUtilGaussianFitGraphs(name, x, y, error, xLabel, yLabel, 'G')
 
@@ -568,7 +567,7 @@ class GaussianFitting:
 
         xLabel = 'Voltage'
         yLabel = 'A x W'
-        name = 'Peak #2 Amplitude X Width (Scan#: ' + str(self.dockedOpt.specDataList.currentRow() + 1) + ')'
+        name = 'Peak #2 Amplitude X Width (Scan#: ' + self.readSpec.scan + ')'
 
         self.GraphUtilGaussianFitGraphs(name, x, y, error, xLabel, yLabel, 'G')
 
@@ -647,7 +646,7 @@ class GaussianFitting:
         y = self.LPosData
         xLabel = 'Voltage'
         yLabel = 'L Constant (\u00c5)'
-        name = 'Lattice - Position (Scan#: ' + str(self.dockedOpt.specDataList.currentRow() + 1) + ')'
+        name = 'Lattice - Position (Scan#: ' + self.readSpec.scan + ')'
 
         self.GraphUtilGaussianFitGraphs(name, x, y, None, xLabel, yLabel, 'L')
 
@@ -658,7 +657,7 @@ class GaussianFitting:
         y = self.LPos1Data
         xLabel = 'Voltage'
         yLabel = 'L Constant'
-        name = 'Lattice - Position #1 (Scan#: ' + str(self.dockedOpt.specDataList.currentRow() + 1) + ')'
+        name = 'Lattice - Position #1 (Scan#: ' + self.readSpec.scan + ')'
 
         self.GraphUtilGaussianFitGraphs(name, x, y, None, xLabel, yLabel, 'L')
 
@@ -669,7 +668,7 @@ class GaussianFitting:
         y = self.LPos2Data
         xLabel = 'Voltage'
         yLabel = 'L Constant'
-        name = 'Lattice - Position #2 (Scan#: ' + str(self.dockedOpt.specDataList.currentRow() + 1) + ')'
+        name = 'Lattice - Position #2 (Scan#: ' + self.readSpec.scan + ')'
 
         self.GraphUtilGaussianFitGraphs(name, x, y, None, xLabel, yLabel, 'L')
 
@@ -701,7 +700,7 @@ class GaussianFitting:
         y = self.LPosPrcChangeData
         xLabel = 'Voltage'
         yLabel = '%-Change'
-        name = 'Lattice %-Change (Scan#: ' + str(self.dockedOpt.specDataList.currentRow() + 1) + ')'
+        name = 'Lattice %-Change (Scan#: ' + self.readSpec.scan + ')'
 
         self.GraphUtilGaussianFitGraphs(name, x, y, None, xLabel, yLabel, 'L')
 
@@ -712,7 +711,7 @@ class GaussianFitting:
         y = self.LPos1PrcChangeData
         xLabel = 'Voltage'
         yLabel = '%-Change'
-        name = 'Lattice %-Change #1 (Scan#: ' + str(self.dockedOpt.specDataList.currentRow() + 1) + ')'
+        name = 'Lattice %-Change #1 (Scan#: ' + self.readSpec.scan + ')'
 
         self.GraphUtilGaussianFitGraphs(name, x, y, None, xLabel, yLabel, 'L')
 
@@ -723,7 +722,7 @@ class GaussianFitting:
         y = self.LPos2PrcChangeData
         xLabel = 'Voltage'
         yLabel = '%-Change'
-        name = 'Lattice %-Change #2 (Scan#: ' + str(self.dockedOpt.specDataList.currentRow() + 1) + ')'
+        name = 'Lattice %-Change #2 (Scan#: ' + self.readSpec.scan + ')'
 
         self.GraphUtilGaussianFitGraphs(name, x, y, None, xLabel, yLabel, 'L')
 
@@ -742,7 +741,7 @@ class GaussianFitting:
                     header += str(i)+" "
                     i += 1
 
-                scanNum = str(self.dockedOpt.specDataList.currentRow() + 1)
+                scanNum = self.readSpec.scan
                 comment = "#C PVvalue #" + scanNum + "\n"
                 if self.dockedOpt.onePeakStat == True:
                     np.savetxt(reportFile, self.binFitData, fmt=str('%f'), header=header, comments=comment)
