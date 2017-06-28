@@ -12,6 +12,7 @@ import sys
 import os
 import numpy as np
 from pylab import *
+from threading import Timer
 
 from matplotlib.backends import qt_compat
 from matplotlib.figure import Figure
@@ -101,6 +102,17 @@ class MainWindow (QMainWindow):
         """
         self.myStatusBar = QStatusBar()
         self.setStatusBar(self.myStatusBar)
+        self.progressBar = QProgressBar()
+        self.progressBar.setMaximum(100)
+        self.progressBar.setMinimum(0)
+        self.progressLabel = QLabel()
+        self.spaceLabel = QLabel()
+        self.myStatusBar.addWidget(self.progressLabel)
+        self.myStatusBar.addWidget(self.spaceLabel)
+        self.myStatusBar.addWidget(self.progressBar, 1)
+        self.spaceLabel.hide()
+        self.progressLabel.hide()
+        self.progressBar.hide()
         self.myStatusBar.showMessage('Ready', 3000)
 
         self.CreateActions()
@@ -153,6 +165,22 @@ class MainWindow (QMainWindow):
         self.aboutAction = QAction(QIcon('about.png'), 'A&bout',
                                          self, shortcut="Ctrl+B", statusTip="Displays info about the graph program",
                                          triggered=self.aboutHelp)
+
+    def showProgress(self, txt):
+        self.progressBar.show()
+        self.progressLabel.show()
+        self.spaceLabel.show()
+
+        self.progressLabel.setText(txt)
+        self.progressBar.setValue(100)
+        stop = Timer(1.5, self.hideProgress)
+        stop.start()
+
+    def hideProgress(self):
+        self.progressBar.setValue(0)
+        self.progressBar.hide()
+        self.progressLabel.hide()
+        self.spaceLabel.hide()
 
     def CreateMenus(self):
         """This is where I initialize the menu bar and create the menus

@@ -54,7 +54,6 @@ class ReadSpec:
         h = text.split('.')
         return int(h[1])
 
-
     def openSpecDialog(self):
         """This method creates a file dialog to open the spec file. Once the file has been open it resets
         various attributes to their original value to initialize/reestablish functionality.
@@ -81,6 +80,7 @@ class ReadSpec:
                 self.dockedOpt.fileOpened = False
                 self.continueGraphingEachFit = True
                 self.myMainWindow.LatticeFitAction.setEnabled(False)
+                self.myMainWindow.showProgress("Spec file opened")
         except:
              print("Please make sure the directory follows the proper format, including the spec and PVvalue files.")
 
