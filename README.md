@@ -1,4 +1,4 @@
-xPlot Util Version 0.0.1 06/12/2017
+xPlot Util
 ===================================
 
 The program provides an interface for the the user to fit, graph and normalize its data. The GUI creates an interactive
@@ -7,6 +7,10 @@ directory of teh spec file will be loaded on the docked widget on the right of t
 scan by double clicking on it, the program will automatically open the particular selected file. This enables the user
 to graph the raw data, as well as do a Gaussian fit, normalize the data or do a Lattice fit. The program allows the user
 to graph the data obtained from both the Gaussian and Lattice fit, as well as to create a report from those fits.
+
+Version
+-------
+0.0.1 - 06/12/2017
 
 Getting Started
 ---------------
