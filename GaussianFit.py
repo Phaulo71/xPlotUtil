@@ -221,7 +221,7 @@ class GaussianFitting:
     def gausTwoPeakInputDialog(self):
         """Two Peak dialog where user inputs guesses for the gaussian fit.
         """
-        self.dialogGausFit = QDialog()
+        self.dialogGausFit = QDialog(self.myMainWindow)
         inputForm = QFormLayout()
         buttonLayout = QHBoxLayout()
         spaceLayout = QVBoxLayout()
