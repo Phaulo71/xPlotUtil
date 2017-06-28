@@ -75,7 +75,7 @@ class GaussianFitting:
             m = (y2-y1)/(x2-x1)
             b = y2-m*x2
             mean = sum(xx * yy) / sum(yy)  # note this correction
-            sig = np.sqrt(sum(yy * (xx - mean) ** 2)) / sqrt(sum(yy))
+            # sig = np.sqrt(sum(yy * (xx - mean) ** 2)) / sqrt(sum(yy))
             popt, pcov = curve_fit(self.gaus1, xx, yy, p0=[self.onePeakAmp, self.onePeakPos, self.onePeakWid, b, m])
             perr = np.sqrt(np.diag(pcov))
 
