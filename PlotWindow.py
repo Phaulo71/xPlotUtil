@@ -52,6 +52,9 @@ class MainWindow (QMainWindow):
         self.setCentralWidget(self.tabWidget)
         self.setTabPosition(Qt.RightDockWidgetArea | Qt.LeftDockWidgetArea, QTabWidget.North)
 
+        self.contrastMax = 0
+        self.contrastMin = 0
+
     # -----------------------------Central Tab Widget------------------------------------------------------------------#
     def windowTabs(self):
         """This function creates the central widget QTabWidget.
@@ -197,12 +200,8 @@ class MainWindow (QMainWindow):
             ampl = words[6]
         line1 = '[-' + str(ampl) + '] --> [0] --> [+' + str(ampl) + '] --> [0] --> [-' + str(ampl) + '] '
 
-        if self.readSpec.lMax - self.readSpec.lMin == 0:
-            xx = range(len(self.readSpec.L))
-            yLabel = 'Points'
-        else:
-            xx = self.readSpec.L
-            yLabel = "RLU (Reciprocal Lattice Unit)"
+        xx = self.readSpec.L
+        yLabel = "RLU (Reciprocal Lattice Unit)"
 
         gTitle = 'Raw Data Color Graph (Scan#: ' + self.readSpec.scan + ')'
         statTip = "Raw Data Color Graph"
@@ -216,39 +215,101 @@ class MainWindow (QMainWindow):
         """This method creates a dialog with dynamically created radio buttons from the spec file, which allow the
         user to pick which chamber was used to normalize.
         """
-        if self.dockedOpt.normalizingStat == False and self.dockedOpt.FileError() == False :
-            self.normalizeDialog = QDialog(self.myMainWindow)
-            dialogBox = QVBoxLayout()
-            buttonLayout = QHBoxLayout()
-            vBox = QVBoxLayout()
+        # if self.dockedOpt.normalizingStat == False and self.dockedOpt.FileError() == False :
+        self.contrastDialog = QDialog(self)
+        inputForm = QFormLayout()
+        buttonLayout = QHBoxLayout()
+        hBox = QHBoxLayout()
+        hBox1 = QHBoxLayout()
 
-            groupBox = QGroupBox("Select normalizer")
-            self.buttonGroup = QButtonGroup(groupBox)
+        maxContrastLbl = QLabel("Max Intensity:")
+        self.maxContrastSpin = QDoubleSpinBox()
+        self.maxContrastSpin.setMaximum(np.max(self.dockedOpt.TT) + 1000)
+        self.maxContrastSpin.setMinimum(np.min(self.dockedOpt.TT) - 999)
+        self.maxContrastSpin.setValue(np.max(self.dockedOpt.TT))
+        self.maxContrastSpin.valueChanged.connect(self.ContrastSpinMaxValue)
+        self.contrastMax = self.maxContrastSpin.value()
+        self.maxContrastSlider = QSlider(Qt.Horizontal)
+        self.maxContrastSlider.setMaximum(np.max(self.dockedOpt.TT) + 1000)
+        self.maxContrastSlider.setMinimum(np.min(self.dockedOpt.TT) - 999)
+        self.maxContrastSlider.setValue(np.max(self.dockedOpt.TT))
+        self.maxContrastSlider.valueChanged.connect(self.maxContrastSpin.setValue)
 
-            for norm in self.normalizers:
-                normalizerRB = QRadioButton(norm)
-                self.buttonGroup.addButton(normalizerRB, int(norm[-1]))
-                vBox.addWidget(normalizerRB)
+        minContrastLbl = QLabel("Min Intensity: ")
+        self.minContrastSpin = QDoubleSpinBox()
+        self.minContrastSpin.setMaximum(np.max(self.dockedOpt.TT) + 999)
+        self.minContrastSpin.setMinimum(np.min(self.dockedOpt.TT) - 1000)
+        self.minContrastSpin.setValue(np.min(self.dockedOpt.TT))
+        self.minContrastSpin.valueChanged.connect(self.ContrastSpinMinValue)
+        self.contrastMin = self.minContrastSpin.value()
+        self.minContrastSlider = QSlider(Qt.Horizontal)
+        self.minContrastSlider.setMaximum(np.max(self.dockedOpt.TT) + 999)
+        self.minContrastSlider.setMinimum(np.min(self.dockedOpt.TT) - 1000)
+        self.minContrastSlider.setValue(np.min(self.dockedOpt.TT))
+        self.minContrastSlider.valueChanged.connect(self.minContrastSpin.setValue)
+        self.minContrastSlider.setTickInterval(4)
 
-            groupBox.setLayout(vBox)
+        hBox.addWidget(maxContrastLbl)
+        hBox.addWidget(self.maxContrastSpin)
+        hBox.addWidget(self.maxContrastSlider)
+        hBox1.addWidget(minContrastLbl)
+        hBox1.addWidget(self.minContrastSpin)
+        hBox1.addWidget(self.minContrastSlider)
 
-            ok = QPushButton("Ok")
-            cancel = QPushButton("Cancel")
+        okBtn = QPushButton("Ok")
+        okBtn.clicked.connect(self.ReplottingColorGraph)
+        cancelBtn = QPushButton("Cancel")
+        cancelBtn.clicked.connect(self.contrastDialog.close)
 
-            cancel.clicked.connect(self.normalizeDialog.close)
-            ok.clicked.connect(self.getNormalizer)
+        buttonLayout.addWidget(cancelBtn)
+        buttonLayout.addStretch(1)
+        buttonLayout.addWidget(okBtn)
 
-            buttonLayout.addWidget(cancel)
-            buttonLayout.addStretch(1)
-            buttonLayout.addWidget(ok)
+        inputForm.addRow(hBox)
+        inputForm.addRow(hBox1)
+        inputForm.addRow(buttonLayout)
 
-            dialogBox.addWidget(groupBox)
-            dialogBox.addLayout(buttonLayout)
+        self.contrastDialog.setWindowTitle("Adjust contrast")
+        self.contrastDialog.setLayout(inputForm)
+        self.contrastDialog.resize(300, 100)
+        self.contrastDialog.exec_()
 
-            self.normalizeDialog.setWindowTitle("Normalize raw data")
-            self.normalizeDialog.setLayout(dialogBox)
-            self.normalizeDialog.resize(250, 250)
-            self.normalizeDialog.exec_()
+    def ContrastSpinMinValue(self, value):
+        if value >= self.maxContrastSpin.value():
+            self.minContrastSpin.setValue(self.contrastMin)
+            self.minContrastSlider.setValue(self.contrastMin)
+        else:
+            self.contrastMin = value
+
+    def ContrastSpinMaxValue(self, value):
+        if value <= self.minContrastSpin.value():
+            self.maxContrastSpin.setValue(self.contrastMax)
+            self.maxContrastSlider.setValue(self.contrastMax)
+        else:
+            self.contrastMax = value
+
+    def ReplottingColorGraph(self):
+        self.contrastDialog.close()
+        max = self.maxContrastSpin.value()
+        min = self.minContrastSpin.value()
+        ind = self.tabWidget.currentIndex()
+        self.figArray[ind].clear()
+        axes = self.figArray[ind].add_subplot(111)
+        nRow = self.dockedOpt.TT.shape[0]
+        nCol = self.dockedOpt.TT.shape[1]
+
+        z = np.linspace(min, max)
+        xx = self.readSpec.L
+        yy = range(nCol)
+        axes.contourf(yy, xx, self.dockedOpt.TT, z, cmap='jet')
+        self.figArray[ind].colorbar(axes.contourf(yy, xx, self.dockedOpt.TT, z, cmap='jet'))
+        gTitle = 'Raw Data Color Graph (Scan#: ' + self.readSpec.scan + ')'
+        xLabel = 'Bins'
+        yLabel = "RLU (Reciprocal Lattice Unit)"
+        axes.set_title(gTitle)
+        axes.set_xlabel(xLabel)
+        axes.set_ylabel(yLabel)
+        self.canvasArray[ind].draw()
 
     def GraphUtilRawDataLineGraphs(self, gTitle, xLabel, yLabel, statTip, tabName, xx, whichG):
         """Generic graph method that helps graph the raw data.
@@ -279,32 +340,12 @@ class MainWindow (QMainWindow):
             tMin = np.min(self.dockedOpt.TT)
             z = np.linspace(tMin, tMax)
             yy = range(nCol)
-            """data = np.loadtxt("text")
-            nRow = data.shape[0]  # Gets the number of rows
-            nCol = data.shape[1]  # Gets the number of columns
-            x = 0
-            for f in range(nCol):
-                if (np.mean(data[:, f]) == 0):
-                    break
-                else:
-                    x += 1
-            nCol = x
-            txt = np.zeros((nRow, nCol))
-            for i in range(nCol):
-                txt[:, i] = data[:, i]
-            print len(txt[1, :])
-            xx = 1.982, 1.984, 1.986, 1.988, 1.99, 1.992, 1.994, 1.996, 1.998, 2, 2.002, 2.004,\
-                 2.006, 2.008, 2.01, 2.012, 2.014, 2.016, 2.018, 2.02, 2.022, 2.024, 2.026, 2.028
-            yy = range(20)
-            tMax = np.max(txt)
-            tMin = np.min(txt)
-            z = np.linspace(tMin, tMax)"""
-            axes.contourf(yy, xx, self.dockedOpt.TT, z)
-            fig.colorbar(axes.contourf(yy, xx, self.dockedOpt.TT, z))
+
+            axes.contourf(yy, xx, self.dockedOpt.TT, z, cmap='jet')
+            fig.colorbar(axes.contourf(yy, xx, self.dockedOpt.TT, z, cmap='jet'))
 
             contrastBtn = QPushButton("Contrast")
-            contrastBtn.clicked.connect(self.normalizeDialog.close)
-
+            contrastBtn.clicked.connect(self.ColorGraphContrastDialog)
 
         axes.set_title(gTitle)
         axes.set_xlabel(xLabel)
@@ -316,6 +357,11 @@ class MainWindow (QMainWindow):
         vbox = QVBoxLayout()
         graphNavigationBar = NavigationToolbar(canvas, self)
         vbox.addWidget(graphNavigationBar)
+        if whichG == 'C':
+            hBox = QHBoxLayout()
+            hBox.addStretch()
+            hBox.addWidget(contrastBtn)
+            vbox.addLayout(hBox)
         vbox.addWidget(canvas)
         tab.setLayout(vbox)
 
