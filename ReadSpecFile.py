@@ -105,7 +105,12 @@ class ReadSpec:
         scan = self.PvFiles[self.dockedOpt.specDataList.currentRow()].split(".")
         self.scan = scan[1]
         self.currentRow = self.dockedOpt.specDataList.currentRow()
-        fileName = self.specDirectory + "/" + self.PvFiles[self.currentRow]
+
+        if self.specDirectory.find("/") == 0:
+            fileName = self.specDirectory + "/" + self.PvFiles[self.currentRow]
+        elif self.specDirectory.find("\\") == 0:
+            fileName = self.specDirectory + "\\" + self.PvFiles[self.currentRow]
+
         self.dockedOpt.openFile(fileName)
 
         # Making sure the file of the PVvalue has been opened
