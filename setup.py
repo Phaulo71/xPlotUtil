@@ -9,7 +9,7 @@ from setuptools import setup
 
 setup(
   name='xPlotUtil',
-  version='0.0.6',
+  version='0.0.7',
   description='The program provides a GUI for the user to graph the data in different forms, normalize and fit it.',
   author='Phaulo C. Escalante',
   author_email='escalante.phaulo@outlook.com',
@@ -24,5 +24,9 @@ setup(
                     ],
   license='See LICENSE File',
   platforms='any',
-  scripts=['Scripts/xPlotUtil.cmd', ]
+  scripts=['Scripts/xPlotUtil.bat', ],
+  entry_points={
+    'setuptools.installation': [
+        'eggsecutable = xPlotUtil.PlotWindow:main', ]
+  }
 )
