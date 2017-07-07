@@ -14,7 +14,6 @@ import numpy as np
 import os
 from pylab import *
 from peakutils import peak
-from matplotlib.backends import qt_compat
 from PyQt5.QtGui import *
 from PyQt5.QtCore import *
 from PyQt5.QtWidgets import *
@@ -25,7 +24,7 @@ from matplotlib.figure import Figure
 from matplotlib.backends.backend_qt5agg import FigureCanvasQTAgg as FigureCanvas
 from matplotlib.backends.backend_qt5 import NavigationToolbar2QT as NavigationToolbar
 from matplotlib.ticker import FormatStrFormatter
-from AlgebraicExpressions import AlgebraicExpress
+from xPlotUtil.AlgebraicExpressions import AlgebraicExpress
 # ---------------------------------------------------------------------------------------------------------------------#
 
 class GaussianFitting:

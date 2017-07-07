@@ -9,17 +9,18 @@ See LICENSE file.
 
 # ---------------------------------------------------------------------------------------------------------------------#
 from __future__ import unicode_literals
-from pylab import *
-from matplotlib.backends import qt_compat
-import os
-import gc
 
-from PyQt5.QtGui import *
+import gc
+import os
+
 from PyQt5.QtCore import *
 from PyQt5.QtWidgets import *
-
+from pylab import *
 from spec2nexus.spec import SpecDataFile
-from ReadSpecFile import ReadSpec
+
+from xPlotUtil.ReadSpecFile import ReadSpec
+
+
 # ---------------------------------------------------------------------------------------------------------------------#
 
 
