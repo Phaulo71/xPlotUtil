@@ -9,24 +9,19 @@ from setuptools import setup
 
 setup(
   name='xPlotUtil',
-  version='0.0.7',
+  version='0.1.2',
   description='The program provides a GUI for the user to graph the data in different forms, normalize and fit it.',
   author='Phaulo C. Escalante',
   author_email='escalante.phaulo@outlook.com',
   url='https://github.com/AdvancedPhotonSource/xPlotUtil',
-  packages=['xPlotUtil', ],
+  packages=['xPlotUtil', 'xPlotUtil.Source' ],
   install_requires=['spec2nexus',
                     'matplotlib',
                     'numpy',
                     'future',
-                    'scipy',
                     'peakutils',
                     ],
   license='See LICENSE File',
   platforms='any',
-  scripts=['Scripts/xPlotUtil.bat', ],
-  entry_points={
-    'setuptools.installation': [
-        'eggsecutable = xPlotUtil.PlotWindow:main', ]
-  }
+  scripts=['Scripts/xPlotUtil.bat', 'Scripts/xPlotUtil'],
 )
