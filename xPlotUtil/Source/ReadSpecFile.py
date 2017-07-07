@@ -9,16 +9,15 @@ See LICENSE file.
 
 # ---------------------------------------------------------------------------------------------------------------------#
 from __future__ import unicode_literals
-from pylab import *
-from matplotlib.backends import qt_compat
+
 import os
-from xPlotUtil.GaussianFit import GaussianFitting
 
-from PyQt5.QtGui import *
-from PyQt5.QtCore import *
 from PyQt5.QtWidgets import *
+from pylab import *
 
-from spec2nexus.spec import SpecDataFile
+from xPlotUtil.Source.GaussianFit import GaussianFitting
+
+
 # ---------------------------------------------------------------------------------------------------------------------#
 
 

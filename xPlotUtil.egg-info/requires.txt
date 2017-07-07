@@ -2,5 +2,4 @@ spec2nexus
 matplotlib
 numpy
 future
-scipy
 peakutils

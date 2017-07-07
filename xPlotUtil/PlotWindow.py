@@ -8,24 +8,21 @@ See LICENSE file.
 """
 # ---------------------------------------------------------------------------------------------------------------------#
 from __future__ import unicode_literals
-import sys
-import os
-import numpy as np
-from pylab import *
+
+import gc
 from threading import Timer
 
-from matplotlib.backends import qt_compat
-from matplotlib.figure import Figure
-from matplotlib.backends.backend_qt5agg import FigureCanvasQTAgg as FigureCanvas
-from matplotlib.backends.backend_qt5 import NavigationToolbar2QT as NavigationToolbar
-import gc
-
-
-from PyQt5.QtGui import *
 from PyQt5.QtCore import *
+from PyQt5.QtGui import *
 from PyQt5.QtWidgets import *
+from matplotlib.backends.backend_qt5 import NavigationToolbar2QT as NavigationToolbar
+from matplotlib.backends.backend_qt5agg import FigureCanvasQTAgg as FigureCanvas
+from matplotlib.figure import Figure
+from pylab import *
 
-from DockedOptions import DockedOption
+from xPlotUtil.Source.DockedOptions import DockedOption
+
+
 # ---------------------------------------------------------------------------------------------------------------------#
 
 class MainWindow (QMainWindow):
@@ -39,7 +36,7 @@ class MainWindow (QMainWindow):
         self.setGeometry(50, 50, 1000, 800)
         self.setMinimumSize(800, 700)
         self.setWindowTitle("xPlot Util")
-        self.setWindowIcon(QIcon('Icons/Graph.png'))
+        self.setWindowIcon(QIcon('Graph.png'))
         self.dockedOpt = DockedOption(parent=self)
         self.gausFit = self.dockedOpt.gausFit
         self.readSpec = self.dockedOpt.readSpec
@@ -205,10 +202,10 @@ class MainWindow (QMainWindow):
         """
         """This needs further development. In it's infancy level. """
         QMessageBox.about(self, "About xPlot Util",
-                          "Click on the browse button to select and open a spec file.\n"
-                          "Choose a PVValue and under xPlot in the menu bar you can click\n on the fits. "
-                          "Once you've clicked on the fit, checkboxes will apear that\n will enable you "
-                          "to graph")
+                          "Click on the browse button to select and open a spec file. "
+                          "The PVvalue files should be under the same directory as the spec. Double click"
+                          " on a PVvalue and the file will automatically open. After the file has been open"
+                          " the program's fittings and plots will enable.")
 
     # ----------------------------------------Raw Data Graphs----------------------------------------------------------#
     def PlotColorGraphRawData(self):

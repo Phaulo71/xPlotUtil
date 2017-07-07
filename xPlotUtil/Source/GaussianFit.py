@@ -9,22 +9,20 @@ See LICENSE file.
 """
 # ---------------------------------------------------------------------------------------------------------------------#
 from __future__ import unicode_literals
-import sys
-import numpy as np
-import os
-from pylab import *
-from peakutils import peak
-from PyQt5.QtGui import *
-from PyQt5.QtCore import *
-from PyQt5.QtWidgets import *
 
-from scipy.optimize import curve_fit
-from scipy import exp
-from matplotlib.figure import Figure
-from matplotlib.backends.backend_qt5agg import FigureCanvasQTAgg as FigureCanvas
+from PyQt5.QtWidgets import *
 from matplotlib.backends.backend_qt5 import NavigationToolbar2QT as NavigationToolbar
+from matplotlib.backends.backend_qt5agg import FigureCanvasQTAgg as FigureCanvas
+from matplotlib.figure import Figure
 from matplotlib.ticker import FormatStrFormatter
-from xPlotUtil.AlgebraicExpressions import AlgebraicExpress
+from peakutils import peak
+from pylab import *
+from scipy import exp
+from scipy.optimize import curve_fit
+
+from xPlotUtil.Source.AlgebraicExpressions import AlgebraicExpress
+
+
 # ---------------------------------------------------------------------------------------------------------------------#
 
 class GaussianFitting:

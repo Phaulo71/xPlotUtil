@@ -11,14 +11,13 @@ See LICENSE file.
 from __future__ import unicode_literals
 
 import gc
-import os
 
 from PyQt5.QtCore import *
 from PyQt5.QtWidgets import *
 from pylab import *
 from spec2nexus.spec import SpecDataFile
 
-from xPlotUtil.ReadSpecFile import ReadSpec
+from xPlotUtil.Source.ReadSpecFile import ReadSpec
 
 
 # ---------------------------------------------------------------------------------------------------------------------#
