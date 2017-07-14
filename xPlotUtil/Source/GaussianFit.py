@@ -16,6 +16,8 @@ from matplotlib.backends.backend_qt5agg import FigureCanvasQTAgg as FigureCanvas
 from matplotlib.figure import Figure
 from matplotlib.ticker import FormatStrFormatter
 from peakutils import peak
+from lmfit.models import LorentzianModel, GaussianModel, LinearModel, VoigtModel
+from lmfit import Parameters
 from pylab import *
 from scipy import exp
 from scipy.optimize import curve_fit
@@ -26,7 +28,7 @@ from xPlotUtil.Source.AlgebraicExpressions import AlgebraicExpress
 # ---------------------------------------------------------------------------------------------------------------------#
 
 class GaussianFitting:
-    """This were most of the fits occur, and the plotting of those outcomes.
+    """Contains Gaussian fit and lattice fit.
     """
 
     def __init__ (self, parent=None):
@@ -39,29 +41,30 @@ class GaussianFitting:
         self.dockedOpt = self.readSpec.dockedOpt
         self.myMainWindow = self.dockedOpt.myMainWindow
         self.algebraExp = AlgebraicExpress(parent=self)
-        self.continueGraphingEachFit = True #Boolean to stop on Each fit graphing
+        self.lorentFit = self.algebraExp.lorentFit
+        self.continueGraphingEachFit = True  # Boolean to stop on Each fit graphing
 
     # --------------------------------Gaussian Fit---------------------------------------------------------------------#
     def OnePeakFitting(self):
         """Calls on the gaussian fit function for one peak and saves fitted data in array.
         """
-        try:
-            nRow, nCol = self.dockedOpt.fileInfo()
+        # try:
+        nRow, nCol = self.dockedOpt.fileInfo()
 
-            self.binFitData = zeros((nRow, 0))
-            self.OnePkFitData = zeros((nCol, 6))  # Creates the empty 2D List
-            for j in range(nCol):
-                col_data = self.dockedOpt.TT[:, j]
-                xx = arange(0, len(col_data))
-                param = self.onePkFitting(xx, col_data)
-                fit_result = param[0]
-                fit_error = param[1]
-                self.OnePkFitData[j, :] = (fit_result[0], fit_error[0], fit_result[1], fit_error[1], fit_result[2],
-                                           fit_error[2])
-            return False
-        except:
-            QMessageBox.warning(self.myMainWindow, "Error", "Please make sure the guesses are realistic when fitting.")
-            return True
+        self.binFitData = zeros((nRow, 0))
+        self.OnePkFitData = zeros((nCol, 6))  # Creates the empty 2D List
+        for j in range(nCol):
+            col_data = self.dockedOpt.TT[:, j]
+            xx = arange(0, len(col_data))
+            param = self.onePkFitting(xx, col_data)
+            fit_result = param[0]
+            fit_error = param[1]
+            self.OnePkFitData[j, :] = (fit_result[0], fit_error[0], fit_result[1], fit_error[1], fit_result[2],
+                                       fit_error[2])
+        return False
+        # except:
+            # QMessageBox.warning(self.myMainWindow, "Error", "Please make sure the guesses are realistic when fitting.")
+           # return True
 
     def onePkFitting(self, xx, yy):
         """Gaussian Fit for one Peak.
@@ -85,7 +88,7 @@ class GaussianFitting:
         self.binFitData = np.concatenate((self.binFitData, binFit), axis=1)
 
         if self.continueGraphingEachFit == True:
-            self.graphEachFitRawData(xx, yy, popt, 1)
+            self.graphEachFitRawData(xx, yy, popt, 'G', 1)
         return popt, perr
 
     def gaus1(self, x, a, x0, sigma, b, m):
@@ -144,7 +147,7 @@ class GaussianFitting:
         if error == False:
             self.dockedOpt.onePeakStat = True
             self.dockedOpt.gausFitStat = True
-            self.dockedOpt.GraphingGaussianOptionsTree()
+            self.dockedOpt.GraphingFitOptionsTree('G')
 
     def GuessOnePeak(self):
         """This method uses the PeakUtils module to calculate the position of the peak, which helps get the
@@ -163,23 +166,23 @@ class GaussianFitting:
     def TwoPeakFitting(self):
         """Calls on the gaussian fit function for two peaks and saves fitted data in array.
         """
-        try:
-            nRow, nCol = self.dockedOpt.fileInfo()
-            self.binFitData = zeros((nRow, 0))
-            self.TwoPkGausFitData = zeros((nCol, 12))  # Creates the empty 2D List
-            for j in range(nCol):
-                col_data = self.dockedOpt.TT[:, j]
-                xx = arange(0, len(col_data))
-                param = self.twoPkFitting(xx, col_data)
-                fit_result = ["%f" % member for member in param[0]]
-                fit_error = ["%f" % member for member in param[1]]
-                self.TwoPkGausFitData[j, :] = (fit_result[0], fit_error[0], fit_result[1], fit_error[1], fit_result[2],
-                                           fit_error[2], fit_result[3], fit_error[3], fit_result[4], fit_error[4],
-                                           fit_result[5], fit_error[5])
-            return False
-        except:
-            QMessageBox.warning(self.myMainWindow, "Warning", "Please make sure to input realistic guesses.")
-            return True
+       # try:
+        nRow, nCol = self.dockedOpt.fileInfo()
+        self.binFitData = zeros((nRow, 0))
+        self.TwoPkGausFitData = zeros((nCol, 12))  # Creates the empty 2D List
+        for j in range(nCol):
+            col_data = self.dockedOpt.TT[:, j]
+            xx = arange(0, len(col_data))
+            param = self.twoPkFitting(xx, col_data)
+            fit_result = ["%f" % member for member in param[0]]
+            fit_error = ["%f" % member for member in param[1]]
+            self.TwoPkGausFitData[j, :] = (fit_result[0], fit_error[0], fit_result[1], fit_error[1], fit_result[2],
+                                       fit_error[2], fit_result[3], fit_error[3], fit_result[4], fit_error[4],
+                                       fit_result[5], fit_error[5])
+        return False
+        #except:
+           # QMessageBox.warning(self.myMainWindow, "Warning", "Please make sure to input realistic guesses.")
+            #return True
 
     def twoPkFitting(self, xx, yy):
         """Gaussian Fit for one Peak.
@@ -205,7 +208,7 @@ class GaussianFitting:
         self.binFitData = np.concatenate((self.binFitData, binFit), axis=1)
 
         if self.continueGraphingEachFit == True:
-            self.graphEachFitRawData(xx, yy, popt, 2)
+            self.graphEachFitRawData(xx, yy, popt, 'G', 2)
 
         return popt, perr
 
@@ -282,7 +285,7 @@ class GaussianFitting:
             # Marks that the data has been fitted for one peak
             self.dockedOpt.twoPeakStat = True
             self.dockedOpt.gausFitStat = True
-            self.dockedOpt.GraphingGaussianOptionsTree()
+            self.dockedOpt.GraphingFitOptionsTree("G")
 
     def GuessTwoPeak(self):
         """This method uses the PeakUtils module to calculate the position of the peaks, which help get the
@@ -300,7 +303,7 @@ class GaussianFitting:
         except:
             return 0, 0, 0, 0
 
-    def graphEachFitRawData(self, xx, yy, popt, whichPeak):
+    def graphEachFitRawData(self, xx, yy, fitData, whichFit, whichPeak):
         """This method graphs the raw data and the fitted data for each column.
         :param xx: bins
         :param yy: raw data column
@@ -316,12 +319,21 @@ class GaussianFitting:
         axes = fig.add_subplot(111)
 
         axes.plot(xx, yy, 'b+:', label='data')
-        if(whichPeak == 1):
-            axes.plot(xx, self.gaus1(xx, *popt), 'ro:', label='fit')
-        elif(whichPeak == 2):
-            axes.plot(xx, self.gaus2(xx, *popt), 'ro:', label='fit')
+        if whichFit == 'G':
+            if(whichPeak == 1):
+                axes.plot(xx, self.gaus1(xx, *fitData), 'ro:', label='fit')
+            elif(whichPeak == 2):
+                # axes.plot(xx, self.gaus2(xx, *fitData), 'ro:', label='fit')
+                axes.plot(xx, fitData, 'ro:', label='fit')
+            axes.set_title('Gaussian Fit')
+        elif whichFit == 'L':
+            axes.plot(xx, fitData, 'ro:', label='fit')
+            axes.set_title("Lorentzian Fit")
+        elif whichFit == 'V':
+            axes.plot(xx, fitData, 'ro:', label='fit')
+            axes.set_title("Voigt Fit")
+
         axes.legend()
-        axes.set_title('Gaussian Fit')
         axes.set_xlabel('Bins')
         axes.set_ylabel('Intensity')
         canvas.draw()

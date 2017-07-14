@@ -11,6 +11,7 @@ See LICENSE file.
 from __future__ import unicode_literals
 
 import gc
+import os
 
 from PyQt5.QtCore import *
 from PyQt5.QtWidgets import *
@@ -35,6 +36,7 @@ class DockedOption(QDockWidget):
         self.readSpec = ReadSpec(self)
         self.gausFit = self.readSpec.gausFit
         self.algebraExp = self.gausFit.algebraExp
+        self.lorentFit = self.readSpec.lorentFit
 
         # Keeps track of when the function has been apply
         self.onePeakStat = False
@@ -169,7 +171,7 @@ class DockedOption(QDockWidget):
             self.mainOptions.close()
             self.DockMainOptions()
             self.specFileInfo()
-            self.myMainWindow.LatticeFitAction.setEnabled(False)
+            self.myMainWindow.latticeFitAction.setEnabled(False)
             self.specDataList.setCurrentRow(self.readSpec.currentRow)
             self.onePeakStat = False
             self.twoPeakStat = False
@@ -274,7 +276,7 @@ class DockedOption(QDockWidget):
         self.DockMainOptions()
         self.gausFit.continueGraphingEachFit = True
 
-        self.myMainWindow.LatticeFitAction.setEnabled(False)
+        self.myMainWindow.latticeFitAction.setEnabled(False)
 
         self.readSpec.specFileOpened = False
         self.readSpec.specFileName = None
@@ -376,24 +378,30 @@ class DockedOption(QDockWidget):
             self.algebraExp.singularValueDecomposition()
             self.graphingOptionsTree.addTopLevelItem(self.algebraicExpTopBranch)
 
-    def GraphingGaussianOptionsTree(self):
+    def GraphingFitOptionsTree(self, fit):
         """This method initializes the tree branch for the gaussian fit graphing options.
         """
-        # Gaussian Fit Top Branch
-        self.gaussianFitTopBranch = QTreeWidgetItem()
-        self.gaussianFitTopBranch.setText(0, "Gaussian Fit")
-        self.gaussianFitTopBranch.setFlags(self.gaussianFitTopBranch.flags() | Qt.ItemIsTristate |
+        if fit == 'G':
+            name = "Gaussian Fit"
+        elif fit == 'L':
+            name = 'Lorentzian Fit'
+        elif fit == 'V':
+            name = 'Voigt Fit'
+
+        self.fitTopBranch = QTreeWidgetItem()
+        self.fitTopBranch.setText(0, name)
+        self.fitTopBranch.setFlags(self.fitTopBranch.flags() | Qt.ItemIsTristate |
                                            Qt.ItemIsUserCheckable)
 
         if self.twoPeakStat == True:
-            """Gaussian Fit Children"""
+            """Fit Children"""
             # Peak One
-            self.peakOneBranch = QTreeWidgetItem(self.gaussianFitTopBranch)
+            self.peakOneBranch = QTreeWidgetItem(self.fitTopBranch)
             self.peakOneBranch.setText(0, "Peak #1")
             self.peakOneBranch.setFlags(self.peakOneBranch.flags() | Qt.ItemIsTristate | Qt.ItemIsUserCheckable)
 
             # Peak Two
-            self.peakTwoBranch = QTreeWidgetItem(self.gaussianFitTopBranch)
+            self.peakTwoBranch = QTreeWidgetItem(self.fitTopBranch)
             self.peakTwoBranch.setText(0, "Peak #2")
             self.peakTwoBranch.setFlags(self.peakTwoBranch.flags() | Qt.ItemIsTristate | Qt.ItemIsUserCheckable)
 
@@ -450,33 +458,33 @@ class DockedOption(QDockWidget):
         elif self.onePeakStat == True:
             """Children of Gaussian Branch"""
             # Amplitude
-            self.onePeakAmplitude = QTreeWidgetItem(self.gaussianFitTopBranch)
+            self.onePeakAmplitude = QTreeWidgetItem(self.fitTopBranch)
             self.onePeakAmplitude.setFlags(self.onePeakAmplitude.flags() | Qt.ItemIsUserCheckable | Qt.ItemIsTristate)
             self.onePeakAmplitude.setText(0, "Amplitude")
             self.onePeakAmplitude.setCheckState(0, Qt.Unchecked)
 
             # Position
-            self.onePeakPosition = QTreeWidgetItem(self.gaussianFitTopBranch)
+            self.onePeakPosition = QTreeWidgetItem(self.fitTopBranch)
             self.onePeakPosition.setFlags(self.onePeakPosition.flags() | Qt.ItemIsUserCheckable | Qt.ItemIsTristate)
             self.onePeakPosition.setText(0, "Position")
             self.onePeakPosition.setCheckState(0, Qt.Unchecked)
 
             # Width Peak One
-            self.onePeakWidth = QTreeWidgetItem(self.gaussianFitTopBranch)
+            self.onePeakWidth = QTreeWidgetItem(self.fitTopBranch)
             self.onePeakWidth.setFlags(self.onePeakWidth.flags() | Qt.ItemIsUserCheckable | Qt.ItemIsTristate)
             self.onePeakWidth.setText(0, "Width")
             self.onePeakWidth.setCheckState(0, Qt.Unchecked)
 
             # Amplitude x Width Peak One
-            self.onePeakAmpxWid = QTreeWidgetItem(self.gaussianFitTopBranch)
+            self.onePeakAmpxWid = QTreeWidgetItem(self.fitTopBranch)
             self.onePeakAmpxWid.setFlags(self.onePeakAmpxWid.flags() | Qt.ItemIsUserCheckable | Qt.ItemIsTristate)
             self.onePeakAmpxWid.setText(0, "Amplitude x Width")
             self.onePeakAmpxWid.setCheckState(0, Qt.Unchecked)
 
         #Adding the top branch to the graphing options tree
-        self.graphingOptionsTree.addTopLevelItem(self.gaussianFitTopBranch)
+        self.graphingOptionsTree.addTopLevelItem(self.fitTopBranch)
 
-        self.myMainWindow.LatticeFitAction.setEnabled(True)
+        self.myMainWindow.latticeFitAction.setEnabled(True)
 
 
     def GraphingLatticeOptionsTree(self):

@@ -41,6 +41,7 @@ class MainWindow (QMainWindow):
         self.gausFit = self.dockedOpt.gausFit
         self.readSpec = self.dockedOpt.readSpec
         self.algebraExp = self.gausFit.algebraExp
+        self.lorentFit = self.dockedOpt.lorentFit
         self.canvasArray = []
         self.figArray = []
 
@@ -124,21 +125,25 @@ class MainWindow (QMainWindow):
         self.graphMenu.addAction(self.mainOptionsAction)
         self.graphMenu.addAction(self.normalizeAction)
         self.graphMenu.addAction(self.algebraicExpAction)
-        self.graphMenu.addAction(self.GaussianFitAction)
-        self.graphMenu.addAction(self.LatticeFitAction)
+        self.fitMenu = self.graphMenu.addMenu("Fits")
+        self.fitMenu.addAction(self.gaussianFitAction)
+        self.fitMenu.addAction(self.lorentzianFitAction)
+        self.fitMenu.addAction(self.voigtFitAction)
+        self.fitMenu.addAction(self.latticeFitAction)
         self.graphMenu.addSeparator()
         self.helpMenu.addSeparator()  
         self.helpMenu.addAction(self.aboutAction)
 
-        self.LatticeFitAction.setEnabled(False)
+        self.latticeFitAction.setEnabled(False)
 
     def CreateActions(self):
         """Function that creates the actions used in the menu bar
         """
-        self.openAction = QAction(QIcon('openFolder.png'), '&Open',
-                                        self, shortcut=QKeySequence.Open,
-                                        statusTip="Open an existing file",
-                                        triggered=self.readSpec.openSpecFile)
+        self.openAction = QAction(QIcon('openFolder.png'), '&Open', self)
+        self.openAction.setShortcut(QKeySequence.Open)
+        self.openAction.setStatusTip("Open an existing file")
+        self.openAction.triggered.connect(self.readSpec.openSpecFile)
+
         self.exitAction = QAction(QIcon('exit.png'), 'E&xit',
                                         self, shortcut="Ctrl+Q",
                                         statusTip="Exit the Application",
@@ -147,15 +152,19 @@ class MainWindow (QMainWindow):
                                   triggered=self.dockedOpt.resetxPlot)
         self.reportAction = QAction('Report', self, statusTip="Create a report of the data",
                                          triggered=self.ReportDialog)
-        self.binGausFitReportAction = QAction('Bin Gaussian Fit', self, statusTip="Create a report from bin fitted data",
+        self.binGausFitReportAction = QAction('Gaussian Fit by Bins', self, statusTip="Create a report from bin fitted data",
                                               triggered=self.gausFit.EachFitDataReport)
         self.mainOptionsAction = QAction('Main Options', self, statusTip="Main options for xPlot Util",
                                              triggered=self.dockedOpt.restoreMainOptions)
-        self.GaussianFitAction= QAction('Gaussian Fit',self, statusTip="Dock the graphing options" ,
+        self.gaussianFitAction= QAction('Gaussian Fit',self, statusTip="Gaussian fit",
                                         triggered=self.dockedOpt.WhichPeakGaussianFit)
-        self.LatticeFitAction = QAction('Lattice Fit', self, statusTip="Fits the data to the L fit",
+        self.lorentzianFitAction = QAction('Lorentzian Fit', self, statusTip="Lorentzian fit.",
+                                         triggered=self.lorentFit.WhichPeakLorentzianFit)
+        self.voigtFitAction = QAction('Voigt Fit', self, statusTip="Voigt fit.",
+                                         triggered=self.lorentFit.WhichPeakVoigtFit)
+        self.latticeFitAction = QAction('Lattice Fit', self, statusTip="Lattice fit.",
                                   triggered =self.dockedOpt.GraphingLatticeOptionsTree)
-        self.normalizeAction = QAction('Normalize', self, statusTip ='Normalizes the data',
+        self.normalizeAction = QAction('Normalize', self, statusTip='Normalizes the data',
                                        triggered=self.readSpec.NormalizerDialog)
         self.algebraicExpAction = QAction('Algebraic Expressions', self, statusTip='Algebraic expressions.',
                                        triggered=self.dockedOpt.DataGraphingAlgebraicExpOptionsTree)

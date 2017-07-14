@@ -29,6 +29,7 @@ class ReadSpec:
         self.dockedOpt = parent
         self.myMainWindow = self.dockedOpt.myMainWindow
         self.gausFit = GaussianFitting(self)
+        self.lorentFit = self.gausFit.lorentFit
         self.algebraExp = self.gausFit.algebraExp
         self.specFileOpened = False
         self.specFileName = None
@@ -78,7 +79,7 @@ class ReadSpec:
                 self.specFileOpened = True
                 self.dockedOpt.fileOpened = False
                 self.continueGraphingEachFit = True
-                self.myMainWindow.LatticeFitAction.setEnabled(False)
+                self.myMainWindow.latticeFitAction.setEnabled(False)
                 self.myMainWindow.showProgress("Spec file opened")
         except:
              print("Please make sure the directory follows the proper format, including the spec and PVvalue files.")
