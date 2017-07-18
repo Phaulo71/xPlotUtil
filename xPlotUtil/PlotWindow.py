@@ -467,7 +467,7 @@ class MainWindow (QMainWindow):
         self.reportCbGausFit.setEnabled(False)
         self.reportCbLFit.setEnabled(False)
 
-        if self.dockedOpt.gausFitStat == True:
+        if self.dockedOpt.fitStat == True:
             self.reportCbGausFit.setEnabled(True)
         if self.dockedOpt.LFitStat == True:
             self.reportCbLFit.setEnabled(True)

@@ -43,7 +43,7 @@ class DockedOption(QDockWidget):
         self.twoPeakStat = False
         self.fileOpened = False
 
-        self.gausFitStat = False
+        self.fitStat = False
         self.LFitStat = False
         self.normalizingStat = False
         self.algebraicExpStat = False
@@ -176,7 +176,7 @@ class DockedOption(QDockWidget):
             self.onePeakStat = False
             self.twoPeakStat = False
             self.normalizingStat = False
-            self.gausFitStat = False
+            self.fitStat = False
             self.LFitStat = False
             self.algebraicExpStat = False
             self.rdOnlyScanSelected.setStatusTip(self.fileName)
@@ -237,12 +237,12 @@ class DockedOption(QDockWidget):
         """This function asks the user for the amount of peaks. Then calls on the appropriate dialog, depending on
         the peak number.
         """
-        if self.FileError() == False and self.gausFitStat == False:
+        if self.FileError() == False and self.fitStat == False:
             chosePeak = self.PeakDialog()
             if (chosePeak == 'One'):
-                self.gausFit.gausOnePeakInputDialog()
+                self.gausFit.OnePeakGaussianFit()
             elif (chosePeak == 'Two'):
-                self.gausFit.gausTwoPeakInputDialog()
+                self.gausFit.TwoPeakGaussianFit()
 
     def PeakDialog(self):
         """Method that creates a dialog, so that the user can peak the number of peaks.
@@ -285,7 +285,7 @@ class DockedOption(QDockWidget):
         self.onePeakStat = False
         self.twoPeakStat = False
         self.fileOpened = False
-        self.gausFitStat = False
+        self.fitStat = False
         self.LFitStat = False
         self.normalizingStat = False
         self.algebraicExpStat = False
@@ -489,7 +489,7 @@ class DockedOption(QDockWidget):
 
     def GraphingLatticeOptionsTree(self):
         """This method initializes the tree branch for the lattice fit graphing options"""
-        if self.LFitStat == False and self.gausFitStat == True:
+        if self.LFitStat == False and self.fitStat == True:
             # L Fit Top Branch
             self.LFitTopBranch = QTreeWidgetItem()
             self.LFitTopBranch.setText(0, "Lattice Fit")

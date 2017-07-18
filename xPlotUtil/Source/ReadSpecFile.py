@@ -71,7 +71,7 @@ class ReadSpec:
 
                 self.dockedOpt.mainOptions.close()
                 self.dockedOpt.DockMainOptions()
-                self.dockedOpt.gausFitStat = False
+                self.dockedOpt.fitStat = False
                 self.dockedOpt.LFitStat = False
                 self.dockedOpt.normalizingStat = False
                 self.algebraicExpStat = False
