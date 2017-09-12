@@ -11,9 +11,12 @@ See LICENSE file.
 from __future__ import unicode_literals
 
 from PyQt5.QtWidgets import *
-from lmfit.models import LorentzianModel, GaussianModel, LinearModel, VoigtModel
+from lmfit.models import LorentzianModel, GaussianModel, LinearModel, VoigtModel, Model
+from lmfit.lineshapes import voigt, linear
 from lmfit import Parameters
 from pylab import *
+from peakutils import peak
+from scipy.optimize import curve_fit
 # ---------------------------------------------------------------------------------------------------------------------#
 
 
@@ -29,13 +32,26 @@ class LorentzianFitting:
         self.myMainWindow = self.algebraExp.myMainWindow
 
     def WhichPeakLorentzianFit(self):
-
-        if self.dockedOpt.FileError() == False and self.dockedOpt.fitStat == False:
-            chosePeak = self.dockedOpt.PeakDialog()
-            if (chosePeak == 'One'):
-                self.OnePeakLorentzianFit()
-            elif (chosePeak == 'Two'):
-                self.TwoPeakLorentzianFit()
+        if self.dockedOpt.fitStat == True:
+            ans = self.dockedOpt.msgApp("New Fit", "Would you like to refit the data? \n\n This will delete the data"
+                                                   "from the previous fit.")
+            if ans == 'N':
+                pass
+            else:
+                self.dockedOpt.openFile(self.dockedOpt.fileName)
+                if self.dockedOpt.FileError() == False and self.dockedOpt.fitStat == False:
+                    chosePeak = self.dockedOpt.PeakDialog()
+                    if (chosePeak == 'One'):
+                        self.OnePeakLorentzianFit()
+                    elif (chosePeak == 'Two'):
+                        self.TwoPeakLorentzianFit()
+        else:
+            if self.dockedOpt.FileError() == False and self.dockedOpt.fitStat == False:
+                chosePeak = self.dockedOpt.PeakDialog()
+                if (chosePeak == 'One'):
+                    self.onePeakLorentzianFit()
+                elif (chosePeak == 'Two'):
+                    self.TwoPeakLorentzianFit()
 
     def OnePeakLorentzianFit(self):
         error = self.onePeakLorentzianFit()
@@ -63,7 +79,7 @@ class LorentzianFitting:
                 b = y2 - m * x2
 
                 mod = LorentzianModel()
-                pars = mod.guess(yy, x=xx)
+                pars = mod.guess(yy, x=xx, slope=m)
                 mod = mod + LinearModel()
                 pars.add('intercept', value=b, vary=True)
                 pars.add('slope', value=m, vary=True)
@@ -132,6 +148,9 @@ class LorentzianFitting:
                 pars.add('intercept', value=b, vary=True)
                 pars.add('slope', value=m, vary=True)
                 out = mod.fit(yy, pars, x=xx, slope=m)
+                print pars
+                print out.fit_report()
+                print out.best_values
 
                 self.gausFit.TwoPkGausFitData[j, :] = (out.best_values['p1_amplitude'], 0, out.best_values['p1_center'],
                                                        0, out.best_values['p1_sigma'], 0,
@@ -151,8 +170,20 @@ class LorentzianFitting:
             return True
 
     def WhichPeakVoigtFit(self):
-
-        if self.dockedOpt.FileError() == False and self.dockedOpt.fitStat == False:
+        if self.dockedOpt.fitStat == True:
+            ans = self.dockedOpt.msgApp("New Fit", "Would you like to refit the data? \n\n This will delete the data"
+                                                   "from the previous fit.")
+            if ans == 'N':
+                pass
+            else:
+                self.dockedOpt.openFile(self.dockedOpt.fileName)
+                if self.dockedOpt.FileError() == False and self.dockedOpt.fitStat == False:
+                    chosePeak = self.dockedOpt.PeakDialog()
+                    if (chosePeak == 'One'):
+                        self.OnePeakVoigtFit()
+                    elif (chosePeak == 'Two'):
+                        self.TwoPeakVoigtFit()
+        else:
             chosePeak = self.dockedOpt.PeakDialog()
             if (chosePeak == 'One'):
                 self.OnePeakVoigtFit()
@@ -167,46 +198,53 @@ class LorentzianFitting:
             self.dockedOpt.fitStat = True
             self.dockedOpt.GraphingFitOptionsTree("V")
 
+
     def onePeakVoigtFit(self):
-        try:
-            nRow, nCol = self.dockedOpt.fileInfo()
+        # try:
+        nRow, nCol = self.dockedOpt.fileInfo()
 
-            self.gausFit.binFitData = zeros((nRow, 0))
-            self.gausFit.OnePkFitData = zeros((nCol, 6))  # Creates the empty 2D List
-            for j in range(nCol):
-                yy = self.dockedOpt.TT[:, j]
-                xx = arange(0, len(yy))
+        self.gausFit.binFitData = zeros((nRow, 0))
+        self.gausFit.OnePkFitData = zeros((nCol, 6))  # Creates the empty 2D List
+        for j in range(nCol):
+            yy = self.dockedOpt.TT[:, j]
+            xx = arange(0, len(yy))
+            x1 = xx[0]
+            x2 = xx[-1]
+            y1 = yy[0]
+            y2 = yy[-1]
+            m = (y2 - y1) / (x2 - x1)
+            b = y2 - m * x2
 
-                x1 = xx[0]
-                x2 = xx[-1]
-                y1 = yy[0]
-                y2 = yy[-1]
-                m = (y2 - y1) / (x2 - x1)
-                b = y2 - m * x2
+            mod = VoigtModel()
+            mod.guess(yy, x=xx)
+            pars = mod.guess(yy, x=xx)
+            print pars
+            mod = mod + LinearModel()
+            pars.add('intercept', value=b, vary=True)
+            pars.add('slope', value=m, vary=True)
+            out = mod.fit(yy, pars, x=xx)
+            amplitude = out.best_values['amplitude']
+            print amplitude
+            print out.best_values
+            print out.fit_report()
 
-                mod = VoigtModel()
-                # print mod.param_names
-                pars = mod.guess(yy, x=xx)
-                mod = mod + LinearModel()
-                pars.add('intercept', value=b, vary=True)
-                pars.add('slope', value=m, vary=True)
-                out = mod.fit(yy, pars, x=xx, slope=m)
+            fitError = self.getFitError(out.fit_report(sort_pars=True), amplitude)
 
-                self.gausFit.OnePkFitData[j, :] = (out.best_values['amplitude'], 0, out.best_values['center'], 0,
-                                           out.best_values['sigma'], 0)
+            self.gausFit.OnePkFitData[j, :] = (amplitude, 0, out.best_values['center'], 0,
+                                       out.best_values['sigma'], 0)
 
-                # Saves fitted data of each fit
-                fitData = out.best_fit
-                binFit = np.reshape(fitData, (len(fitData), 1))
-                self.gausFit.binFitData = np.concatenate((self.gausFit.binFitData, binFit), axis=1)
+            # Saves fitted data of each fit
+            fitData = out.best_fit
+            binFit = np.reshape(fitData, (len(fitData), 1))
+            self.gausFit.binFitData = np.concatenate((self.gausFit.binFitData, binFit), axis=1)
 
-                if self.gausFit.continueGraphingEachFit == True:
-                    self.gausFit.graphEachFitRawData(xx, yy, out.best_fit, 'V')
+            if self.gausFit.continueGraphingEachFit == True:
+                self.gausFit.graphEachFitRawData(xx, yy, out.best_fit, 'V')
 
-            return False
-        except:
-            QMessageBox.warning(self.myMainWindow, "Error", "Please make sure the guesses are realistic when fitting.")
-            return True
+        return False
+        #except:
+            #QMessageBox.warning(self.myMainWindow, "Error", "Please make sure the guesses are realistic when fitting.")
+            #return True
 
     def TwoPeakVoigtFit(self):
         error = self.twoPeakVoigtFit()
@@ -245,9 +283,6 @@ class LorentzianFitting:
                 m = (y2 - y1) / (x2 - x1)
                 b = y2 - m * x2
 
-                print "m ", m
-                print 'b ', b
-
                 mod1 = VoigtModel(prefix='p1_')
                 mod2 = VoigtModel(prefix='p2_')
 
@@ -260,7 +295,7 @@ class LorentzianFitting:
                 pars.add('slope', value=m, vary=False)
                 print pars
                 out = mod.fit(yy, pars, x=xx)
-
+                print out.fit_report()
                 print out.best_values
 
                 self.gausFit.TwoPkGausFitData[j, :] = (out.best_values['p1_amplitude'], 0, out.best_values['p1_center'],
@@ -280,5 +315,60 @@ class LorentzianFitting:
         except:
             QMessageBox.warning(self.myMainWindow, "Error", "Please make sure the guesses are realistic when fitting.")
             return True
+
+    def getFitError(self, report, amplitude):
+        try:
+            variables = ""
+            amplitudeLine = ""
+            amplitudeData = []
+            positionLine = ""
+            positionData= []
+            sigmaLine = ""
+            sigmaData = []
+
+            print report
+            report = report.split("[[")
+
+            for r in report:
+                if r.startswith('Variables'):
+                    variables = r
+
+            variables = variables.split('\n')
+            print variables
+
+            for v in variables:
+                if "amplitude:" in v:
+                    amplitudeLine = v
+                if "center:" in v:
+                    positionLine = v
+                if "sigma:" in v:
+                    sigmaLine = v
+
+            amplitudeLine = amplitudeLine.split(" ")
+            for a in amplitudeLine:
+                if a != "":
+                    amplitudeData.append(a)
+
+            print amplitudeData
+            print amplitudeData[3]
+            print amplitude
+
+            positionLine = positionLine.split(" ")
+            for p in positionLine:
+                if p !="":
+                    positionData.append(p)
+
+            sigmaLine = sigmaLine.split(" ")
+            for s in sigmaLine:
+                if s != "":
+                    sigmaData.append(s)
+
+            print positionData[3]
+            print sigmaData[3]
+
+            return report[3]
+        except:
+            return 0, 0, 0, 0, 0, 0
+
 
 

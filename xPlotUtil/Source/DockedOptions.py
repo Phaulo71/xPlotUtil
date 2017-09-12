@@ -237,12 +237,26 @@ class DockedOption(QDockWidget):
         """This function asks the user for the amount of peaks. Then calls on the appropriate dialog, depending on
         the peak number.
         """
-        if self.FileError() == False and self.fitStat == False:
-            chosePeak = self.PeakDialog()
-            if (chosePeak == 'One'):
-                self.gausFit.OnePeakGaussianFit()
-            elif (chosePeak == 'Two'):
-                self.gausFit.TwoPeakGaussianFit()
+        if self.fitStat == True:
+            ans = self.msgApp("New Fit", "Would you like to refit the data? \n\nThis will delete the data"
+                                                   "from the previous fit.")
+            if ans == 'N':
+                pass
+            else:
+                self.openFile(self.fileName)
+                if self.FileError() == False and self.fitStat == False:
+                    chosePeak = self.PeakDialog()
+                    if (chosePeak == 'One'):
+                        self.gausFit.OnePeakGaussianFit()
+                    elif (chosePeak == 'Two'):
+                        self.gausFit.TwoPeakGaussianFit()
+        else:
+            if self.FileError() == False and self.fitStat == False:
+                chosePeak = self.PeakDialog()
+                if (chosePeak == 'One'):
+                    self.gausFit.OnePeakGaussianFit()
+                elif (chosePeak == 'Two'):
+                    self.gausFit.TwoPeakGaussianFit()
 
     def PeakDialog(self):
         """Method that creates a dialog, so that the user can peak the number of peaks.
