@@ -135,7 +135,7 @@ class ReadSpec:
             except:
                 print("Please make sure the PVValue has the correct information in the spec file.")
 
-    ''' # Current using the L from the spec file
+    ''' # Currently using the L from the spec file
     def getRLU(self):
         """This function gets the Lattice for the particular file, using the lattice max, lattice min and the
         number of points on each column for the raw data. """

@@ -39,7 +39,7 @@ class GaussianFitting:
         self.myMainWindow = self.dockedOpt.myMainWindow
         self.algebraExp = AlgebraicExpress(parent=self)
         self.lorentFit = self.algebraExp.lorentFit
-        self.continueGraphingEachFit = True  # Boolean to stop on Each fit graphing
+        self.continueGraphingEachFit = True  # Boolean to stop Each fit graphing
 
     # --------------------------------Gaussian Fit---------------------------------------------------------------------#
     def OnePeakGaussianFit(self):
@@ -77,16 +77,15 @@ class GaussianFitting:
 
                 mod = GaussianModel()
                 pars = mod.guess(yy, x=xx)
-                print pars
+                print ("Parameters")
+                print (pars)
                 mod = mod + LinearModel()
                 pars.add('intercept', value=b, vary=True)
                 pars.add('slope', value=m, vary=True)
-                out = mod.fit(yy, pars, x=xx, amplitude=26000)
+                out = mod.fit(yy, pars, x=xx)
+                print (out)
 
-                print out.best_values
-                print out.fit_report(min_correl=1)
-                print out.eval_components()
-                print out.eval_uncertainty()
+
 
                 self.OnePkFitData[j, :] = (out.best_values['amplitude'], 0, out.best_values['center'], 0,
                                                    out.best_values['sigma'], 0)
@@ -155,8 +154,8 @@ class GaussianFitting:
 
                 self.TwoPkGausFitData[j, :] = (out.best_values['p1_amplitude'], 0, out.best_values['p1_center'],
                                                        0, out.best_values['p1_sigma'], 0,
-                                                       out.best_values['p1_amplitude'], 0, out.best_values['p1_center'],
-                                                       0, out.best_values['p1_sigma'], 0)
+                                                       out.best_values['p2_amplitude'], 0, out.best_values['p2_center'],
+                                                       0, out.best_values['p2_sigma'], 0)
 
                 # Saves fitted data of each fit
                 fitData = out.best_fit

@@ -146,9 +146,7 @@ class LorentzianFitting:
                 pars.add('intercept', value=b, vary=True)
                 pars.add('slope', value=m, vary=True)
                 out = mod.fit(yy, pars, x=xx, slope=m)
-                print pars
-                print out.fit_report()
-                print out.best_values
+
 
                 self.gausFit.TwoPkGausFitData[j, :] = (out.best_values['p1_amplitude'], 0, out.best_values['p1_center'],
                                                        0, out.best_values['p1_sigma'], 0,
@@ -216,15 +214,13 @@ class LorentzianFitting:
             mod = VoigtModel()
             mod.guess(yy, x=xx)
             pars = mod.guess(yy, x=xx)
-            print pars
+
             mod = mod + LinearModel()
             pars.add('intercept', value=b, vary=True)
             pars.add('slope', value=m, vary=True)
             out = mod.fit(yy, pars, x=xx)
             amplitude = out.best_values['amplitude']
-            print amplitude
-            print out.best_values
-            print out.fit_report()
+
 
             fitError = self.getFitError(out.fit_report(sort_pars=True), amplitude)
 
@@ -291,10 +287,9 @@ class LorentzianFitting:
 
                 pars.add('intercept', value=b)
                 pars.add('slope', value=m, vary=False)
-                print pars
+
                 out = mod.fit(yy, pars, x=xx)
-                print out.fit_report()
-                print out.best_values
+
 
                 self.gausFit.TwoPkGausFitData[j, :] = (out.best_values['p1_amplitude'], 0, out.best_values['p1_center'],
                                                        0, out.best_values['p1_sigma'], 0,
@@ -324,7 +319,7 @@ class LorentzianFitting:
             sigmaLine = ""
             sigmaData = []
 
-            print report
+
             report = report.split("[[")
 
             for r in report:
@@ -332,7 +327,7 @@ class LorentzianFitting:
                     variables = r
 
             variables = variables.split('\n')
-            print variables
+
 
             for v in variables:
                 if "amplitude:" in v:
@@ -347,9 +342,7 @@ class LorentzianFitting:
                 if a != "":
                     amplitudeData.append(a)
 
-            print amplitudeData
-            print amplitudeData[3]
-            print amplitude
+
 
             positionLine = positionLine.split(" ")
             for p in positionLine:
@@ -360,9 +353,6 @@ class LorentzianFitting:
             for s in sigmaLine:
                 if s != "":
                     sigmaData.append(s)
-
-            print positionData[3]
-            print sigmaData[3]
 
             return report[3]
         except:
