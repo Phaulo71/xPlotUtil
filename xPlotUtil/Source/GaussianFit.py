@@ -13,14 +13,11 @@ from __future__ import unicode_literals
 from PyQt5.QtWidgets import *
 from matplotlib.backends.backend_qt5 import NavigationToolbar2QT as NavigationToolbar
 from matplotlib.backends.backend_qt5agg import FigureCanvasQTAgg as FigureCanvas
-from matplotlib.figure import Figure
-from matplotlib.ticker import FormatStrFormatter
-from peakutils import peak
+
 from lmfit.models import LorentzianModel, GaussianModel, LinearModel, VoigtModel
-from lmfit import Parameters
+
 from pylab import *
-from scipy import exp
-from scipy.optimize import curve_fit
+
 
 from xPlotUtil.Source.AlgebraicExpressions import AlgebraicExpress
 

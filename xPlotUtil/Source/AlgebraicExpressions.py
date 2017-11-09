@@ -15,12 +15,11 @@ from PyQt5.QtGui import *
 from PyQt5.QtCore import *
 from PyQt5.QtWidgets import *
 
-from scipy.optimize import curve_fit
-from scipy import exp
+
 from matplotlib.figure import Figure
 from matplotlib.backends.backend_qt5agg import FigureCanvasQTAgg as FigureCanvas
 from matplotlib.backends.backend_qt5 import NavigationToolbar2QT as NavigationToolbar
-from matplotlib.ticker import FormatStrFormatter
+
 
 from xPlotUtil.Source.LorentzianFit import LorentzianFitting
 # ---------------------------------------------------------------------------------------------------------------------#

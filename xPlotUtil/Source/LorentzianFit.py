@@ -15,8 +15,6 @@ from lmfit.models import LorentzianModel, GaussianModel, LinearModel, VoigtModel
 from lmfit.lineshapes import voigt, linear
 from lmfit import Parameters
 from pylab import *
-from peakutils import peak
-from scipy.optimize import curve_fit
 # ---------------------------------------------------------------------------------------------------------------------#
 
 
@@ -34,7 +32,7 @@ class LorentzianFitting:
     def WhichPeakLorentzianFit(self):
         if self.dockedOpt.fitStat == True:
             ans = self.dockedOpt.msgApp("New Fit", "Would you like to refit the data? \n\n This will delete the data"
-                                                   "from the previous fit.")
+                                                   " from the previous fit.")
             if ans == 'N':
                 pass
             else:
