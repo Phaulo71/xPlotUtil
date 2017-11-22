@@ -148,10 +148,11 @@ class LorentzianFitting:
                 out = mod.fit(yy, pars, x=xx, slope=m)
 
 
+
                 self.gausFit.TwoPkGausFitData[j, :] = (out.best_values['p1_amplitude'], 0, out.best_values['p1_center'],
                                                        0, out.best_values['p1_sigma'], 0,
-                                                       out.best_values['p1_amplitude'], 0, out.best_values['p1_center'],
-                                                       0, out.best_values['p1_sigma'], 0)
+                                                       out.best_values['p2_amplitude'], 0, out.best_values['p2_center'],
+                                                       0, out.best_values['p2_sigma'], 0)
 
                 # Saves fitted data of each fit
                 fitData = out.best_fit
@@ -162,7 +163,9 @@ class LorentzianFitting:
                     self.gausFit.graphEachFitRawData(xx, yy, out.best_fit, 'L')
 
             return False
-        except:
+        except Exception as ex:
+            print('Error')
+            print(ex)
             return True
 
     def WhichPeakVoigtFit(self):
@@ -293,8 +296,8 @@ class LorentzianFitting:
 
                 self.gausFit.TwoPkGausFitData[j, :] = (out.best_values['p1_amplitude'], 0, out.best_values['p1_center'],
                                                        0, out.best_values['p1_sigma'], 0,
-                                                       out.best_values['p1_amplitude'], 0, out.best_values['p1_center'],
-                                                       0, out.best_values['p1_sigma'], 0)
+                                                       out.best_values['p2_amplitude'], 0, out.best_values['p2_center'],
+                                                       0, out.best_values['p2_sigma'], 0)
 
                 # Saves fitted data of each fit
                 fitData = out.best_fit
@@ -305,8 +308,9 @@ class LorentzianFitting:
                     self.gausFit.graphEachFitRawData(xx, yy, out.best_fit, 'V')
 
             return False
-        except:
-            QMessageBox.warning(self.myMainWindow, "Error", "Please make sure the guesses are realistic when fitting.")
+        except Exception as e:
+            QMessageBox.warning(self.myMainWindow, "Error", "Something went wrong while fitting. \n\n"
+                                                            "The following exception occur: " + e)
             return True
 
     def getFitError(self, report, amplitude):

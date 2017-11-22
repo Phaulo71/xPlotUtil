@@ -352,8 +352,8 @@ class GaussianFitting:
         """This method graphs the peak one position for two peak.
         """
         x = self.getVoltage()
-        y = self.TwoPkGausFitData[:, 4]
-        error = self.TwoPkGausFitData[:, 5]
+        y = self.TwoPkGausFitData[:, 2]
+        error = self.TwoPkGausFitData[:, 3]
         xLabel = 'Voltage'
         yLabel = 'Position'
         name = 'Peak #1 Position (Scan#: ' + self.readSpec.scan + ')'
@@ -364,8 +364,8 @@ class GaussianFitting:
         """This method graphs the peak one width for two peak.
         """
         x = self.getVoltage()
-        y = self.TwoPkGausFitData[:, 8]
-        error = self.TwoPkGausFitData[:, 9]
+        y = self.TwoPkGausFitData[:, 4]
+        error = self.TwoPkGausFitData[:, 5]
         xLabel = 'Voltage'
         yLabel = 'Width'
         name = 'Peak #1 Width (Scan#: ' + self.readSpec.scan + ')'
@@ -377,9 +377,9 @@ class GaussianFitting:
         """
         x = self.getVoltage()
         yA = self.TwoPkGausFitData[:, 0]
-        yW = self.TwoPkGausFitData[:, 8]
+        yW = self.TwoPkGausFitData[:, 4]
         a_err = self.TwoPkGausFitData[:, 1]
-        w_err = self.TwoPkGausFitData[:, 9]
+        w_err = self.TwoPkGausFitData[:, 5]
         y = yA * yW
         error = ((y * a_err) + (y * w_err))/y
 
@@ -393,8 +393,8 @@ class GaussianFitting:
         """This method graphs the peak two Amplitude for two peak.
         """
         x = self.getVoltage()
-        y = self.TwoPkGausFitData[:, 2]
-        error = self.TwoPkGausFitData[:, 3]
+        y = self.TwoPkGausFitData[:, 6]
+        error = self.TwoPkGausFitData[:, 7]
         xLabel = 'Voltage'
         yLabel = 'Intensity'
         name = 'Peak #2 Amplitude (Scan#: ' + self.readSpec.scan + ')'
@@ -406,8 +406,8 @@ class GaussianFitting:
         """This method graphs the peak two position for two peak.
         """
         x = self.getVoltage()
-        y = self.TwoPkGausFitData[:, 6]
-        error = self.TwoPkGausFitData[:, 7]
+        y = self.TwoPkGausFitData[:, 8]
+        error = self.TwoPkGausFitData[:, 9]
         xLabel = 'Voltage'
         yLabel = 'Position'
         name = 'Peak #2 Position (Scan#: ' + self.readSpec.scan + ')'
@@ -430,9 +430,9 @@ class GaussianFitting:
         """This method graphs the peak two amplitude x width for the two peak.
         """
         x = self.getVoltage()
-        yA = self.TwoPkGausFitData[:, 2]
+        yA = self.TwoPkGausFitData[:, 6]
         yW = self.TwoPkGausFitData[:, 10]
-        a_err = self.TwoPkGausFitData[:, 3]
+        a_err = self.TwoPkGausFitData[:, 7]
         w_err = self.TwoPkGausFitData[:, 11]
         y = yA * yW
         error = ((y * a_err) + (y * w_err)) / y

@@ -19,7 +19,7 @@ from matplotlib.backends.backend_qt5 import NavigationToolbar2QT as NavigationTo
 from matplotlib.backends.backend_qt5agg import FigureCanvasQTAgg as FigureCanvas
 from pylab import *
 
-from xPlotUtil.Source.DockedOptions import DockedOption
+from Source.DockedOptions import DockedOption
 
 
 # ---------------------------------------------------------------------------------------------------------------------#
@@ -149,9 +149,10 @@ class MainWindow (QMainWindow):
                                         triggered=self.exitFile)
         self.resetAction = QAction('Reset', self, statusTip="Resets xPlot Util",
                                   triggered=self.dockedOpt.resetxPlot)
-        self.reportAction = QAction('Report', self, statusTip="Create a report of the data",
+        self.reportAction = QAction('Fit Report', self, statusTip="Create a report of the fit data",
                                          triggered=self.ReportDialog)
-        self.binGausFitReportAction = QAction('Gaussian Fit by Bins', self, statusTip="Create a report from bin fitted data",
+        self.binGausFitReportAction = QAction('Fit of each Bin Report', self, statusTip="Create a report from rach bin "
+                                                                                        "fit data.",
                                               triggered=self.gausFit.EachFitDataReport)
         self.mainOptionsAction = QAction('Main Options', self, statusTip="Main options for xPlot Util",
                                              triggered=self.dockedOpt.restoreMainOptions)
@@ -208,7 +209,7 @@ class MainWindow (QMainWindow):
     def aboutHelp(self):
         """Talks briefly about the program.
         """
-        """This needs further development. In it's infancy level. """
+        """This needs further development. In its infancy level. """
         QMessageBox.about(self, "About xPlot Util",
                           "Click on the browse button to select and open a spec file. "
                           "The PVvalue files should be under the same directory as the spec. Double click"
@@ -411,7 +412,7 @@ class MainWindow (QMainWindow):
     def ReportButton(self):
         """This button creates a report.
         """
-        self.reportBtn = QPushButton('Report', self)
+        self.reportBtn = QPushButton('Fit Report', self)
         self.reportBtn.setStatusTip("Creates a report of the chosen data.")
         self.reportBtn.clicked.connect(self.CreateReport)
 
