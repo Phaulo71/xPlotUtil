@@ -479,24 +479,24 @@ class GaussianFitting:
             print "Bins: ",  bins
 
             # Uses the data to find the x axis
-            amplStart = amp/2
-            points = bins/2
-            xDif = amp/points
-            xStart = xDif/2
-            startX = (-1*amplStart) + xStart
+            ampStart = 0
+            rate = (amp/2)/(bins/4)
 
-            x.append(startX)
-            for j in range(int(points)-1):
-                startX = startX + xDif
-                x.append(startX)
+        
+            for j in xrange(int(bins/4)):
+                ampStart = ampStart + rate
+                x.append(ampStart)
 
-            x.append(startX)
-            for j in range(int(points)-1):
-                startX = startX - xDif
-                x.append(startX)
+            for j in xrange(int(bins/2)):
+                ampStart = ampStart - rate
+                x.append(ampStart)
+
+            for j in xrange(int(bins / 4)):
+                ampStart = ampStart + rate
+                x.append(ampStart)
 
             print x
-            print len(x)
+
             return x
         except Exception as e:
             QMessageBox.warning(self.myMainWindow, "Error", "Unable to detect voltage. Please make sure the PVvalue "
