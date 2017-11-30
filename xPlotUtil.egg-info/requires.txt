@@ -2,4 +2,5 @@ spec2nexus
 matplotlib
 numpy
 future
-peakutils
+lmfit
+pylab

@@ -19,7 +19,7 @@ from PyQt5.QtGui import *
 from pylab import *
 from spec2nexus.spec import SpecDataFile
 
-from xPlotUtil.Source.ReadSpecFile import ReadSpec
+from ReadSpecFile import ReadSpec
 
 
 # ---------------------------------------------------------------------------------------------------------------------#
@@ -596,10 +596,11 @@ class DockedOption(QDockWidget):
                     self.graphingOnePeak()
                 elif self.twoPeakStat == True:
                     self.graphingTwoPeak()
-        except:
+        except Exception as e:
             QMessageBox.warning(self.myMainWindow, "Warning", "Please make sure the PVvalue file belongs to the spec"
                                                               " file and/or follows the appropriate format. "
-                                                              "Reopen the PVvalue file.")
+                                                              "Reopen the PVvalue file.\n\n"
+                                                              "Exception: " + str(e))
 
     def graphingOnePeak(self):
         """This method calls on the appropriate method to plot one peak graphs.

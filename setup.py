@@ -9,7 +9,7 @@ from setuptools import setup
 
 setup(
   name='xPlotUtil',
-  version='0.1.2',
+  version='0.1.4',
   description='The program provides a GUI for the user to graph the data in different forms, normalize and fit it.',
   author='Phaulo C. Escalante',
   author_email='escalante.phaulo@outlook.com',
@@ -19,7 +19,8 @@ setup(
                     'matplotlib',
                     'numpy',
                     'future',
-                    'peakutils',
+                    'lmfit',
+                    'pylab',
                     ],
   license='See LICENSE File',
   platforms='any',

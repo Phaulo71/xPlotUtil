@@ -19,7 +19,7 @@ from lmfit.models import LorentzianModel, GaussianModel, LinearModel, VoigtModel
 from pylab import *
 
 
-from xPlotUtil.Source.AlgebraicExpressions import AlgebraicExpress
+from AlgebraicExpressions import AlgebraicExpress
 
 
 # ---------------------------------------------------------------------------------------------------------------------#
@@ -449,6 +449,7 @@ class GaussianFitting:
         """
         try:
             x = [] # X array initialized
+            PVInfo = {}
 
             # Gets the amplitude
             inF = open(self.dockedOpt.fileName, 'r')
@@ -457,14 +458,25 @@ class GaussianFitting:
             for (iL, line) in enumerate(lines):
                 if line.startswith('#'):
                     header = line
+                    break
             inF.close()
-            words = header.split()
-            amplWord = words[6]
-            ampl = amplWord.split('.')
-            amp = float(ampl[0])
+            headerParts = header.split('(')
+            titles = headerParts[1].split(',')
+            values = headerParts[2].split(',')
 
-            # get the bins
-            nRow, bins = self.dockedOpt.fileInfo()
+            for i in xrange(len(titles)):
+                if i == (len(titles) - 1):
+                    lastT = titles[i].split(')')
+                    lastV = values[i].split(')')
+                    PVInfo.update({str(lastT[0].strip()): float(lastV[0])})
+                else:
+                    PVInfo.update({str(titles[i].strip()): float(values[i])})
+            bins = PVInfo['N_bins']
+            amp = PVInfo['amplitude']
+
+            print "Amplitude: ", amp
+
+            print "Bins: ",  bins
 
             # Uses the data to find the x axis
             amplStart = amp/2
@@ -472,19 +484,24 @@ class GaussianFitting:
             xDif = amp/points
             xStart = xDif/2
             startX = (-1*amplStart) + xStart
+
             x.append(startX)
-            for j in range(points-1):
+            for j in range(int(points)-1):
                 startX = startX + xDif
                 x.append(startX)
 
             x.append(startX)
-            for j in range(points-1):
+            for j in range(int(points)-1):
                 startX = startX - xDif
                 x.append(startX)
+
+            print x
+            print len(x)
             return x
-        except:
+        except Exception as e:
             QMessageBox.warning(self.myMainWindow, "Error", "Unable to detect voltage. Please make sure the PVvalue "
-                                                            "contains the voltage in the comments.")
+                                                            "contains the voltage in the comments.\n\n"
+                                                            "Exception: " + str(e))
     # -----------------------------------------Lattice Fit-------------------------------------------------------------#
     def PositionLFit(self, pos, rows):
         """This method calculates the lattice based on the passed paramaters.
