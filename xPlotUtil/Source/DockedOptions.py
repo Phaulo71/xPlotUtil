@@ -19,7 +19,7 @@ from PyQt5.QtGui import *
 from pylab import *
 from spec2nexus.spec import SpecDataFile
 
-from ReadSpecFile import ReadSpec
+from xPlotUtil.Source.ReadSpecFile import ReadSpec
 
 
 # ---------------------------------------------------------------------------------------------------------------------#

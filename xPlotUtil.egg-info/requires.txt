@@ -3,4 +3,3 @@ matplotlib
 numpy
 future
 lmfit
-pylab

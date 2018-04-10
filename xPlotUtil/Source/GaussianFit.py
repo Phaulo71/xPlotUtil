@@ -19,7 +19,7 @@ from lmfit.models import LorentzianModel, GaussianModel, LinearModel, VoigtModel
 from pylab import *
 
 
-from AlgebraicExpressions import AlgebraicExpress
+from xPlotUtil.Source.AlgebraicExpressions import AlgebraicExpress
 
 
 # ---------------------------------------------------------------------------------------------------------------------#
@@ -474,9 +474,9 @@ class GaussianFitting:
             bins = PVInfo['N_bins']
             amp = PVInfo['amplitude']
 
-            print "Amplitude: ", amp
+            print ("Amplitude: ", amp)
 
-            print "Bins: ",  bins
+            print ("Bins: ",  bins)
 
             # Uses the data to find the x axis
             ampStart = 0
@@ -494,8 +494,6 @@ class GaussianFitting:
             for j in xrange(int(bins / 4)):
                 ampStart = ampStart + rate
                 x.append(ampStart)
-
-            print x
 
             return x
         except Exception as e:

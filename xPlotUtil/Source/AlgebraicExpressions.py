@@ -21,7 +21,7 @@ from matplotlib.backends.backend_qt5agg import FigureCanvasQTAgg as FigureCanvas
 from matplotlib.backends.backend_qt5 import NavigationToolbar2QT as NavigationToolbar
 
 
-from LorentzianFit import LorentzianFitting
+from xPlotUtil.Source.LorentzianFit import LorentzianFitting
 # ---------------------------------------------------------------------------------------------------------------------#
 
 class AlgebraicExpress:

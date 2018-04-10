@@ -15,7 +15,7 @@ import os
 from PyQt5.QtWidgets import *
 from pylab import *
 
-from GaussianFit import GaussianFitting
+from xPlotUtil.Source.GaussianFit import GaussianFitting
 
 
 # ---------------------------------------------------------------------------------------------------------------------#

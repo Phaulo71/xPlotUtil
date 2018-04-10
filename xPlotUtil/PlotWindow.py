@@ -18,8 +18,7 @@ from PyQt5.QtWidgets import *
 from matplotlib.backends.backend_qt5 import NavigationToolbar2QT as NavigationToolbar
 from matplotlib.backends.backend_qt5agg import FigureCanvasQTAgg as FigureCanvas
 from pylab import *
-
-from Source.DockedOptions import DockedOption
+from xPlotUtil.Source.DockedOptions import DockedOption
 
 
 # ---------------------------------------------------------------------------------------------------------------------#
