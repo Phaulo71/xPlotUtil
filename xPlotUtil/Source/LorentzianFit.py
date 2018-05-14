@@ -163,9 +163,8 @@ class LorentzianFitting:
                     self.gausFit.graphEachFitRawData(xx, yy, out.best_fit, 'L')
 
             return False
-        except Exception as ex:
-            print('Error')
-            print(ex)
+        except Exception as e:
+            QMessageBox.warning(self.myMainWindow, "Error", "There was an error \n\n Exception: " + str(e))
             return True
 
     def WhichPeakVoigtFit(self):
@@ -199,49 +198,49 @@ class LorentzianFitting:
 
 
     def onePeakVoigtFit(self):
-        # try:
-        nRow, nCol = self.dockedOpt.fileInfo()
+        try:
+            nRow, nCol = self.dockedOpt.fileInfo()
 
-        self.gausFit.binFitData = zeros((nRow, 0))
-        self.gausFit.OnePkFitData = zeros((nCol, 6))  # Creates the empty 2D List
-        for j in range(nCol):
-            yy = self.dockedOpt.TT[:, j]
-            xx = arange(0, len(yy))
-            x1 = xx[0]
-            x2 = xx[-1]
-            y1 = yy[0]
-            y2 = yy[-1]
-            m = (y2 - y1) / (x2 - x1)
-            b = y2 - m * x2
+            self.gausFit.binFitData = zeros((nRow, 0))
+            self.gausFit.OnePkFitData = zeros((nCol, 6))  # Creates the empty 2D List
+            for j in range(nCol):
+                yy = self.dockedOpt.TT[:, j]
+                xx = arange(0, len(yy))
+                x1 = xx[0]
+                x2 = xx[-1]
+                y1 = yy[0]
+                y2 = yy[-1]
+                m = (y2 - y1) / (x2 - x1)
+                b = y2 - m * x2
 
-            mod = VoigtModel()
-            mod.guess(yy, x=xx)
-            pars = mod.guess(yy, x=xx)
+                mod = VoigtModel()
+                mod.guess(yy, x=xx)
+                pars = mod.guess(yy, x=xx)
 
-            mod = mod + LinearModel()
-            pars.add('intercept', value=b, vary=True)
-            pars.add('slope', value=m, vary=True)
-            out = mod.fit(yy, pars, x=xx)
-            amplitude = out.best_values['amplitude']
+                mod = mod + LinearModel()
+                pars.add('intercept', value=b, vary=True)
+                pars.add('slope', value=m, vary=True)
+                out = mod.fit(yy, pars, x=xx)
+                amplitude = out.best_values['amplitude']
 
 
-            fitError = self.getFitError(out.fit_report(sort_pars=True), amplitude)
+                fitError = self.getFitError(out.fit_report(sort_pars=True), amplitude)
 
-            self.gausFit.OnePkFitData[j, :] = (amplitude, 0, out.best_values['center'], 0,
-                                       out.best_values['sigma'], 0)
+                self.gausFit.OnePkFitData[j, :] = (amplitude, 0, out.best_values['center'], 0,
+                                           out.best_values['sigma'], 0)
 
-            # Saves fitted data of each fit
-            fitData = out.best_fit
-            binFit = np.reshape(fitData, (len(fitData), 1))
-            self.gausFit.binFitData = np.concatenate((self.gausFit.binFitData, binFit), axis=1)
+                # Saves fitted data of each fit
+                fitData = out.best_fit
+                binFit = np.reshape(fitData, (len(fitData), 1))
+                self.gausFit.binFitData = np.concatenate((self.gausFit.binFitData, binFit), axis=1)
 
-            if self.gausFit.continueGraphingEachFit == True:
-                self.gausFit.graphEachFitRawData(xx, yy, out.best_fit, 'V')
+                if self.gausFit.continueGraphingEachFit == True:
+                    self.gausFit.graphEachFitRawData(xx, yy, out.best_fit, 'V')
 
-        return False
-        #except:
-            #QMessageBox.warning(self.myMainWindow, "Error", "Please make sure the guesses are realistic when fitting.")
-            #return True
+            return False
+        except Exception as e:
+                QMessageBox.warning(self.myMainWindow, "Error", "There was an error \n\n Exception: " + str(e)).warning(self.myMainWindow, "Error", "Please make sure the guesses are realistic when fitting.")
+                return True
 
     def TwoPeakVoigtFit(self):
         error = self.twoPeakVoigtFit()

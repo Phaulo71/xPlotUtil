@@ -464,7 +464,7 @@ class GaussianFitting:
             titles = headerParts[1].split(',')
             values = headerParts[2].split(',')
 
-            for i in xrange(len(titles)):
+            for i in range(len(titles)):
                 if i == (len(titles) - 1):
                     lastT = titles[i].split(')')
                     lastV = values[i].split(')')
@@ -483,15 +483,15 @@ class GaussianFitting:
             rate = (amp/2)/(bins/4)
 
         
-            for j in xrange(int(bins/4)):
+            for j in range(int(bins/4)):
                 ampStart = ampStart + rate
                 x.append(ampStart)
 
-            for j in xrange(int(bins/2)):
+            for j in range(int(bins/2)):
                 ampStart = ampStart - rate
                 x.append(ampStart)
 
-            for j in xrange(int(bins / 4)):
+            for j in range(int(bins / 4)):
                 ampStart = ampStart + rate
                 x.append(ampStart)
 

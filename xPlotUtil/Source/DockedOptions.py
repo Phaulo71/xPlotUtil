@@ -627,10 +627,9 @@ class DockedOption(QDockWidget):
                 if self.onePeakRLUPrcChange.checkState(0) == 2:
                     self.gausFit.percentageChangeLConstantOnePeak()
                     self.onePeakRLUPrcChange.setCheckState(0, 0)
-        except:
-            QMessageBox.warning(self.myMainWindow, "Warning", "Please make sure to the fitting was correct and/or the "
-                                                              "files follow the correct format. "
-                                                              "Reopen the PVvalue file")
+
+        except Exception as e:
+            QMessageBox.warning(self.myMainWindow, "Error", "There was an error \n\n Exception: " + str(e))
 
     def graphingTwoPeak(self):
         """This method calls on the appropriate method to plot two peak graphs.
@@ -678,10 +677,9 @@ class DockedOption(QDockWidget):
                 if self.RLUPrcChangePeakTwo.checkState(0) == 2:
                     self.gausFit.percentageChangeLConstantPeakTwo()
                     self.RLUPrcChangePeakTwo.setCheckState(0, 0)
-        except:
-            QMessageBox.warning(self.myMainWindow, "Warning", "Please make sure to the fitting was correct and/or the"
-                                                              "files follow the correct format. "
-                                                              "Reopen the PVvalue")
+
+        except Exception as e:
+             QMessageBox.warning(self.myMainWindow, "Error", "There was an error \n\n Exception: " + str(e))
 
 
 

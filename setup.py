@@ -1,27 +1,22 @@
-#!/usr/bin/env python
+from cx_Freeze import setup, Executable
+import os
+import sys
+import scipy
 
-"""
-Copyright (c) UChicago Argonne, LLC. All rights reserved.
-See LICENSE file.
-"""
+PYTHON_INSTALL_DIR = os.path.dirname(os.path.dirname(os.__file__))
+os.environ['TCL_LIBRARY'] = os.path.join(PYTHON_INSTALL_DIR, 'tcl', 'tcl8.6')
+os.environ['TK_LIBRARY'] = os.path.join(PYTHON_INSTALL_DIR, 'tcl', 'tk8.6')
 
-from setuptools import setup
+includefiles_list=[]
+scipy_path = os.path.dirname(scipy.__file__)
+includefiles_list.append(scipy_path)
 
-setup(
-  name='xPlotUtil',
-  version='1.0.55',
-  description='The program provides a GUI for the user to graph the data in different forms, normalize and fit it.',
-  author='Phaulo C. Escalante',
-  author_email='escalante.phaulo@outlook.com',
-  url='https://github.com/AdvancedPhotonSource/xPlotUtil',
-  packages=['xPlotUtil', 'xPlotUtil.Source'],
-  install_requires=['spec2nexus',
-                    'matplotlib',
-                    'numpy',
-                    'future',
-                    'lmfit',
-                    ],
-  license='See LICENSE File',
-  platforms='any',
-  scripts=['Scripts/xPlotUtil.bat'],
-)
+base = 'Win32GUI' if sys.platform == 'win32' else None
+
+options = {"packages": ["os", "idna", "numpy", "spec2nexus"], "include_files": includefiles_list, "includes": ['multiprocessing.process']}
+
+setup(name="xPlotUtil",
+      version="0.1",
+      options={"build_exe": options},
+      description="Allows fitting and plotting of point data from spec file.",
+      executables=[Executable("xPlotUtil/PlotWindow.py", base=base)])
