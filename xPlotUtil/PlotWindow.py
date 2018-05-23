@@ -19,7 +19,6 @@ from matplotlib.backends.backend_qt5 import NavigationToolbar2QT as NavigationTo
 from matplotlib.backends.backend_qt5agg import FigureCanvasQTAgg as FigureCanvas
 from pylab import *
 from xPlotUtil.Source.DockedOptions import DockedOption
-from multiprocessing import Process, Pipe, freeze_support
 
 # ---------------------------------------------------------------------------------------------------------------------#
 

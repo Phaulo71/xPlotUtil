@@ -17,6 +17,7 @@ from matplotlib.backends.backend_qt5agg import FigureCanvasQTAgg as FigureCanvas
 from lmfit.models import LorentzianModel, GaussianModel, LinearModel, VoigtModel
 
 from pylab import *
+import numpy as np
 
 
 from xPlotUtil.Source.AlgebraicExpressions import AlgebraicExpress
@@ -47,11 +48,11 @@ class GaussianFitting:
         """
         error = self.onePeakGaussianFit()
 
-        if error == False:
+        if error is False:
             self.dockedOpt.onePeakStat = True
             self.dockedOpt.fitStat = True
             self.dockedOpt.GraphingFitOptionsTree("G")
-        return False
+
 
     def onePeakGaussianFit(self):
         """Gaussian Fit for one Peak.
@@ -64,6 +65,7 @@ class GaussianFitting:
 
             self.binFitData = zeros((nRow, 0))
             self.OnePkFitData = zeros((nCol, 6))  # Creates the empty 2D List
+            QMessageBox.warning(self.myMainWindow, "Hi", "Hola")
             for j in range(nCol):
                 yy = self.dockedOpt.TT[:, j]
                 xx = arange(0, len(yy))
@@ -77,14 +79,10 @@ class GaussianFitting:
 
                 mod = GaussianModel()
                 pars = mod.guess(yy, x=xx)
-                print ("Parameters")
-                print (pars)
                 mod = mod + LinearModel()
                 pars.add('intercept', value=b, vary=True)
                 pars.add('slope', value=m, vary=True)
                 out = mod.fit(yy, pars, x=xx)
-                print (out)
-
 
 
                 self.OnePkFitData[j, :] = (out.best_values['amplitude'], 0, out.best_values['center'], 0,
@@ -104,12 +102,16 @@ class GaussianFitting:
             return True
 
     def TwoPeakGaussianFit(self):
-        error = self.twoPeakGaussianFit()
+        try:
+            error = self.twoPeakGaussianFit()
 
-        if error == False:
-            self.dockedOpt.twoPeakStat = True
-            self.dockedOpt.fitStat = True
-            self.dockedOpt.GraphingFitOptionsTree("G")
+            if error == False:
+                self.dockedOpt.twoPeakStat = True
+                self.dockedOpt.fitStat = True
+                self.dockedOpt.GraphingFitOptionsTree("G")
+        except Exception as ex:
+            QMessageBox.warning(self.myMainWindow, "Error", "Please make sure the guesses are realistic when fitting."
+                                                            "\n\nException: " + str(ex))
 
     def twoPeakGaussianFit(self):
         try:
@@ -132,7 +134,6 @@ class GaussianFitting:
                 xx = arange(0, len(yy))
                 xx1 = arange(0, len(yy) / 2)
                 xx2 = arange(len(yy) / 2, len(yy))
-
                 x1 = xx[0]
                 x2 = xx[-1]
                 y1 = yy[0]
@@ -141,16 +142,19 @@ class GaussianFitting:
                 b = y2 - m * x2
 
                 mod1 = GaussianModel(prefix='p1_')
+
                 mod2 = GaussianModel(prefix='p2_')
 
                 pars1 = mod1.guess(yy1, x=xx1)
                 pars2 = mod2.guess(yy2, x=xx2)
+
                 mod = mod1 + mod2 + LinearModel()
                 pars = pars1 + pars2
 
                 pars.add('intercept', value=b, vary=True)
                 pars.add('slope', value=m, vary=True)
                 out = mod.fit(yy, pars, x=xx, slope=m)
+                QMessageBox.warning(self.myMainWindow, "Hi", "About to start fitting")
 
                 self.TwoPkGausFitData[j, :] = (out.best_values['p1_amplitude'], 0, out.best_values['p1_center'],
                                                        0, out.best_values['p1_sigma'], 0,
@@ -166,8 +170,9 @@ class GaussianFitting:
                     self.graphEachFitRawData(xx, yy, out.best_fit, 'G')
 
             return False
-        except:
-            QMessageBox.warning(self.myMainWindow, "Error", "Please make sure the guesses are realistic when fitting.")
+        except Exception as ex:
+            QMessageBox.warning(self.myMainWindow, "Error", "Please make sure the guesses are realistic when fitting."
+                                                            "\n\nException: " + str(ex))
             return True
 
     def graphEachFitRawData(self, xx, yy, fitData, whichFit):
@@ -177,43 +182,46 @@ class GaussianFitting:
         :param popt: from the gaussian fit
         :param whichPeak: number of peaks
         """
-        self.mainGraph = QDialog(self.myMainWindow)
-        self.mainGraph.resize(600, 600)
-        dpi = 100
-        fig = Figure((3.0, 3.0), dpi=dpi)
-        canvas = FigureCanvas(fig)
-        canvas.setParent(self.mainGraph)
-        axes = fig.add_subplot(111)
+        try:
+            self.mainGraph = QDialog(self.myMainWindow)
+            self.mainGraph.resize(600, 600)
+            dpi = 100
+            fig = Figure((3.0, 3.0), dpi=dpi)
+            canvas = FigureCanvas(fig)
+            canvas.setParent(self.mainGraph)
+            axes = fig.add_subplot(111)
 
-        axes.plot(xx, yy, 'b+:', label='data')
-        if whichFit == 'G':
-            axes.plot(xx, fitData, 'ro:', label='fit')
-            axes.set_title('Gaussian Fit')
-        elif whichFit == 'L':
-            axes.plot(xx, fitData, 'ro:', label='fit')
-            axes.set_title("Lorentzian Fit")
-        elif whichFit == 'V':
-            axes.plot(xx, fitData, 'ro:', label='fit')
-            axes.set_title("Voigt Fit")
+            axes.plot(xx, yy, 'b+:', label='data')
+            if whichFit == 'G':
+                axes.plot(xx, fitData, 'ro:', label='fit')
+                axes.set_title('Gaussian Fit')
+            elif whichFit == 'L':
+                axes.plot(xx, fitData, 'ro:', label='fit')
+                axes.set_title("Lorentzian Fit")
+            elif whichFit == 'V':
+                axes.plot(xx, fitData, 'ro:', label='fit')
+                axes.set_title("Voigt Fit")
 
-        axes.legend()
-        axes.set_xlabel('Bins')
-        axes.set_ylabel('Intensity')
-        canvas.draw()
+            axes.legend()
+            axes.set_xlabel('Bins')
+            axes.set_ylabel('Intensity')
+            canvas.draw()
 
-        vbox = QVBoxLayout()
-        hbox = QHBoxLayout()
-        self.skipEachFitGraphButton()
-        self.nextFitGraphButton()
-        hbox.addWidget(self.skipEachFitGraphBtn)
-        hbox.addStretch(1)
-        hbox.addWidget(self.nextFitGraphBtn)
-        graphNavigationBar = NavigationToolbar(canvas, self.mainGraph)
-        vbox.addLayout(hbox)
-        vbox.addWidget(graphNavigationBar)
-        vbox.addWidget(canvas)
-        self.mainGraph.setLayout(vbox)
-        self.mainGraph.exec_()
+            vbox = QVBoxLayout()
+            hbox = QHBoxLayout()
+            self.skipEachFitGraphButton()
+            self.nextFitGraphButton()
+            hbox.addWidget(self.skipEachFitGraphBtn)
+            hbox.addStretch(1)
+            hbox.addWidget(self.nextFitGraphBtn)
+            graphNavigationBar = NavigationToolbar(canvas, self.mainGraph)
+            vbox.addLayout(hbox)
+            vbox.addWidget(graphNavigationBar)
+            vbox.addWidget(canvas)
+            self.mainGraph.setLayout(vbox)
+            self.mainGraph.exec_()
+        except Exception as e:
+            QMessageBox.warning(self.myMainWindow, "Error", "Please make sure the guesses are realistic when fitting. \n\n" + str(e))
 
     def skipEachFitGraphButton(self):
         """Button that allows the user to skip each fit graph.

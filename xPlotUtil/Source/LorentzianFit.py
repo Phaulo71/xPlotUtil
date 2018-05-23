@@ -37,14 +37,14 @@ class LorentzianFitting:
                 pass
             else:
                 self.dockedOpt.openFile(self.dockedOpt.fileName)
-                if self.dockedOpt.FileError() == False and self.dockedOpt.fitStat == False:
+                if self.dockedOpt.FileError() is False and self.dockedOpt.fitStat is False:
                     chosePeak = self.dockedOpt.PeakDialog()
                     if (chosePeak == 'One'):
                         self.OnePeakLorentzianFit()
                     elif (chosePeak == 'Two'):
                         self.TwoPeakLorentzianFit()
         else:
-            if self.dockedOpt.FileError() == False and self.dockedOpt.fitStat == False:
+            if self.dockedOpt.FileError() is False and self.dockedOpt.fitStat is False:
                 chosePeak = self.dockedOpt.PeakDialog()
                 if (chosePeak == 'One'):
                     self.onePeakLorentzianFit()
@@ -239,8 +239,8 @@ class LorentzianFitting:
 
             return False
         except Exception as e:
-                QMessageBox.warning(self.myMainWindow, "Error", "There was an error \n\n Exception: " + str(e)).warning(self.myMainWindow, "Error", "Please make sure the guesses are realistic when fitting.")
-                return True
+            QMessageBox.warning(self.myMainWindow, "Error", "There was an error \n\n Exception: " + str(e))
+            return True
 
     def TwoPeakVoigtFit(self):
         error = self.twoPeakVoigtFit()
@@ -308,8 +308,8 @@ class LorentzianFitting:
 
             return False
         except Exception as e:
-            QMessageBox.warning(self.myMainWindow, "Error", "Something went wrong while fitting. \n\n"
-                                                            "The following exception occur: " + e)
+            QMessageBox.warning(self.myMainWindow, "Error", "Something went wrong while fitting. \n\n" +
+                                                            "The following exception occur: " + str(e))
             return True
 
     def getFitError(self, report, amplitude):

@@ -10,13 +10,15 @@ os.environ['TK_LIBRARY'] = os.path.join(PYTHON_INSTALL_DIR, 'tcl', 'tk8.6')
 includefiles_list=[]
 scipy_path = os.path.dirname(scipy.__file__)
 includefiles_list.append(scipy_path)
+includefiles_list.append("graph.ico")
 
 base = 'Win32GUI' if sys.platform == 'win32' else None
 
-options = {"packages": ["os", "idna", "numpy", "spec2nexus"], "include_files": includefiles_list, "includes": ['multiprocessing.process']}
+options = {"packages": ["os", "idna", "numpy", "spec2nexus", "lmfit"],
+           "include_files": includefiles_list, "includes": ['multiprocessing.process', 'lmfit.models']}
 
 setup(name="xPlotUtil",
       version="0.1",
       options={"build_exe": options},
       description="Allows fitting and plotting of point data from spec file.",
-      executables=[Executable("xPlotUtil/PlotWindow.py", base=base)])
+      executables=[Executable("xPlotUtil/PlotWindow.py", icon='graph.ico', base=base, shortcutDir='xPlotUtil')])
