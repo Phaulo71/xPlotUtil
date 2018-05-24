@@ -22,7 +22,6 @@ following modules:
     - pyqt 5.6.0
     - matplotlib 2.0.2
     - numpy 1.13.0
-    - pyside 1.2.0
     - spec2nexus 2017.522.1
     - future 0.16.0
     - scipy 0.19.0
