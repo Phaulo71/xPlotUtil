@@ -2,20 +2,22 @@ from cx_Freeze import setup, Executable
 import os
 import sys
 import scipy
+import matplotlib
 
-PYTHON_INSTALL_DIR = os.path.dirname(os.path.dirname(os.__file__))
-os.environ['TCL_LIBRARY'] = os.path.join(PYTHON_INSTALL_DIR, 'tcl', 'tcl8.6')
-os.environ['TK_LIBRARY'] = os.path.join(PYTHON_INSTALL_DIR, 'tcl', 'tk8.6')
 
 includefiles_list=[]
 scipy_path = os.path.dirname(scipy.__file__)
 includefiles_list.append(scipy_path)
+matplotlib_path = os.path.dirname(matplotlib.__file__)
+includefiles_list.append(matplotlib_path)
+os_path = os.path.dirname(os.__file__)
+includefiles_list.append(os_path)
 includefiles_list.append("graph.ico")
 
 base = 'Win32GUI' if sys.platform == 'win32' else None
 
-options = {"packages": ["os", "idna", "numpy", "spec2nexus", "lmfit"],
-           "include_files": includefiles_list, "includes": ['multiprocessing.process', 'lmfit.models']}
+options = {"packages": ["os", "idna", "numpy", "spec2nexus", "lmfit", "matplotlib", ],
+           "include_files": includefiles_list, "includes": ['os', 'lmfit.models']}
 
 setup(name="xPlotUtil",
       version="0.1",
