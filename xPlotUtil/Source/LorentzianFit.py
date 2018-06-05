@@ -11,9 +11,7 @@ See LICENSE file.
 from __future__ import unicode_literals
 
 from PyQt5.QtWidgets import *
-from lmfit.models import LorentzianModel, GaussianModel, LinearModel, VoigtModel, Model
-from lmfit.lineshapes import voigt, linear
-from lmfit import Parameters
+from lmfit.models import LorentzianModel, LinearModel, VoigtModel
 from pylab import *
 # ---------------------------------------------------------------------------------------------------------------------#
 
