@@ -6,13 +6,9 @@ See LICENSE file.
 """
 # ---------------------------------------------------------------------------------------------------------------------#
 from __future__ import unicode_literals
-import sys
-import numpy as np
-import os
 from pylab import *
 
-from PyQt5.QtGui import *
-from PyQt5.QtCore import *
+
 from PyQt5.QtWidgets import *
 
 
