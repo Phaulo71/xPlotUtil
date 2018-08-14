@@ -68,7 +68,7 @@ class ReadSpec:
                 # Gets the PVvalue files in the directory
                 self.specDirectory = os.path.dirname(self.specFileName)
                 self.PvFiles = [f for f in os.listdir(self.specDirectory) if f.find("PVvalue") == 0]
-                sorted(self.PvFiles, key=self.getPVNumKey)
+                self.PvFiles.sort(key=self.getPVNumKey)
 
                 self.dockedOpt.mainOptions.close()
                 self.dockedOpt.DockMainOptions()
@@ -137,22 +137,6 @@ class ReadSpec:
             except Exception as e:
                 QMessageBox.warning(self.myMainWindow, "Error", "There was an error \n\n Exception: " + str(e))
 
-    ''' # Currently using the L from the spec file
-    def getRLU(self):
-        """This function gets the Lattice for the particular file, using the lattice max, lattice min and the
-        number of points on each column for the raw data. """
-        nRow, nCol = self.dockedOpt.fileInfo()  # nRows = points || nCol = bins
-        if nRow != 0:
-            adjustment = (self.lMax - self.lMin)/nRow
-            self.L = [] #  Initializing Lattice array
-            self.L.append(self.lMin)
-            RLU = self.lMin
-            count = 1
-            while count < nRow:
-                RLU += round(adjustment, 4)
-                self.L.append(round(RLU, 5))
-                count += 1
-    '''
 
     def NormalizerDialog(self):
         """This method creates a dialog with dynamically created radio buttons from the spec file, which allow the

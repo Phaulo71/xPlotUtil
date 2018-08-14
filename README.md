@@ -16,7 +16,7 @@ Version
 Getting Started
 ---------------
 - The first step to building an environment to run xPlot Util is downloading Anaconda. Install the version that utilizes
-Python 2.7. For further instructions on how to download Anaconda visit https://www.continuum.io/downloads
+Python 3.5. For further instructions on how to download Anaconda visit https://www.continuum.io/downloads
 - Once Anaconda has been installed on your machine, through the terminal either using pip or conda. Please install the
 following modules:
     - pyqt 5.6.0

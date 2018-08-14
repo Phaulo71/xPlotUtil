@@ -41,6 +41,7 @@ class GaussianFitting:
         self.algebraExp = AlgebraicExpress(parent=self)
         self.lorentFit = self.algebraExp.lorentFit
         self.continueGraphingEachFit = True  # Boolean to stop Each fit graphing
+        self.useImportedX = False
 
     # --------------------------------Gaussian Fit---------------------------------------------------------------------#
     def OnePeakGaussianFit(self):
@@ -65,7 +66,6 @@ class GaussianFitting:
 
             self.binFitData = zeros((nRow, 0))
             self.OnePkFitData = zeros((nCol, 6))  # Creates the empty 2D List
-            QMessageBox.warning(self.myMainWindow, "Hi", "Hola")
             for j in range(nCol):
                 yy = self.dockedOpt.TT[:, j]
                 xx = arange(0, len(yy))
@@ -154,7 +154,6 @@ class GaussianFitting:
                 pars.add('intercept', value=b, vary=True)
                 pars.add('slope', value=m, vary=True)
                 out = mod.fit(yy, pars, x=xx, slope=m)
-                QMessageBox.warning(self.myMainWindow, "Hi", "About to start fitting")
 
                 self.TwoPkGausFitData[j, :] = (out.best_values['p1_amplitude'], 0, out.best_values['p1_center'],
                                                        0, out.best_values['p1_sigma'], 0,
@@ -456,54 +455,55 @@ class GaussianFitting:
         :return: the voltage
         """
         try:
-            x = [] # X array initialized
-            PVInfo = {}
+            if self.useImportedX is False:
+                x = []  # X array initialized
 
-            # Gets the amplitude
-            inF = open(self.dockedOpt.fileName, 'r')
-            lines = inF.readlines()
-            header = ''
-            for (iL, line) in enumerate(lines):
-                if line.startswith('#'):
-                    header = line
-                    break
-            inF.close()
-            headerParts = header.split('(')
-            titles = headerParts[1].split(',')
-            values = headerParts[2].split(',')
+                PVInfo = {}
 
-            for i in range(len(titles)):
-                if i == (len(titles) - 1):
-                    lastT = titles[i].split(')')
-                    lastV = values[i].split(')')
-                    PVInfo.update({str(lastT[0].strip()): float(lastV[0])})
-                else:
-                    PVInfo.update({str(titles[i].strip()): float(values[i])})
-            bins = PVInfo['N_bins']
-            amp = PVInfo['amplitude']
+                # Gets the amplitude
+                inF = open(self.dockedOpt.fileName, 'r')
+                lines = inF.readlines()
+                header = ''
+                for (iL, line) in enumerate(lines):
+                    if line.startswith('#'):
+                        header = line
+                        break
+                inF.close()
+                headerParts = header.split('(')
+                titles = headerParts[1].split(',')
+                values = headerParts[2].split(',')
 
-            print ("Amplitude: ", amp)
+                for i in range(len(titles)):
+                    if i == (len(titles) - 1):
+                        lastT = titles[i].split(')')
+                        lastV = values[i].split(')')
+                        PVInfo.update({str(lastT[0].strip()): float(lastV[0])})
+                    else:
+                        PVInfo.update({str(titles[i].strip()): float(values[i])})
+                bins = PVInfo['N_bins']
+                amp = PVInfo['amplitude']
 
-            print ("Bins: ",  bins)
+                # Uses the data to find the x axis
+                ampStart = 0
+                rate = (amp/2)/(bins/4)
 
-            # Uses the data to find the x axis
-            ampStart = 0
-            rate = (amp/2)/(bins/4)
+                for j in range(int(round(bins/4))):
+                    ampStart = ampStart - rate
 
-        
-            for j in range(int(bins/4)):
-                ampStart = ampStart + rate
+                for j in range(int(bins/2)):
+                    ampStart = ampStart + rate
+                    x.append(ampStart)
+
                 x.append(ampStart)
+                for j in range(int(bins/2)-1):
+                    ampStart = ampStart - rate
+                    x.append(ampStart)
 
-            for j in range(int(bins/2)):
-                ampStart = ampStart - rate
-                x.append(ampStart)
 
-            for j in range(int(bins / 4)):
-                ampStart = ampStart + rate
-                x.append(ampStart)
+                print(x)
+                print(len(x))
+                return x
 
-            return x
         except Exception as e:
             QMessageBox.warning(self.myMainWindow, "Error", "Unable to detect voltage. Please make sure the PVvalue "
                                                             "contains the voltage in the comments.\n\n"
