@@ -487,7 +487,8 @@ class GaussianFitting:
                 ampStart = 0
                 rate = (amp/2)/(bins/4)
 
-                for j in range(int(round(bins/4))):
+                # Voltage: This voltage goes from -V to +V to -V
+                """for j in range(int(round(bins/4))):
                     ampStart = ampStart - rate
 
                 for j in range(int(bins/2)):
@@ -497,9 +498,24 @@ class GaussianFitting:
                 x.append(ampStart)
                 for j in range(int(bins/2)-1):
                     ampStart = ampStart - rate
+                    x.append(ampStart)"""
+
+                # This voltage goes from 0 to V to -V to 0
+                for j in range(int(bins / 4)):
+                    ampStart = ampStart + rate
                     x.append(ampStart)
 
+                x.append(ampStart)
+                for j in range(int(bins / 2) - 1):
+                    ampStart = ampStart - rate
+                    x.append(ampStart)
 
+                x.append(ampStart)
+                for j in range(int(bins / 4) -1):
+                    ampStart = ampStart + rate
+                    x.append(ampStart)
+
+                print("Voltage: ")
                 print(x)
                 print(len(x))
                 return x
