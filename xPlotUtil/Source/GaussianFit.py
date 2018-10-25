@@ -450,6 +450,7 @@ class GaussianFitting:
 
         self.GraphUtilGaussianFitGraphs(name, x, y, error, xLabel, yLabel, 'G')
 
+
     def getVoltage(self):
         """This method gets the voltage of the bins.
         :return: the voltage
