@@ -487,15 +487,18 @@ class GaussianFitting:
                 ampStart = 0
                 rate = (amp/2)/(bins/4)
 
-                for j in range(int(round(bins/4))):
+                x.append(ampStart)
+                for j in range(int(round(bins/4))-1):
                     ampStart = ampStart - rate
-
-                for j in range(int(bins/2)):
-                    ampStart = ampStart + rate
                     x.append(ampStart)
 
                 x.append(ampStart)
                 for j in range(int(bins/2)-1):
+                    ampStart = ampStart + rate
+                    x.append(ampStart)
+
+                x.append(ampStart)
+                for j in range(int(bins/4)-1):
                     ampStart = ampStart - rate
                     x.append(ampStart)
 
@@ -533,10 +536,10 @@ class GaussianFitting:
                 self.LPos2Data = []  # L Constant for Two Peak [#2]
                 # Position 1
                 for i in range(nCol):
-                  self.LPos1Data.append(self.PositionLFit(self.TwoPkGausFitData[i, 4], nCol))
+                  self.LPos1Data.append(self.PositionLFit(self.TwoPkGausFitData[i, 2], nCol))
                 # Position 2
                 for i in range(nCol):
-                  self.LPos2Data.append(self.PositionLFit(self.TwoPkGausFitData[i, 6], nCol))
+                  self.LPos2Data.append(self.PositionLFit(self.TwoPkGausFitData[i, 8], nCol))
         except:
             QMessageBox.warning(self.myMainWindow, "Error", "Please make sure the gaussian fit was done correctly.")
 
@@ -546,7 +549,7 @@ class GaussianFitting:
         x = self.getVoltage()
         y = self.LPosData
         xLabel = 'Voltage'
-        yLabel = 'L Constant (\u00c5)'
+        yLabel = 'Lattice (\u00c5)'
         name = 'Lattice - Position (Scan#: ' + self.readSpec.scan + ')'
 
         self.GraphUtilGaussianFitGraphs(name, x, y, None, xLabel, yLabel, 'L')
@@ -557,7 +560,7 @@ class GaussianFitting:
         x = self.getVoltage()
         y = self.LPos1Data
         xLabel = 'Voltage'
-        yLabel = 'L Constant'
+        yLabel = 'Lattice'
         name = 'Lattice - Position #1 (Scan#: ' + self.readSpec.scan + ')'
 
         self.GraphUtilGaussianFitGraphs(name, x, y, None, xLabel, yLabel, 'L')

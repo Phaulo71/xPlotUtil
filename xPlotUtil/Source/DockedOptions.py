@@ -556,7 +556,7 @@ class DockedOption(QDockWidget):
 
                 # %Change Graph Peak two
                 self.RLUPrcChangePeakTwo = QTreeWidgetItem(peakTwoBranch)
-                self.RLUPrcChangePeakTwo.setText(0, "Lattice")
+                self.RLUPrcChangePeakTwo.setText(0, "Lattice %-Change")
                 self.RLUPrcChangePeakTwo.setFlags(self.RLUPrcChangePeakTwo.flags() | Qt.ItemIsTristate | Qt.ItemIsUserCheckable)
                 self.RLUPrcChangePeakTwo.setCheckState(0, Qt.Unchecked)
 
