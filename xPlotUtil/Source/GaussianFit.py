@@ -484,7 +484,7 @@ class GaussianFitting:
                 bins = PVInfo['N_bins']
                 amp = PVInfo['amplitude']
 
-                # Uses the data to find the x axis
+                # Voltage 0 --> (-) --> (+) --> 0
                 ampStart = 0
                 rate = (amp/2)/(bins/4)
 
