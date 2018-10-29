@@ -11,6 +11,10 @@ includefiles_list.append(scipy_path)
 matplotlib_path = os.path.dirname(matplotlib.__file__)
 includefiles_list.append(matplotlib_path)
 os_path = os.path.dirname(os.__file__)
+
+# This is required by windows to create the executable folder.
+os.environ['TCL_LIBRARY'] = r'C:\Program Files\Python35-32\tcl\tcl8.6'
+os.environ['TK_LIBRARY'] = r'C:\Program Files\Python35-32\tcl\tk8.6'
 includefiles_list.append(os_path)
 includefiles_list.append("graph.ico")
 
