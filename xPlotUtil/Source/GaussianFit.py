@@ -488,21 +488,18 @@ class GaussianFitting:
                 ampStart = 0
                 rate = (amp/2)/(bins/4)
 
-                x.append(ampStart)
-                for j in range(int(round(bins/4))-1):
+                for j in range(int(round(bins/4))):
                     ampStart = ampStart - rate
-                    x.append(ampStart)
 
                 x.append(ampStart)
-                for j in range(int(bins/2)-1):
+                for j in range(int(round(bins/2))-1):
                     ampStart = ampStart + rate
                     x.append(ampStart)
 
                 x.append(ampStart)
-                for j in range(int(bins/4)-1):
+                for j in range(int(bins/2)-1):
                     ampStart = ampStart - rate
                     x.append(ampStart)
-
 
                 print(x)
                 print(len(x))
@@ -572,7 +569,7 @@ class GaussianFitting:
         x = self.getVoltage()
         y = self.LPos2Data
         xLabel = 'Voltage'
-        yLabel = 'L Constant'
+        yLabel = 'Lattice'
         name = 'Lattice - Position #2 (Scan#: ' + self.readSpec.scan + ')'
 
         self.GraphUtilGaussianFitGraphs(name, x, y, None, xLabel, yLabel, 'L')
