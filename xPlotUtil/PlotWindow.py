@@ -367,6 +367,7 @@ class MainWindow (QMainWindow):
             for j in range(nCol):
                 yy = self.dockedOpt.TT[:, j]
                 axes.plot(xx, yy)
+                print (yy)
         elif whichG == 'C':
             tMax = np.max(self.dockedOpt.TT)
             tMin = np.min(self.dockedOpt.TT)

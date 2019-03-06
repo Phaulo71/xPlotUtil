@@ -14,7 +14,7 @@ from PyQt5.QtWidgets import *
 from matplotlib.backends.backend_qt5 import NavigationToolbar2QT as NavigationToolbar
 from matplotlib.backends.backend_qt5agg import FigureCanvasQTAgg as FigureCanvas
 
-from lmfit.models import LorentzianModel, GaussianModel, LinearModel, VoigtModel
+from lmfit.models import GaussianModel, LinearModel
 
 from pylab import *
 import numpy as np
@@ -268,7 +268,9 @@ class GaussianFitting:
         axes = fig.add_subplot(111)
 
         axes.plot(x, y)
-
+        print(y)
+        print("Fitted Data")
+        print(name)
         if whichGraph == 'G':
             axes.errorbar(x, y, yerr=error, fmt='o')
         elif whichGraph == 'L':
@@ -295,6 +297,7 @@ class GaussianFitting:
         """
         x = self.getVoltage()
         y = self.OnePkFitData[:, 0]
+        print(y)
         error = self.OnePkFitData[:, 1]
         xLabel = 'Voltage'
         yLabel = 'Intensity'
