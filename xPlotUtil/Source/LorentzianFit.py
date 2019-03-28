@@ -45,7 +45,7 @@ class LorentzianFitting:
             if self.dockedOpt.FileError() is False and self.dockedOpt.fitStat is False:
                 chosePeak = self.dockedOpt.PeakDialog()
                 if (chosePeak == 'One'):
-                    self.onePeakLorentzianFit()
+                    self.OnePeakLorentzianFit()
                 elif (chosePeak == 'Two'):
                     self.TwoPeakLorentzianFit()
 

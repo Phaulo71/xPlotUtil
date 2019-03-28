@@ -9,7 +9,6 @@ See LICENSE file.
 # ---------------------------------------------------------------------------------------------------------------------#
 from __future__ import unicode_literals
 
-import gc
 from threading import Timer
 
 from PyQt5.QtCore import *
@@ -50,6 +49,9 @@ class MainWindow (QMainWindow):
 
         self.contrastMax = 0
         self.contrastMin = 0
+        self.scan = ""
+        self.xAxisName = ""
+        self.xAxis = []
 
     # -----------------------------Central Tab Widget------------------------------------------------------------------#
     def windowTabs(self):
@@ -74,7 +76,6 @@ class MainWindow (QMainWindow):
         self.canvasArray[tabIndex].mpl_disconnect(self.canvasArray[tabIndex].button_pick_id)
         self.canvasArray[tabIndex].close()
         self.canvasArray.pop(tabIndex)
-        gc.collect()
 
         self.tabWidget.removeTab(tabIndex)
 
@@ -113,21 +114,28 @@ class MainWindow (QMainWindow):
         self.CreateActions()
         self.CreateMenus()
         self.fileMenu.addAction(self.openAction)
+
         self.exportMenu = self.fileMenu.addMenu("Export")
         self.exportMenu.addAction(self.reportAction)
         self.exportMenu.addAction(self.binGausFitReportAction)
+
         self.fileMenu.addAction(self.resetAction)
         self.fileMenu.addSeparator()
         self.fileMenu.addAction(self.exitAction)
+
         self.graphMenu.addAction(self.mainOptionsAction)
         self.graphMenu.addAction(self.normalizeAction)
         self.graphMenu.addAction(self.algebraicExpAction)
+
         self.fitMenu = self.graphMenu.addMenu("Fits")
         self.fitMenu.addAction(self.gaussianFitAction)
         self.fitMenu.addAction(self.lorentzianFitAction)
         self.fitMenu.addAction(self.voigtFitAction)
         self.fitMenu.addAction(self.latticeFitAction)
         self.graphMenu.addSeparator()
+        self.graphMenu.addAction(self.selectScanxAxisAction)
+        self.graphMenu.addAction(self.setVoltageAction)
+
         self.helpMenu.addSeparator()  
         self.helpMenu.addAction(self.aboutAction)
 
@@ -166,6 +174,10 @@ class MainWindow (QMainWindow):
                                        triggered=self.readSpec.NormalizerDialog)
         self.algebraicExpAction = QAction('Algebraic Expressions', self, statusTip='Algebraic expressions.',
                                        triggered=self.dockedOpt.DataGraphingAlgebraicExpOptionsTree)
+        self.selectScanxAxisAction = QAction('Set x-Axis', self, statusTip='Select xAxis for scan',
+                                                                           triggered=self.selectScanxAxis)
+        self.setVoltageAction = QAction('Set Voltage', self, statusTip='Set the voltage for the fits',
+                                             triggered=self.setVoltage)
         self.aboutAction = QAction(QIcon('about.png'), 'A&bout',
                                          self, shortcut="Ctrl+B", statusTip="Displays info about the graph program",
                                          triggered=self.aboutHelp)
@@ -229,13 +241,17 @@ class MainWindow (QMainWindow):
         words = header.split()
         ampl = ''
         if len(words) > 6:
-            ampl = words[6]
+            ampl = words[5]
+
         line1 = '[-' + str(ampl) + '] --> [0] --> [+' + str(ampl) + '] --> [0] --> [-' + str(ampl) + '] '
 
-        xx = self.readSpec.L
-        yLabel = "RLU (Reciprocal Lattice Unit)"
+        xx = self.xAxis
+        if self.xAxisName == "Bins":
+            yLabel = "Points"
+        else:
+            yLabel = self.xAxisName
 
-        gTitle = 'Raw Data Color Graph (Scan#: ' + self.readSpec.scan + ')'
+        gTitle = 'Raw Data Color Graph (Scan#: ' + self.scan + ')'
         statTip = "Raw Data Color Graph"
         xLabel = 'Bins (voltage:' + line1 + ')'
         tabName = 'Raw Data Color Graph'
@@ -331,13 +347,13 @@ class MainWindow (QMainWindow):
         nCol = self.dockedOpt.TT.shape[1]
 
         z = np.linspace(min, max)
-        xx = self.readSpec.L
+        xx = self.xAxis
         yy = range(nCol)
         axes.contourf(yy, xx, self.dockedOpt.TT, z, cmap='jet')
         self.figArray[ind].colorbar(axes.contourf(yy, xx, self.dockedOpt.TT, z, cmap='jet'))
         gTitle = 'Raw Data Color Graph (Scan#: ' + self.readSpec.scan + ')'
         xLabel = 'Bins'
-        yLabel = "RLU (Reciprocal Lattice Unit)"
+        yLabel = self.xAxisName
         axes.set_title(gTitle)
         axes.set_xlabel(xLabel)
         axes.set_ylabel(yLabel)
@@ -367,15 +383,14 @@ class MainWindow (QMainWindow):
             for j in range(nCol):
                 yy = self.dockedOpt.TT[:, j]
                 axes.plot(xx, yy)
-                print (yy)
         elif whichG == 'C':
             tMax = np.max(self.dockedOpt.TT)
             tMin = np.min(self.dockedOpt.TT)
             z = np.linspace(tMin, tMax)
-            yy = range(nCol)
+            yx = range(nCol)
 
-            axes.contourf(yy, xx, self.dockedOpt.TT, z, cmap='jet')
-            fig.colorbar(axes.contourf(yy, xx, self.dockedOpt.TT, z, cmap='jet'))
+            axes.contourf(yx, xx, self.dockedOpt.TT, z, cmap='jet')
+            fig.colorbar(axes.contourf(yx, xx, self.dockedOpt.TT, z, cmap='jet'))
 
             contrastBtn = QPushButton("Contrast")
             contrastBtn.clicked.connect(self.ColorGraphContrastDialog)
@@ -403,9 +418,26 @@ class MainWindow (QMainWindow):
     def PlotLineGraphRawData(self):
         """This method graphs the raw data into a line graph with the x-axis the user picks.
         """
-        xx, gTitle, xLabel, statTip, tabName = self.readSpec.getRawDataLinePlotElements()
-        if gTitle != 0:
-             self.GraphUtilRawDataLineGraphs(gTitle, xLabel, 'Intensity', statTip, tabName, xx, 'L')
+        xAxis, xx, scan = self.getScanxAxis()
+
+        if xAxis != 0:
+            if xAxis == 'L':
+                gTitle = 'Raw Data in RLU (Scan#: ' + scan + ')'
+                xLabel = 'RLU (Reciprocal Lattice Unit)'
+                statTip = 'Raw Data in RLU (Reciprocal Lattice Unit)'
+                tabName = 'Raw Data (RLU)'
+            elif xAxis == 'Bins':
+                gTitle = 'Raw Data in Bins (Scan#: ' + scan + ')'
+                xLabel = 'Points'
+                statTip = 'Raw Data in Bins'
+                tabName = 'Raw Data (Bins)'
+            else:
+                gTitle = 'Raw Data in ' + xAxis + ' (Scan#: ' + scan + ')'
+                xLabel = xAxis
+                statTip = 'Raw Data in ' + xAxis
+                tabName = 'Raw Data (' + xAxis + ')'
+
+            self.GraphUtilRawDataLineGraphs(gTitle, xLabel, 'Intensity', statTip, tabName, xx, 'L')
 
     # -----------------------------------Creating Report---------------------------------------------------------------#
     def ReportButton(self):
@@ -513,6 +545,16 @@ class MainWindow (QMainWindow):
 
         # Writes to sheet
         np.savetxt(self.reportFile, reportData, fmt=str('%f'), header=header, comments=comment)
+
+    def selectScanxAxis(self):
+        if any(self.dockedOpt.TT):
+            self.xAxisName, self.xAxis, self.scan = self.readSpec.getxAxisForScan()
+
+    def getScanxAxis(self):
+        return self.xAxisName, self.xAxis, self.scan
+
+    def setVoltage(self):
+        self.gausFit.setVoltage()
 
 def main():
     """Main method.

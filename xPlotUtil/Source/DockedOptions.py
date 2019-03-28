@@ -10,7 +10,6 @@ See LICENSE file.
 # ---------------------------------------------------------------------------------------------------------------------#
 from __future__ import unicode_literals
 
-import gc
 import os
 
 from PyQt5.QtCore import *
@@ -206,10 +205,12 @@ class DockedOption(QDockWidget):
 
             for i in range(nCol):
                 self.TT[:, i] = data[:, i]
-        except:
+
+            self.myMainWindow.selectScanxAxis()
+        except Exception as e:
             QMessageBox.warning(self.myMainWindow, "Warning", "Please make sure the PVvalue file follows the "
                                                               "appropriate format. There should be an equal amount of "
-                                                              "rows and columns.")
+                                                              "rows and columns.\n\n" + str(e))
             self.mainOptions.close()
             self.DockMainOptions()
             self.specFileInfo()
@@ -312,7 +313,6 @@ class DockedOption(QDockWidget):
         while i < index:
             self.myMainWindow.canvasArray.pop(j)
             self.myMainWindow.figArray.pop(j)
-            gc.collect()
             self.myMainWindow.tabWidget.removeTab(j)
             i += 1
 

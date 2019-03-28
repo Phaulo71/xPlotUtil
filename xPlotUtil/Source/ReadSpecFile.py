@@ -108,7 +108,7 @@ class ReadSpec:
         self.scan = scan[1]
         self.currentRow = self.dockedOpt.specDataList.currentRow()
 
-        if self.specDirectory.find("/") == 0:
+        if self.specDirectory.find("/") != -1:
             fileName = self.specDirectory + "/" + self.PvFiles[self.currentRow]
         else:
             fileName = self.specDirectory + "\\" + self.PvFiles[self.currentRow]
@@ -209,8 +209,8 @@ class ReadSpec:
         return linePlotXAxis
 
     def RawDataLineGraphXAxisDialog(self):
-        """This method creates a dialog with dynamically created radio buttons from the spec file, which allow the
-        user to pick which x-axis to use for the raw data line graph.
+        """Creates a dialog with dynamically coded radio buttons from the spec file, which allow the
+        user to select the x-axis for the scan.
         """
         self.xAxisRawDataDialog = QDialog(self.myMainWindow)
         self.xAxisRawDataDialog.setModal(True)
@@ -221,71 +221,53 @@ class ReadSpec:
         groupBox = QGroupBox("Select x-axis")
         self.possibleRawDataXBtnGroup = QButtonGroup(groupBox)
         xAxis = self.possibleRawDataLineGraphXAxis()
+        i = 0
         for x in xAxis:
             xRB = QRadioButton(x)
-            self.possibleRawDataXBtnGroup.addButton(xRB)
+            self.possibleRawDataXBtnGroup.addButton(xRB, i)
             vBox.addWidget(xRB)
+            i += 1
         groupBox.setLayout(vBox)
 
         ok = QPushButton("Ok")
-        cancel = QPushButton("Cancel")
 
-        cancel.clicked.connect(self.xAxisRawDataDialog.close)
         ok.clicked.connect(self.xAxisRawDataDialog.accept)
 
-        buttonLayout.addWidget(cancel)
         buttonLayout.addStretch(1)
         buttonLayout.addWidget(ok)
 
         dialogBox.addWidget(groupBox)
         dialogBox.addLayout(buttonLayout)
 
-        self.xAxisRawDataDialog.setWindowTitle("Raw data line graph x-axis")
+        self.xAxisRawDataDialog.setWindowTitle("Select x-axis for scan")
         self.xAxisRawDataDialog.setLayout(dialogBox)
         self.xAxisRawDataDialog.resize(200, 100)
         self.xAxisRawDataDialog.exec_()
 
-    def getRawDataLinePlotElements(self):
+    def getxAxisForScan(self):
         """This function selects the x-axis depending on what the user selected, as well as other
         criteria for the raw data line graph. Returns a list of zeros if no radio button was selected.
         :return: list of elements to plot the raw data line graph
         """
         self.RawDataLineGraphXAxisDialog()
+        while self.xAxisRawDataDialog.result() != self.xAxisRawDataDialog.Accepted:
+            self.RawDataLineGraphXAxisDialog()
 
-        if self.xAxisRawDataDialog.result() == self.xAxisRawDataDialog.Accepted and self.possibleRawDataXBtnGroup.checkedButton() != None:
-            xAxis = self.possibleRawDataLineGraphXAxis()
-            radioBtn = self.possibleRawDataXBtnGroup.buttons()
+        if self.xAxisRawDataDialog.result() == self.xAxisRawDataDialog.Accepted and \
+                self.possibleRawDataXBtnGroup.checkedId() != -1:
+            xAxisList = self.possibleRawDataLineGraphXAxis()
+            xAxisInd = self.possibleRawDataXBtnGroup.checkedId()
 
-            # Gets the x-axis for the line graph
-            i = 0
-            for btn in radioBtn:
-                if btn == self.possibleRawDataXBtnGroup.checkedButton():
-                    if xAxis[i] == 'L':
-                        x = self.scans[self.scan].data[xAxis[i]]
-                        gTitle = 'Raw Data in RLU (Scan#: ' + self.scan + ')'
-                        xLabel = 'RLU (Reciprocal Lattice Unit)'
-                        statTip = 'Raw Data in RLU (Reciprocal Lattice Unit)'
-                        tabName = 'Raw Data (RLU)'
-                    elif xAxis[i] == 'Bins':
-                        nRow, nCol = self.dockedOpt.fileInfo()
-                        x = range(nRow)
-                        gTitle = 'Raw Data in Bins (Scan#: ' + self.scan + ')'
-                        xLabel = 'Points'
-                        statTip = 'Raw Data in Bins'
-                        tabName = 'Raw Data (Bins)'
-                    else:
-                        x = self.scans[self.scan].data[xAxis[i]]
-                        gTitle = 'Raw Data in ' + xAxis[i] + ' (Scan#: ' + self.scan + ')'
-                        xLabel = xAxis[i]
-                        statTip = 'Raw Data in ' + xAxis[i]
-                        tabName = 'Raw Data (' + xAxis[i] + ')'
-                else:
-                    i += 1
+            xAxisName = xAxisList[xAxisInd]
+            if xAxisName == "Bins":
+                nRow, nCol = self.dockedOpt.fileInfo()
+                x = range(nRow)
+            else:
+                x = self.scans[self.scan].data[xAxisName]
+
             self.xAxisRawDataDialog.close()
-            return x, gTitle, xLabel, statTip, tabName
-        else:
-            self.xAxisRawDataDialog.close()
-            return 0, 0, 0, 0, 0
+
+            return xAxisName, x, self.scan
 
 
 

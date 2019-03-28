@@ -21,6 +21,7 @@ import numpy as np
 
 
 from xPlotUtil.Source.AlgebraicExpressions import AlgebraicExpress
+from xPlotUtil.Source.voltage_dialog import VoltageDialog
 
 
 # ---------------------------------------------------------------------------------------------------------------------#
@@ -42,6 +43,7 @@ class GaussianFitting:
         self.lorentFit = self.algebraExp.lorentFit
         self.continueGraphingEachFit = True  # Boolean to stop Each fit graphing
         self.useImportedX = False
+        self.voltageDialog = VoltageDialog()
 
     # --------------------------------Gaussian Fit---------------------------------------------------------------------#
     def OnePeakGaussianFit(self):
@@ -190,6 +192,9 @@ class GaussianFitting:
             canvas.setParent(self.mainGraph)
             axes = fig.add_subplot(111)
 
+            xAxisName, xAxis, scan = self.myMainWindow.getScanxAxis()
+            axes.set_xlabel(xAxisName)
+            xx = xAxis
             axes.plot(xx, yy, 'b+:', label='data')
             if whichFit == 'G':
                 axes.plot(xx, fitData, 'ro:', label='fit')
@@ -202,7 +207,6 @@ class GaussianFitting:
                 axes.set_title("Voigt Fit")
 
             axes.legend()
-            axes.set_xlabel('Bins')
             axes.set_ylabel('Intensity')
             canvas.draw()
 
@@ -297,7 +301,6 @@ class GaussianFitting:
         """
         x = self.getVoltage()
         y = self.OnePkFitData[:, 0]
-        print(y)
         error = self.OnePkFitData[:, 1]
         xLabel = 'Voltage'
         yLabel = 'Intensity'
@@ -504,11 +507,16 @@ class GaussianFitting:
                     ampStart = ampStart - rate
                     x.append(ampStart)
 
+                print("Dynamical Voltage")
+                print(rate)
                 print(x)
                 print(len(x))
                 return x
 
-        except Exception as e:
+            else:
+                return self.voltageDialog.voltage
+
+        except Exception or IOError as ex:
             QMessageBox.warning(self.myMainWindow, "Error", "Unable to detect voltage. Please make sure the PVvalue "
                                                             "contains the voltage in the comments.\n\n"
                                                             "Exception: " + str(e))
@@ -662,6 +670,9 @@ class GaussianFitting:
             QMessageBox.warning(self.myMainWindow, "Error", "Make sure the gaussian fit was done properly, before "
                                                             "exporting the report again.")
 
+    def setVoltage(self):
+        self.voltageDialog.show_dialog()
+        self.useImportedX = self.voltageDialog.importedVoltage
 
 
 
