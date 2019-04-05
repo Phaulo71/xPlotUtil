@@ -20,11 +20,11 @@ includefiles_list.append("graph.ico")
 
 base = 'Win32GUI' if sys.platform == 'win32' else None
 
-options = {"packages": ["os", "idna", "numpy", "spec2nexus", "lmfit", "matplotlib", ],
-           "include_files": includefiles_list, "includes": ['os', 'lmfit.models']}
+options = {'packages': ["os", "idna", "numpy", "spec2nexus", "lmfit", "matplotlib", ],
+           'include_files': includefiles_list, "includes": ['os', 'lmfit.models'],
+           'include_msvcr': True}
 
 setup(name="xPlotUtil",
-      version="0.1",
+      version="1.0",
       options={"build_exe": options},
-      description="Allows fitting and plotting of point data from spec file.",
       executables=[Executable("xPlotUtil/PlotWindow.py", icon='graph.ico', base=base, shortcutDir='xPlotUtil')])

@@ -12,8 +12,8 @@ from __future__ import unicode_literals
 
 import os
 
-from PyQt5.QtWidgets import *
-from pylab import *
+import PyQt5.QtWidgets as qtWidgets
+import numpy as np
 
 from xPlotUtil.Source.GaussianFit import GaussianFitting
 import traceback
@@ -61,7 +61,7 @@ class ReadSpec:
         """
         try:
             selectedFilter = "Spec files (*.spec)"
-            self.specFileName, self.specFileFilter = QFileDialog.getOpenFileName(self.myMainWindow, "Open Spec File",
+            self.specFileName, self.specFileFilter = qtWidgets.QFileDialog.getOpenFileName(self.myMainWindow, "Open Spec File",
                                                                                  None, selectedFilter)
             # Makes sure a file has been opened
             if os.path.isfile(self.specFileName):
@@ -83,7 +83,7 @@ class ReadSpec:
                 self.myMainWindow.latticeFitAction.setEnabled(False)
                 self.myMainWindow.showProgress("Spec file opened")
         except Exception as e:
-            QMessageBox.warning(self.myMainWindow, "Error", "There was an error \n\n Exception: " + str(e)
+            qtWidgets.QMessageBox.warning(self.myMainWindow, "Error", "There was an error \n\n Exception: " + str(e)
                                 + "\n\nTraceback: " + str(traceback.print_stack()))
 
     def loadScans(self, scans):
@@ -135,7 +135,7 @@ class ReadSpec:
                             self.normalizers.append(key)
                     sorted(self.normalizers)
             except Exception as e:
-                QMessageBox.warning(self.myMainWindow, "Error", "There was an error \n\n Exception: " + str(e))
+                qtWidgets.QMessageBox.warning(self.myMainWindow, "Error", "There was an error \n\n Exception: " + str(e))
 
 
     def NormalizerDialog(self):
@@ -143,23 +143,23 @@ class ReadSpec:
         user to pick which chamber was used to normalize.
         """
         if self.dockedOpt.normalizingStat == False and self.dockedOpt.FileError() == False :
-            self.normalizeDialog = QDialog(self.myMainWindow)
-            dialogBox = QVBoxLayout()
-            buttonLayout = QHBoxLayout()
-            vBox = QVBoxLayout()
+            self.normalizeDialog = qtWidgets.QDialog(self.myMainWindow)
+            dialogBox = qtWidgets.QVBoxLayout()
+            buttonLayout = qtWidgets.QHBoxLayout()
+            vBox =qtWidgets.QVBoxLayout()
 
-            groupBox = QGroupBox("Select normalizer")
-            self.buttonGroup = QButtonGroup(groupBox)
+            groupBox = qtWidgets.QGroupBox("Select normalizer")
+            self.buttonGroup = qtWidgets.QButtonGroup(groupBox)
 
             for norm in self.normalizers:
-                normalizerRB = QRadioButton(norm)
+                normalizerRB = qtWidgets.QRadioButton(norm)
                 self.buttonGroup.addButton(normalizerRB, int(norm[-1]))
                 vBox.addWidget(normalizerRB)
 
             groupBox.setLayout(vBox)
 
-            ok = QPushButton("Ok")
-            cancel = QPushButton("Cancel")
+            ok = qtWidgets.QPushButton("Ok")
+            cancel = qtWidgets.QPushButton("Cancel")
 
             cancel.clicked.connect(self.normalizeDialog.close)
             ok.clicked.connect(self.getNormalizer)
@@ -189,7 +189,7 @@ class ReadSpec:
                         self.dockedOpt.TT = np.divide(self.dockedOpt.TT, self.normalizer)
                         self.dockedOpt.normalizingStat = True
         except Exception as e:
-            QMessageBox.warning(self.myMainWindow, "Dimension Error", "Please make sure the selected normalizer "
+            qtWidgets.QMessageBox.warning(self.myMainWindow, "Dimension Error", "Please make sure the selected normalizer "
                                                                       "has the same row dimension as the raw data." +
                                                                       "Exception: " + str(e))
 
@@ -212,24 +212,24 @@ class ReadSpec:
         """Creates a dialog with dynamically coded radio buttons from the spec file, which allow the
         user to select the x-axis for the scan.
         """
-        self.xAxisRawDataDialog = QDialog(self.myMainWindow)
+        self.xAxisRawDataDialog = qtWidgets.QDialog(self.myMainWindow)
         self.xAxisRawDataDialog.setModal(True)
-        dialogBox = QVBoxLayout()
-        buttonLayout = QHBoxLayout()
-        vBox = QVBoxLayout()
+        dialogBox = qtWidgets.QVBoxLayout()
+        buttonLayout = qtWidgets.QHBoxLayout()
+        vBox = qtWidgets.QVBoxLayout()
 
-        groupBox = QGroupBox("Select x-axis")
-        self.possibleRawDataXBtnGroup = QButtonGroup(groupBox)
+        groupBox = qtWidgets.QGroupBox("Select x-axis")
+        self.possibleRawDataXBtnGroup = qtWidgets.QButtonGroup(groupBox)
         xAxis = self.possibleRawDataLineGraphXAxis()
         i = 0
         for x in xAxis:
-            xRB = QRadioButton(x)
+            xRB = qtWidgets.QRadioButton(x)
             self.possibleRawDataXBtnGroup.addButton(xRB, i)
             vBox.addWidget(xRB)
             i += 1
         groupBox.setLayout(vBox)
 
-        ok = QPushButton("Ok")
+        ok = qtWidgets.QPushButton("Ok")
 
         ok.clicked.connect(self.xAxisRawDataDialog.accept)
 

@@ -11,28 +11,28 @@ from __future__ import unicode_literals
 
 from threading import Timer
 
-from PyQt5.QtCore import *
-from PyQt5.QtGui import *
-from PyQt5.QtWidgets import *
+import PyQt5.QtCore as qtCore
+import PyQt5.QtWidgets as qtWidgets
+import PyQt5.QtGui as qtGui
+import pylab as plab
+import numpy as np
 from matplotlib.backends.backend_qt5 import NavigationToolbar2QT as NavigationToolbar
 from matplotlib.backends.backend_qt5agg import FigureCanvasQTAgg as FigureCanvas
-from pylab import *
 from xPlotUtil.Source.DockedOptions import DockedOption
 
 # ---------------------------------------------------------------------------------------------------------------------#
 
-class MainWindow (QMainWindow):
+class MainWindow (qtWidgets.QMainWindow):
     """Initializes the main window with the central tab widget. It also has the graphing methods for the raw data and
     creating a report.
     """
-
     def __init__ (self, parent=None):
         super(MainWindow, self).__init__(parent)
 
         self.setGeometry(50, 50, 1000, 800)
         self.setMinimumSize(800, 700)
         self.setWindowTitle("xPlot Util")
-        self.setWindowIcon(QIcon('Graph.png'))
+        self.setWindowIcon(qtGui.QIcon('Graph.png'))
         self.dockedOpt = DockedOption(parent=self)
         self.gausFit = self.dockedOpt.gausFit
         self.readSpec = self.dockedOpt.readSpec
@@ -45,7 +45,7 @@ class MainWindow (QMainWindow):
         self.windowTabs()
         self.dockedOpt.DockMainOptions()
         self.setCentralWidget(self.tabWidget)
-        self.setTabPosition(Qt.RightDockWidgetArea | Qt.LeftDockWidgetArea, QTabWidget.North)
+        self.setTabPosition(qtCore.Qt.RightDockWidgetArea | qtCore.Qt.LeftDockWidgetArea, qtWidgets.QTabWidget.North)
 
         self.contrastMax = 0
         self.contrastMin = 0
@@ -57,7 +57,7 @@ class MainWindow (QMainWindow):
     def windowTabs(self):
         """This function creates the central widget QTabWidget.
         """
-        self.tabWidget = QTabWidget()
+        self.tabWidget = qtWidgets.QTabWidget()
 
         self.tabWidget.setTabsClosable(True)
         self.tabWidget.tabCloseRequested.connect(self.closeTab)
@@ -96,20 +96,20 @@ class MainWindow (QMainWindow):
     def SetupComponents(self):
         """ Function to setups status bar and menu bar
         """
-        self.myStatusBar = QStatusBar()
+        self.myStatusBar = qtWidgets.QStatusBar()
         self.setStatusBar(self.myStatusBar)
-        self.progressBar = QProgressBar()
+        self.progressBar = qtWidgets.QProgressBar()
         self.progressBar.setMaximum(100)
         self.progressBar.setMinimum(0)
-        self.progressLabel = QLabel()
-        self.spaceLabel = QLabel()
+        self.progressLabel = qtWidgets.QLabel()
+        self.spaceLabel = qtWidgets.QLabel()
         self.myStatusBar.addWidget(self.progressLabel)
         self.myStatusBar.addWidget(self.spaceLabel)
         self.myStatusBar.addWidget(self.progressBar, 1)
         self.spaceLabel.hide()
         self.progressLabel.hide()
         self.progressBar.hide()
-        self.myStatusBar.showMessage('Ready', 3000)
+        self.myStatusBar.showMessage("Ready", 3000)
 
         self.CreateActions()
         self.CreateMenus()
@@ -144,41 +144,41 @@ class MainWindow (QMainWindow):
     def CreateActions(self):
         """Function that creates the actions used in the menu bar
         """
-        self.openAction = QAction(QIcon('openFolder.png'), '&Open', self)
-        self.openAction.setShortcut(QKeySequence.Open)
+        self.openAction = qtWidgets.QAction(qtGui.QIcon('openFolder.png'), '&Open', self)
+        self.openAction.setShortcut(qtGui.QKeySequence.Open)
         self.openAction.setStatusTip("Open an existing file")
         self.openAction.triggered.connect(self.readSpec.openSpecFile)
 
-        self.exitAction = QAction(QIcon('exit.png'), 'E&xit',
+        self.exitAction = qtWidgets.QAction(qtGui.QIcon('exit.png'), 'E&xit',
                                         self, shortcut="Ctrl+Q",
                                         statusTip="Exit the Application",
                                         triggered=self.exitFile)
-        self.resetAction = QAction('Reset', self, statusTip="Resets xPlot Util",
+        self.resetAction = qtWidgets.QAction('Reset', self, statusTip="Resets xPlot Util",
                                   triggered=self.dockedOpt.resetxPlot)
-        self.reportAction = QAction('Fit Report', self, statusTip="Create a report of the fit data",
+        self.reportAction = qtWidgets.QAction('Fit Report', self, statusTip="Create a report of the fit data",
                                          triggered=self.ReportDialog)
-        self.binGausFitReportAction = QAction('Fit of each Bin Report', self, statusTip="Create a report from rach bin "
+        self.binGausFitReportAction = qtWidgets.QAction('Fit of each Bin Report', self, statusTip="Create a report from rach bin "
                                                                                         "fit data.",
                                               triggered=self.gausFit.EachFitDataReport)
-        self.mainOptionsAction = QAction('Main Options', self, statusTip="Main options for xPlot Util",
+        self.mainOptionsAction = qtWidgets.QAction('Main Options', self, statusTip="Main options for xPlot Util",
                                              triggered=self.dockedOpt.restoreMainOptions)
-        self.gaussianFitAction= QAction('Gaussian Fit',self, statusTip="Gaussian fit",
+        self.gaussianFitAction= qtWidgets.QAction('Gaussian Fit',self, statusTip="Gaussian fit",
                                         triggered=self.dockedOpt.WhichPeakGaussianFit)
-        self.lorentzianFitAction = QAction('Lorentzian Fit', self, statusTip="Lorentzian fit.",
+        self.lorentzianFitAction = qtWidgets.QAction('Lorentzian Fit', self, statusTip="Lorentzian fit.",
                                          triggered=self.lorentFit.WhichPeakLorentzianFit)
-        self.voigtFitAction = QAction('Voigt Fit', self, statusTip="Voigt fit.",
+        self.voigtFitAction = qtWidgets.QAction('Voigt Fit', self, statusTip="Voigt fit.",
                                          triggered=self.lorentFit.WhichPeakVoigtFit)
-        self.latticeFitAction = QAction('Lattice Fit', self, statusTip="Lattice fit.",
+        self.latticeFitAction = qtWidgets.QAction('Lattice Fit', self, statusTip="Lattice fit.",
                                   triggered =self.dockedOpt.GraphingLatticeOptionsTree)
-        self.normalizeAction = QAction('Normalize', self, statusTip='Normalizes the data',
+        self.normalizeAction = qtWidgets.QAction('Normalize', self, statusTip='Normalizes the data',
                                        triggered=self.readSpec.NormalizerDialog)
-        self.algebraicExpAction = QAction('Algebraic Expressions', self, statusTip='Algebraic expressions.',
+        self.algebraicExpAction = qtWidgets.QAction('Algebraic Expressions', self, statusTip='Algebraic expressions.',
                                        triggered=self.dockedOpt.DataGraphingAlgebraicExpOptionsTree)
-        self.selectScanxAxisAction = QAction('Set x-Axis', self, statusTip='Select xAxis for scan',
+        self.selectScanxAxisAction = qtWidgets.QAction('Set x-Axis', self, statusTip='Select xAxis for scan',
                                                                            triggered=self.selectScanxAxis)
-        self.setVoltageAction = QAction('Set Voltage', self, statusTip='Set the voltage for the fits',
+        self.setVoltageAction = qtWidgets.QAction('Set Voltage', self, statusTip='Set the voltage for the fits',
                                              triggered=self.setVoltage)
-        self.aboutAction = QAction(QIcon('about.png'), 'A&bout',
+        self.aboutAction = qtWidgets.QAction(qtGui.QIcon('about.png'), 'A&bout',
                                          self, shortcut="Ctrl+B", statusTip="Displays info about the graph program",
                                          triggered=self.aboutHelp)
 
@@ -220,7 +220,7 @@ class MainWindow (QMainWindow):
         """Talks briefly about the program.
         """
         """This needs further development. In its infancy level. """
-        QMessageBox.about(self, "About xPlot Util",
+        qtWidgets.QMessageBox.about(self, "About xPlot Util",
                           "Click on the browse button to select and open a spec file. "
                           "The PVvalue files should be under the same directory as the spec. Double click"
                           " on a PVvalue and the file will automatically open. After the file has been open"
@@ -264,33 +264,33 @@ class MainWindow (QMainWindow):
         user to pick which chamber was used to normalize.
         """
         # if self.dockedOpt.normalizingStat == False and self.dockedOpt.FileError() == False :
-        self.contrastDialog = QDialog(self)
-        inputForm = QFormLayout()
-        buttonLayout = QHBoxLayout()
-        hBox = QHBoxLayout()
-        hBox1 = QHBoxLayout()
+        self.contrastDialog = qtWidgets.QDialog(self)
+        inputForm = qtWidgets.QFormLayout()
+        buttonLayout = qtWidgets.QHBoxLayout()
+        hBox = qtWidgets.QHBoxLayout()
+        hBox1 = qtWidgets.QHBoxLayout()
 
-        maxContrastLbl = QLabel("Max Intensity:")
-        self.maxContrastSpin = QDoubleSpinBox()
+        maxContrastLbl = qtWidgets.QLabel("Max Intensity:")
+        self.maxContrastSpin = qtWidgets.QDoubleSpinBox()
         self.maxContrastSpin.setMaximum(np.max(self.dockedOpt.TT) + 1000)
         self.maxContrastSpin.setMinimum(np.min(self.dockedOpt.TT) - 999)
         self.maxContrastSpin.setValue(np.max(self.dockedOpt.TT))
         self.maxContrastSpin.valueChanged.connect(self.ContrastSpinMaxValue)
         self.contrastMax = self.maxContrastSpin.value()
-        self.maxContrastSlider = QSlider(Qt.Horizontal)
+        self.maxContrastSlider = qtWidgets.QSlider(qtCore.Qt.Horizontal)
         self.maxContrastSlider.setMaximum(np.max(self.dockedOpt.TT) + 1000)
         self.maxContrastSlider.setMinimum(np.min(self.dockedOpt.TT) - 999)
         self.maxContrastSlider.setValue(np.max(self.dockedOpt.TT))
         self.maxContrastSlider.valueChanged.connect(self.maxContrastSpin.setValue)
 
-        minContrastLbl = QLabel("Min Intensity: ")
-        self.minContrastSpin = QDoubleSpinBox()
+        minContrastLbl = qtWidgets.QLabel("Min Intensity: ")
+        self.minContrastSpin = qtWidgets.QDoubleSpinBox()
         self.minContrastSpin.setMaximum(np.max(self.dockedOpt.TT) + 999)
         self.minContrastSpin.setMinimum(np.min(self.dockedOpt.TT) - 1000)
         self.minContrastSpin.setValue(np.min(self.dockedOpt.TT))
         self.minContrastSpin.valueChanged.connect(self.ContrastSpinMinValue)
         self.contrastMin = self.minContrastSpin.value()
-        self.minContrastSlider = QSlider(Qt.Horizontal)
+        self.minContrastSlider = qtWidgets.QSlider(qtCore.Qt.Horizontal)
         self.minContrastSlider.setMaximum(np.max(self.dockedOpt.TT) + 999)
         self.minContrastSlider.setMinimum(np.min(self.dockedOpt.TT) - 1000)
         self.minContrastSlider.setValue(np.min(self.dockedOpt.TT))
@@ -304,9 +304,9 @@ class MainWindow (QMainWindow):
         hBox1.addWidget(self.minContrastSpin)
         hBox1.addWidget(self.minContrastSlider)
 
-        okBtn = QPushButton("Ok")
+        okBtn = qtWidgets.QPushButton("Ok")
         okBtn.clicked.connect(self.ReplottingColorGraph)
-        cancelBtn = QPushButton("Cancel")
+        cancelBtn = qtWidgets.QPushButton("Cancel")
         cancelBtn.clicked.connect(self.contrastDialog.close)
 
         buttonLayout.addWidget(cancelBtn)
@@ -369,8 +369,8 @@ class MainWindow (QMainWindow):
         :param xx: x-axis values
         :param whichG: char to know which graph to plot
         """
-        mainGraph = QWidget()
-        fig = Figure((3.0, 3.0), dpi=100)
+        mainGraph = qtWidgets.QWidget()
+        fig = plab.Figure((3.0, 3.0), dpi=100)
         canvas = FigureCanvas(fig)
 
         canvas.setParent(mainGraph)
@@ -392,7 +392,7 @@ class MainWindow (QMainWindow):
             axes.contourf(yx, xx, self.dockedOpt.TT, z, cmap='jet')
             fig.colorbar(axes.contourf(yx, xx, self.dockedOpt.TT, z, cmap='jet'))
 
-            contrastBtn = QPushButton("Contrast")
+            contrastBtn = qtWidgets.QPushButton("Contrast")
             contrastBtn.clicked.connect(self.ColorGraphContrastDialog)
 
         axes.set_title(gTitle)
@@ -400,13 +400,13 @@ class MainWindow (QMainWindow):
         axes.set_ylabel(yLabel)
         canvas.draw()
 
-        tab = QWidget()
+        tab = qtWidgets.QWidget()
         tab.setStatusTip(statTip)
-        vbox = QVBoxLayout()
+        vbox = qtWidgets.QVBoxLayout()
         graphNavigationBar = NavigationToolbar(canvas, self)
         vbox.addWidget(graphNavigationBar)
         if whichG == 'C':
-            hBox = QHBoxLayout()
+            hBox = qtWidgets.QHBoxLayout()
             hBox.addStretch()
             hBox.addWidget(contrastBtn)
             vbox.addLayout(hBox)
@@ -443,14 +443,14 @@ class MainWindow (QMainWindow):
     def ReportButton(self):
         """This button creates a report.
         """
-        self.reportBtn = QPushButton('Fit Report', self)
+        self.reportBtn = qtWidgets.QPushButton('Fit Report', self)
         self.reportBtn.setStatusTip("Creates a report of the chosen data.")
         self.reportBtn.clicked.connect(self.CreateReport)
 
     def CancelReportButton(self):
         """This button cancels the creation of a report.
         """
-        self.cancelReportBtn = QPushButton('Cancel', self)
+        self.cancelReportBtn = qtWidgets.QPushButton('Cancel', self)
         self.cancelReportBtn.setStatusTip("Cancels the creation of the report.")
         self.cancelReportBtn.clicked.connect(self.reportDialog.close)
 
@@ -460,7 +460,7 @@ class MainWindow (QMainWindow):
         if self.reportCbGausFit.isChecked() or self.reportCbLFit.isChecked():
             self.reportDialog.close()
             selectedFilters = ".txt"
-            self.reportFile, self.reportFileFilter = QFileDialog.getSaveFileName(self, "Save Report", "",
+            self.reportFile, self.reportFileFilter = qtWidgets.QFileDialog.getSaveFileName(self, "Save Report", "",
                                                                                  selectedFilters)
             if self.reportFile != "":
                 self.reportFile += self.reportFileFilter
@@ -469,9 +469,9 @@ class MainWindow (QMainWindow):
     def ReportDialog(self):
         """Dialog that allows the user to select the data it wants on the report.
         """
-        self.reportDialog = QDialog(self)
-        vBox = QVBoxLayout()
-        buttonLayout = QHBoxLayout()
+        self.reportDialog = qtWidgets.QDialog(self)
+        vBox = qtWidgets.QVBoxLayout()
+        buttonLayout = qtWidgets.QHBoxLayout()
 
         self.ReportCheckBox()
         self.CancelReportButton()
@@ -491,10 +491,10 @@ class MainWindow (QMainWindow):
     def ReportCheckBox(self):
         """This method creates the check boxes used in the report dialog.
         """
-        self.reportGroupBx = QGroupBox("Select the data")
+        self.reportGroupBx = qtWidgets.QGroupBox("Select the data")
 
-        self.reportCbGausFit = QCheckBox("Gaussian Fit")
-        self.reportCbLFit = QCheckBox("Lattice Fit")
+        self.reportCbGausFit = qtWidgets.QCheckBox("Gaussian Fit")
+        self.reportCbLFit = qtWidgets.QCheckBox("Lattice Fit")
         self.reportCbGausFit.setEnabled(False)
         self.reportCbLFit.setEnabled(False)
 
@@ -503,7 +503,7 @@ class MainWindow (QMainWindow):
         if self.dockedOpt.LFitStat == True:
             self.reportCbLFit.setEnabled(True)
 
-        vbox = QVBoxLayout()
+        vbox = qtWidgets.QVBoxLayout()
         vbox.addWidget(self.reportCbGausFit)
         vbox.addWidget(self.reportCbLFit)
 
@@ -547,7 +547,7 @@ class MainWindow (QMainWindow):
         np.savetxt(self.reportFile, reportData, fmt=str('%f'), header=header, comments=comment)
 
     def selectScanxAxis(self):
-        if any(self.dockedOpt.TT):
+        if self.dockedOpt.TT.any():
             self.xAxisName, self.xAxis, self.scan = self.readSpec.getxAxisForScan()
 
     def getScanxAxis(self):
@@ -559,10 +559,10 @@ class MainWindow (QMainWindow):
 def main():
     """Main method.
     """
-    app = QApplication(sys.argv)
+    app = qtWidgets.QApplication(plab.sys.argv)
     myMainWindow = MainWindow()
     myMainWindow.show()
-    sys.exit(app.exec_())
+    plab.sys.exit(app.exec_())
 
 
 if __name__.endswith('__main__'):

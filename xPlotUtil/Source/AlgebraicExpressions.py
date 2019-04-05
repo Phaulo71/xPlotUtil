@@ -6,11 +6,9 @@ See LICENSE file.
 """
 # ---------------------------------------------------------------------------------------------------------------------#
 from __future__ import unicode_literals
-from pylab import *
-
-
-from PyQt5.QtWidgets import *
-
+import PyQt5.QtWidgets as qtWidgets
+import pylab as plab
+import numpy as np
 
 from matplotlib.figure import Figure
 from matplotlib.backends.backend_qt5agg import FigureCanvasQTAgg as FigureCanvas
@@ -39,7 +37,7 @@ class AlgebraicExpress:
         self.S = []
         self.V = []
 
-        self.U, self.S, self.V = svd(self.dockedOpt.TT)
+        self.U, self.S, self.V = plab.svd(self.dockedOpt.TT)
 
     def PlotAlgebraicExpGraphs(self, title, name1, x, y1, xLabel, yLabel1, y2, name2, yLabel2, y3, name3, yLabel3):
         """Generic plotting method that creates a canvas with 3 subplots.
@@ -56,7 +54,7 @@ class AlgebraicExpress:
         :param name3: name of graph three
         :param yLabel3: y-label for graph three
         """
-        mainGraph = QWidget()
+        mainGraph = qtWidgets.QWidget()
         fig = Figure((5.0, 4.0), dpi=100)
         canvas = FigureCanvas(fig)
 
@@ -83,9 +81,9 @@ class AlgebraicExpress:
         fig.tight_layout(pad=.4, w_pad=.5, h_pad=-1.4)
         canvas.draw()
 
-        tab = QWidget()
+        tab = qtWidgets.QWidget()
         tab.setStatusTip(title)
-        vbox = QVBoxLayout()
+        vbox = qtWidgets.QVBoxLayout()
         graphNavigationBar = NavigationToolbar(canvas, mainGraph)
         vbox.addWidget(graphNavigationBar)
         vbox.addWidget(canvas)
@@ -142,7 +140,7 @@ class AlgebraicExpress:
         :param xLabel: x label
         :param yLabel: y label
         """
-        mainGraph = QWidget()
+        mainGraph = qtWidgets.QWidget()
         fig = Figure((5.0, 4.0), dpi=100)
         canvas = FigureCanvas(fig)
 
@@ -157,9 +155,9 @@ class AlgebraicExpress:
         fig.tight_layout()
         canvas.draw()
 
-        tab = QWidget()
+        tab = qtWidgets.QWidget()
         tab.setStatusTip(title)
-        vbox = QVBoxLayout()
+        vbox = qtWidgets.QVBoxLayout()
         graphNavigationBar = NavigationToolbar(canvas, mainGraph)
         vbox.addWidget(graphNavigationBar)
         vbox.addWidget(canvas)
@@ -173,7 +171,7 @@ class AlgebraicExpress:
         title = 'Singular Value Index (Scan#: ' + self.readSpec.scan + ')'
         name = "Singular Value Index"
         x = self.gausFit.getVoltage()
-        y = log(self.S)
+        y = np.log(self.S)
         xLabel = "Voltage"
         yLabel = "Singular Value"
         self.PlotAlgebraicExpGraph(title, name, x, y, xLabel, yLabel)

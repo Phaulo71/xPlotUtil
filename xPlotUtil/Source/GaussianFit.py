@@ -10,15 +10,14 @@ See LICENSE file.
 # ---------------------------------------------------------------------------------------------------------------------#
 from __future__ import unicode_literals
 
-from PyQt5.QtWidgets import *
+import PyQt5.QtWidgets as qtWidgets
+import pylab as plab
+import numpy as np
+
 from matplotlib.backends.backend_qt5 import NavigationToolbar2QT as NavigationToolbar
 from matplotlib.backends.backend_qt5agg import FigureCanvasQTAgg as FigureCanvas
 
 from lmfit.models import GaussianModel, LinearModel
-
-from pylab import *
-import numpy as np
-
 
 from xPlotUtil.Source.AlgebraicExpressions import AlgebraicExpress
 from xPlotUtil.Source.voltage_dialog import VoltageDialog
@@ -66,11 +65,11 @@ class GaussianFitting:
         try:
             nRow, nCol = self.dockedOpt.fileInfo()
 
-            self.binFitData = zeros((nRow, 0))
-            self.OnePkFitData = zeros((nCol, 6))  # Creates the empty 2D List
+            self.binFitData = np.zeros((nRow, 0))
+            self.OnePkFitData = np.zeros((nCol, 6))  # Creates the empty 2D List
             for j in range(nCol):
                 yy = self.dockedOpt.TT[:, j]
-                xx = arange(0, len(yy))
+                xx = np.arange(0, len(yy))
 
                 x1 = xx[0]
                 x2 = xx[-1]
@@ -100,7 +99,7 @@ class GaussianFitting:
 
             return False
         except:
-            QMessageBox.warning(self.myMainWindow, "Error", "Please make sure the guesses are realistic when fitting.")
+            qtWidgets.QMessageBox.warning(self.myMainWindow, "Error", "Please make sure the guesses are realistic when fitting.")
             return True
 
     def TwoPeakGaussianFit(self):
@@ -112,15 +111,15 @@ class GaussianFitting:
                 self.dockedOpt.fitStat = True
                 self.dockedOpt.GraphingFitOptionsTree("G")
         except Exception as ex:
-            QMessageBox.warning(self.myMainWindow, "Error", "Please make sure the guesses are realistic when fitting."
+            qtWidgets.QMessageBox.warning(self.myMainWindow, "Error", "Please make sure the guesses are realistic when fitting."
                                                             "\n\nException: " + str(ex))
 
     def twoPeakGaussianFit(self):
         try:
             nRow, nCol = self.dockedOpt.fileInfo()
 
-            self.binFitData = zeros((nRow, 0))
-            self.TwoPkGausFitData = zeros((nCol, 12))  # Creates the empty 2D List
+            self.binFitData = np.zeros((nRow, 0))
+            self.TwoPkGausFitData = np.zeros((nCol, 12))  # Creates the empty 2D List
             for j in range(nCol):
                 yy1 = []
                 yy2 = []
@@ -133,9 +132,9 @@ class GaussianFitting:
                         yy2.append(y)
                     i += 1
 
-                xx = arange(0, len(yy))
-                xx1 = arange(0, len(yy) / 2)
-                xx2 = arange(len(yy) / 2, len(yy))
+                xx = np.arange(0, len(yy))
+                xx1 = np.arange(0, len(yy) / 2)
+                xx2 = np.arange(len(yy) / 2, len(yy))
                 x1 = xx[0]
                 x2 = xx[-1]
                 y1 = yy[0]
@@ -172,7 +171,7 @@ class GaussianFitting:
 
             return False
         except Exception as ex:
-            QMessageBox.warning(self.myMainWindow, "Error", "Please make sure the guesses are realistic when fitting."
+            qtWidgets.QMessageBox.warning(self.myMainWindow, "Error", "Please make sure the guesses are realistic when fitting."
                                                             "\n\nException: " + str(ex))
             return True
 
@@ -184,10 +183,10 @@ class GaussianFitting:
         :param whichPeak: number of peaks
         """
         try:
-            self.mainGraph = QDialog(self.myMainWindow)
+            self.mainGraph = qtWidgets.QDialog(self.myMainWindow)
             self.mainGraph.resize(600, 600)
             dpi = 100
-            fig = Figure((3.0, 3.0), dpi=dpi)
+            fig = plab.Figure((3.0, 3.0), dpi=dpi)
             canvas = FigureCanvas(fig)
             canvas.setParent(self.mainGraph)
             axes = fig.add_subplot(111)
@@ -210,8 +209,8 @@ class GaussianFitting:
             axes.set_ylabel('Intensity')
             canvas.draw()
 
-            vbox = QVBoxLayout()
-            hbox = QHBoxLayout()
+            vbox = qtWidgets.QVBoxLayout()
+            hbox = qtWidgets.QHBoxLayout()
             self.skipEachFitGraphButton()
             self.nextFitGraphButton()
             hbox.addWidget(self.skipEachFitGraphBtn)
@@ -224,19 +223,19 @@ class GaussianFitting:
             self.mainGraph.setLayout(vbox)
             self.mainGraph.exec_()
         except Exception as e:
-            QMessageBox.warning(self.myMainWindow, "Error", "Please make sure the guesses are realistic when fitting. \n\n" + str(e))
+            qtWidgets.QMessageBox.warning(self.myMainWindow, "Error", "Please make sure the guesses are realistic when fitting. \n\n" + str(e))
 
     def skipEachFitGraphButton(self):
         """Button that allows the user to skip each fit graph.
         """
-        self.skipEachFitGraphBtn = QPushButton('Skip')
+        self.skipEachFitGraphBtn = qtWidgets.QPushButton('Skip')
         self.skipEachFitGraphBtn.setStatusTip("Skip the graphing of each fit")
         self.skipEachFitGraphBtn.clicked.connect(self.skipEachFit)
 
     def nextFitGraphButton(self):
         """Button that shows the next fit graph.
         """
-        self.nextFitGraphBtn = QPushButton('Next')
+        self.nextFitGraphBtn = qtWidgets.QPushButton('Next')
         self.nextFitGraphBtn.clicked.connect(self.nextFitGraph)
         self.nextFitGraphBtn.setStatusTip("Graphs the next fit and the original data")
 
@@ -264,8 +263,8 @@ class GaussianFitting:
         :param yLabel: y-axis label
         :param whichGraph: char that represents either gaussian or lattice fit
         """
-        mainGraph = QWidget()
-        fig = Figure((5.0, 4.0), dpi=100)
+        mainGraph = qtWidgets.QWidget()
+        fig = plab.Figure((5.0, 4.0), dpi=100)
         canvas = FigureCanvas(fig)
 
         canvas.setParent(mainGraph)
@@ -279,16 +278,16 @@ class GaussianFitting:
             axes.errorbar(x, y, yerr=error, fmt='o')
         elif whichGraph == 'L':
             axes.plot(x, y, 'go')
-            axes.yaxis.set_major_formatter(FormatStrFormatter('%.4f'))
+            axes.yaxis.set_major_formatter(plab.FormatStrFormatter('%.4f'))
 
         axes.set_title(name)
         axes.set_xlabel(xLabel)
         axes.set_ylabel(yLabel)
         canvas.draw()
 
-        tab = QWidget()
+        tab = qtWidgets.QWidget()
         tab.setStatusTip(name)
-        vbox = QVBoxLayout()
+        vbox = qtWidgets.QVBoxLayout()
         graphNavigationBar = NavigationToolbar(canvas, mainGraph)
         vbox.addWidget(graphNavigationBar)
         vbox.addWidget(canvas)
@@ -517,9 +516,9 @@ class GaussianFitting:
                 return self.voltageDialog.voltage
 
         except Exception or IOError as ex:
-            QMessageBox.warning(self.myMainWindow, "Error", "Unable to detect voltage. Please make sure the PVvalue "
+            qtWidgets.QMessageBox.warning(self.myMainWindow, "Error", "Unable to detect voltage. Please make sure the PVvalue "
                                                             "contains the voltage in the comments.\n\n"
-                                                            "Exception: " + str(e))
+                                                            "Exception: " + str(ex))
     # -----------------------------------------Lattice Fit-------------------------------------------------------------#
     def PositionLFit(self, pos, rows):
         """This method calculates the lattice based on the passed paramaters.
@@ -550,7 +549,7 @@ class GaussianFitting:
                 for i in range(nCol):
                   self.LPos2Data.append(self.PositionLFit(self.TwoPkGausFitData[i, 8], nCol))
         except:
-            QMessageBox.warning(self.myMainWindow, "Error", "Please make sure the gaussian fit was done correctly.")
+            qtWidgets.QMessageBox.warning(self.myMainWindow, "Error", "Please make sure the gaussian fit was done correctly.")
 
     def graphOnePeakLFitPos(self):
         """This method graphs the Lattice fit position for one peak.
@@ -607,7 +606,7 @@ class GaussianFitting:
                     pctChangeData = ((self.LPos2Data[i] - self.LPos2Data[0]) / self.LPos2Data[0]) * 100
                     self.LPos2PrcChangeData.append(pctChangeData)
         except:
-            QMessageBox.warning(self.myMainWindow, "Error", "Something went wrong while doing the percentage change"
+            qtWidgets.QMessageBox.warning(self.myMainWindow, "Error", "Something went wrong while doing the percentage change"
                                                             "lattice fit. Make sure the lattice fit was "
                                                             "done correctly.")
 
@@ -648,7 +647,7 @@ class GaussianFitting:
         try:
             if self.dockedOpt.fitStat == True:
                 selectedFilters = ".txt"
-                reportFile, reportFileFilter = QFileDialog.getSaveFileName(self.myMainWindow, "Save Report", None, selectedFilters)
+                reportFile, reportFileFilter = qtWidgets.QFileDialog.getSaveFileName(self.myMainWindow, "Save Report", None, selectedFilters)
 
                 if reportFile != "":
                     reportFile += reportFileFilter
@@ -667,7 +666,7 @@ class GaussianFitting:
                     elif self.dockedOpt.twoPeakStat == True:
                         np.savetxt(reportFile, self.binFitData, fmt=str('%-14.6f'), delimiter=" ", header=header, comments=comment)
         except:
-            QMessageBox.warning(self.myMainWindow, "Error", "Make sure the gaussian fit was done properly, before "
+            qtWidgets.QMessageBox.warning(self.myMainWindow, "Error", "Make sure the gaussian fit was done properly, before "
                                                             "exporting the report again.")
 
     def setVoltage(self):

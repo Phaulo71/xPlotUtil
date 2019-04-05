@@ -10,9 +10,10 @@ See LICENSE file.
 # ---------------------------------------------------------------------------------------------------------------------#
 from __future__ import unicode_literals
 
-from PyQt5.QtWidgets import *
+import PyQt5.QtWidgets as qtWidgets
 from lmfit.models import LorentzianModel, LinearModel, VoigtModel
-from pylab import *
+import pylab as plab
+import numpy as np
 # ---------------------------------------------------------------------------------------------------------------------#
 
 
@@ -61,11 +62,11 @@ class LorentzianFitting:
         try:
             nRow, nCol = self.dockedOpt.fileInfo()
 
-            self.gausFit.binFitData = zeros((nRow, 0))
-            self.gausFit.OnePkFitData = zeros((nCol, 6))  # Creates the empty 2D List
+            self.gausFit.binFitData = plab.zeros((nRow, 0))
+            self.gausFit.OnePkFitData = plab.zeros((nCol, 6))  # Creates the empty 2D List
             for j in range(nCol):
                 yy = self.dockedOpt.TT[:, j]
-                xx = arange(0, len(yy))
+                xx = plab.arange(0, len(yy))
 
                 x1 = xx[0]
                 x2 = xx[-1]
@@ -108,8 +109,8 @@ class LorentzianFitting:
         try:
             nRow, nCol = self.dockedOpt.fileInfo()
 
-            self.gausFit.binFitData = zeros((nRow, 0))
-            self.gausFit.TwoPkGausFitData = zeros((nCol, 12))  # Creates the empty 2D List
+            self.gausFit.binFitData = plab.zeros((nRow, 0))
+            self.gausFit.TwoPkGausFitData = plab.zeros((nCol, 12))  # Creates the empty 2D List
             for j in range(nCol):
                 yy1 = []
                 yy2 = []
@@ -122,9 +123,9 @@ class LorentzianFitting:
                         yy2.append(y)
                     i += 1
 
-                xx = arange(0, len(yy))
-                xx1 = arange(0, len(yy)/2)
-                xx2 = arange(len(yy)/2, len(yy))
+                xx = plab.arange(0, len(yy))
+                xx1 = plab.arange(0, len(yy)/2)
+                xx2 = plab.arange(len(yy)/2, len(yy))
 
                 x1 = xx[0]
                 x2 = xx[-1]
@@ -162,7 +163,7 @@ class LorentzianFitting:
 
             return False
         except Exception as e:
-            QMessageBox.warning(self.myMainWindow, "Error", "There was an error \n\n Exception: " + str(e))
+            qtWidgets.QMessageBox.warning(self.myMainWindow, "Error", "There was an error \n\n Exception: " + str(e))
             return True
 
     def WhichPeakVoigtFit(self):
@@ -199,11 +200,11 @@ class LorentzianFitting:
         try:
             nRow, nCol = self.dockedOpt.fileInfo()
 
-            self.gausFit.binFitData = zeros((nRow, 0))
-            self.gausFit.OnePkFitData = zeros((nCol, 6))  # Creates the empty 2D List
+            self.gausFit.binFitData = plab.zeros((nRow, 0))
+            self.gausFit.OnePkFitData = plab.zeros((nCol, 6))  # Creates the empty 2D List
             for j in range(nCol):
                 yy = self.dockedOpt.TT[:, j]
-                xx = arange(0, len(yy))
+                xx = plab.arange(0, len(yy))
                 x1 = xx[0]
                 x2 = xx[-1]
                 y1 = yy[0]
@@ -237,7 +238,7 @@ class LorentzianFitting:
 
             return False
         except Exception as e:
-            QMessageBox.warning(self.myMainWindow, "Error", "There was an error \n\n Exception: " + str(e))
+            qtWidgets.QMessageBox.warning(self.myMainWindow, "Error", "There was an error \n\n Exception: " + str(e))
             return True
 
     def TwoPeakVoigtFit(self):
@@ -252,8 +253,8 @@ class LorentzianFitting:
         try:
             nRow, nCol = self.dockedOpt.fileInfo()
 
-            self.gausFit.binFitData = zeros((nRow, 0))
-            self.gausFit.TwoPkGausFitData = zeros((nCol, 12))  # Creates the empty 2D List
+            self.gausFit.binFitData = plab.zeros((nRow, 0))
+            self.gausFit.TwoPkGausFitData = plab.zeros((nCol, 12))  # Creates the empty 2D List
             for j in range(nCol):
                 yy1 = []
                 yy2 = []
@@ -266,9 +267,9 @@ class LorentzianFitting:
                         yy2.append(y)
                     i += 1
 
-                xx = arange(0, len(yy))
-                xx1 = arange(0, len(yy) / 2)
-                xx2 = arange(len(yy) / 2, len(yy))
+                xx = plab.arange(0, len(yy))
+                xx1 = plab.arange(0, len(yy) / 2)
+                xx2 = plab.arange(len(yy) / 2, len(yy))
 
                 x1 = xx[0]
                 x2 = xx[-1]
@@ -306,7 +307,7 @@ class LorentzianFitting:
 
             return False
         except Exception as e:
-            QMessageBox.warning(self.myMainWindow, "Error", "Something went wrong while fitting. \n\n" +
+            qtWidgets.QMessageBox.warning(self.myMainWindow, "Error", "Something went wrong while fitting. \n\n" +
                                                             "The following exception occur: " + str(e))
             return True
 
