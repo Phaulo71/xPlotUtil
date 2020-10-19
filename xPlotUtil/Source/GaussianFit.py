@@ -71,6 +71,8 @@ class GaussianFitting:
                 yy = self.dockedOpt.TT[:, j]
                 xx = np.arange(0, len(yy))
 
+                xx = [1, 2, 3, 4, 5]
+                yy = [100, 200, 500, 300, 50]
                 x1 = xx[0]
                 x2 = xx[-1]
                 y1 = yy[0]
@@ -98,7 +100,7 @@ class GaussianFitting:
                     self.graphEachFitRawData(xx, yy, out.best_fit, 'G')
 
             return False
-        except:
+        except Exception as Ex:
             qtWidgets.QMessageBox.warning(self.myMainWindow, "Error", "Please make sure the guesses are realistic when fitting.")
             return True
 

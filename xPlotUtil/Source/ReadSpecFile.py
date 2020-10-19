@@ -34,7 +34,6 @@ class ReadSpec:
         self.algebraExp = self.gausFit.algebraExp
         self.specFileOpened = False
         self.specFileName = None
-
         # Initializing lattice information
         self.lElement = 0
         self.lMax = 0

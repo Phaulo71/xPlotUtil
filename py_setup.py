@@ -9,7 +9,7 @@ from setuptools import setup
 
 setup(
   name='xPlotUtil',
-  version='1.1.5',
+  version='1.1.6',
   description='The program provides a GUI for the user to graph the data in different forms, normalize and fit it.',
   author='Phaulo C. Escalante',
   author_email='escalante.phaulo@outlook.com',
